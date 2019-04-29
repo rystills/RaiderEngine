@@ -4,3 +4,4 @@
 .settings/org.eclipse.core.resources.prefs   <- file encodings
 .settings/org.eclipse.core.runtime.prefs     <- line terminators
 Debug
+libs

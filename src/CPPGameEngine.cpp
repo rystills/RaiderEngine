@@ -1,4 +1,12 @@
+#include <stdio.h>
+#include <string.h>
+
 #include <GLFW/glfw3.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <SOIL.h>
+#include <glm.hpp>
 
 int main(void) {
 	GLFWwindow* window;
