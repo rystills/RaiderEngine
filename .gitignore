@@ -1,0 +1,6 @@
+.project
+.cproject
+.settings/org.eclipse.cdt.codan.core.prefs   <- CDT support stuff
+.settings/org.eclipse.core.resources.prefs   <- file encodings
+.settings/org.eclipse.core.runtime.prefs     <- line terminators
+Debug
