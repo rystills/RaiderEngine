@@ -1,0 +1,13 @@
+﻿~Rendering~
+-reimplement forward rendering techniques in deferred renderer
+	-normal mapping
+	-parallax occlusion mapping
+	-HDR
+	-bloom
+	-blending (using forward pass)
+-SSAO
+-Text rendering
+
+~Usage~
+-document install requirements
+-automate building, similar to how glitter lays it out

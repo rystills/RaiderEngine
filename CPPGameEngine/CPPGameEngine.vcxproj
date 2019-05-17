@@ -77,12 +77,12 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\glfw-3.3.bin.WIN32\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glad\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\glfw-3.3.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glm\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glad\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\lib;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\glfw-3.3.bin.WIN32\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glad\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\glfw-3.3.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glm\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glad\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\lib;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,7 +115,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,6 +135,53 @@
   <ItemGroup>
     <ClCompile Include="..\..\CPPGameEngine_eclipse\src\glad.c" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="filesystem.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="root_directory.h" />
+    <ClInclude Include="shader.h" />
+    <ClInclude Include="shader_m.h" />
+    <ClInclude Include="shader_s.h" />
+    <ClInclude Include="stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1.model_loading.fs" />
+    <None Include="1.model_loading.vs" />
+    <None Include="2.2.basic_lighting.fs" />
+    <None Include="2.2.basic_lighting.vs" />
+    <None Include="3.3.shader.fs" />
+    <None Include="3.3.shader.vs" />
+    <None Include="4.2.lamp.fs" />
+    <None Include="4.2.lamp.vs" />
+    <None Include="4.2.lighting_maps.fs" />
+    <None Include="4.2.lighting_maps.vs" />
+    <None Include="4.2.texture.fs">
+      <FileType>CppHeader</FileType>
+    </None>
+    <None Include="4.2.texture.vs" />
+    <None Include="5.1.transform.fs" />
+    <None Include="5.1.transform.vs" />
+    <None Include="6.3.coordinate_systems.fs" />
+    <None Include="6.3.coordinate_systems.vs" />
+    <None Include="6.lamp.fs" />
+    <None Include="6.lamp.vs" />
+    <None Include="6.multiple_lights.fs" />
+    <None Include="6.multiple_lights.vs" />
+    <None Include="7.4.camera.fs" />
+    <None Include="7.4.camera.vs" />
+    <None Include="2.2.lamp.fs" />
+    <None Include="2.2.lamp.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="awesomeface.png" />
+    <Image Include="container.jpg" />
+    <Image Include="container2.png" />
+    <Image Include="container2_specular.png" />
+    <Image Include="matrix.jpg" />
+    <Image Include="wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
