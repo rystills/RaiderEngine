@@ -18,14 +18,11 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\CPPGameEngine_eclipse\src\glad.c">
+    <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader_s.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="stb_image.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -47,102 +44,33 @@
     <ClInclude Include="shader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="shader_m.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="3.3.shader.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="3.3.shader.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="4.2.texture.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="4.2.texture.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="5.1.transform.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="5.1.transform.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="6.3.coordinate_systems.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="6.3.coordinate_systems.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="7.4.camera.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="7.4.camera.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="2.2.lamp.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="2.2.lamp.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="2.2.basic_lighting.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="2.2.basic_lighting.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="4.2.lighting_maps.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="4.2.lighting_maps.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="4.2.lamp.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="4.2.lamp.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="6.lamp.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="6.lamp.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="6.multiple_lights.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="6.multiple_lights.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="1.model_loading.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="1.model_loading.vs">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="wall.jpg">
       <Filter>Source Files</Filter>
     </Image>
-    <Image Include="container.jpg">
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="deferred_light_box.fs">
       <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="awesomeface.png">
+    </None>
+    <None Include="deferred_light_box.vs">
       <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="container2_specular.png">
+    </None>
+    <None Include="deferred_shading.fs">
       <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="container2.png">
+    </None>
+    <None Include="deferred_shading.vs">
       <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="matrix.jpg">
+    </None>
+    <None Include="g_buffer.fs">
       <Filter>Source Files</Filter>
-    </Image>
+    </None>
+    <None Include="g_buffer.vs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
