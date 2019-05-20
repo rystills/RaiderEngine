@@ -1,7 +1,7 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <glad/glad.h> // holds all OpenGL type declarations
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,7 +13,6 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-using namespace std;
 
 struct Vertex {
     // position
@@ -30,22 +29,24 @@ struct Vertex {
 
 struct Texture {
     unsigned int id;
-    string type;
-    string path;
+	std::string type;
+	std::string path;
 };
 
 class Mesh {
 public:
-    /*  Mesh Data  */
-    vector<Vertex> vertices;
-    vector<unsigned int> indices;
-    vector<Texture> textures;
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	std::vector<Texture> textures;
     unsigned int VAO;
 
-    /*  Functions  */
-    // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
-    {
+	/*
+	Mesh constructor: creates a new mesh with the provided vertex, index, and texture data
+	@param vertices: a vector of vertices that comprise the mesh
+	@param indices: a vector of indices that comprise the mesh
+	@param textures: a vector of textures that the mesh uses
+	*/
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
         this->vertices = vertices;
         this->indices = indices;
         this->textures = textures;
@@ -55,29 +56,24 @@ public:
     }
 
     // render the mesh
-    void Draw(Shader shader) 
-    {
+    void draw(Shader shader) {
         // bind appropriate textures
-        unsigned int diffuseNr  = 1;
-        unsigned int specularNr = 1;
-        unsigned int normalNr   = 1;
-        unsigned int heightNr   = 1;
-        for(unsigned int i = 0; i < textures.size(); i++)
-        {
+        unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, heightNr = 0;
+        for(unsigned int i = 0; i < textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             // retrieve texture number (the N in diffuse_textureN)
-            string number;
-            string name = textures[i].type;
+			std::string number;
+			std::string name = textures[i].type;
             if(name == "texture_diffuse")
-				number = std::to_string(diffuseNr++);
+				number = std::to_string(++diffuseNr);
 			else if(name == "texture_specular")
-				number = std::to_string(specularNr++); // transfer unsigned int to stream
+				number = std::to_string(++specularNr);
             else if(name == "texture_normal")
-				number = std::to_string(normalNr++); // transfer unsigned int to stream
+				number = std::to_string(++normalNr);
              else if(name == "texture_height")
-			    number = std::to_string(heightNr++); // transfer unsigned int to stream
+			    number = std::to_string(++heightNr);
 
-													 // now set the sampler to the correct texture unit
+			// now set the sampler to the correct texture unit
             glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
@@ -93,13 +89,12 @@ public:
     }
 
 private:
-    /*  Render data  */
     unsigned int VBO, EBO;
 
-    /*  Functions    */
-    // initializes all the buffer objects/arrays
-    void setupMesh()
-    {
+    /*
+	initialize all the buffer objects/arrays
+	*/
+    void setupMesh() {
         // create buffers/arrays
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);

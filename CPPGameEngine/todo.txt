@@ -1,13 +1,25 @@
 ﻿~Rendering~
+-implement gamma correct option on model load
 -reimplement forward rendering techniques in deferred renderer
 	-normal mapping
 	-parallax occlusion mapping
 	-HDR
 	-bloom
 	-blending (using forward pass)
+	-shadows
 -SSAO
 -Text rendering
 
 ~Usage~
 -document install requirements
 -automate building, similar to how glitter lays it out
+
+~Map Files~
+-store maps in 3ds max fbx files
+-load via a separate assimp function, storing maps, models, textures, etc.. each in their own folder
+-in maps, objects are defined by their name, which can be:
+	-o_className(constructorArgs) => for a class that should be instantiated
+	-s_meshName => for a static mesh that exists only in that specific map (ie. a static ground plane with pom details)
+
+~Physics~
+-integrate bullet physics

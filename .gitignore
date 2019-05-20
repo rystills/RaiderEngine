@@ -350,4 +350,5 @@ MigrationBackup/
 libs
 LearnOpenGL_master download
 ogldev-source
-test-models
+models
+maps
