@@ -52,28 +52,31 @@ void updateTime() {
 	lastFrame = currentFrame;
 }
 
-void processMapNode(std::shared_ptr<Model> baseModel, aiNode *node, const aiScene *scene, std::string directory) {
+void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
 	// convert nodes starting with o_ into GameObject instances using the named model
 	std::string nameFull = node->mName.C_Str();
 	std::cout << nameFull << std::endl;
+	aiVector3D aiPos, aiRot, aiScale;
+	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
+	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
+	// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
+	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
+	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 	if (strncmp(nameFull.c_str(), "o_", 2) == 0) {
-		aiVector3D aiPos, aiRot, aiScale;
-		node->mTransformation.Decompose(aiScale, aiRot, aiPos);
-		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-		// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
-		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
-		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 		std::size_t nameExtraStart = nameFull.find("_ncl");
 		std::string name = nameExtraStart == std::string::npos ? nameFull.substr(2) : nameFull.substr(2, nameExtraStart - 2);
 		gameObjects.push_back(GameObject(pos, rot, scale, name));
 	}
 	// convert remaining nodes into new meshes loaded from the map itself
 	else {
+		std::shared_ptr<Model> baseModel(new Model());
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+		models.insert({nameFull, baseModel});
+		gameObjects.push_back(GameObject(pos,rot,scale,nameFull));
 		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processMapNode(baseModel, node->mChildren[i], scene, directory);
+			processMapNode(node->mChildren[i], scene, directory);
 	}
 }
 /*
@@ -93,15 +96,8 @@ void loadMap(std::string mapName) {
 		return;
 	}
 
-	// construct GameObjects from named map nodes
-	std::shared_ptr<Model> baseModel(new Model());
-	processMapNode(baseModel, scene->mRootNode, scene, path);
-	// if the map also contained static geometry, give it an entry in the model dict and store it in another GameObject
-	if (baseModel->meshes.size() > 0) {
-		models.insert({path, baseModel});
-		// apply default scaling factor of 0.01 to static meshes
-		gameObjects.push_back(GameObject(glm::vec3(0), glm::vec3(-glm::half_pi<float>(),0,0), glm::vec3(.01), path));
-	}
+	// now process nodes recursively with custom instructions since this is a map model
+	processMapNode(scene->mRootNode, scene, path);
 }
 
 int main() {
