@@ -25,6 +25,6 @@ class Light {
 public:
 	glm::vec3 position, color;
 	float linear, quadratic;
-	Light(glm::vec3 position, glm::vec3 color, float linear, float quadratic) : position(position), color(color), linear(linear), quadratic(quadratic) {}
+	Light(glm::vec3 position, glm::vec3 color, float linear = 0.045f, float quadratic = .0075f) : position(position), color(color), linear(linear), quadratic(quadratic) {}
 };
 #endif

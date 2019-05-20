@@ -64,12 +64,17 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 	if (strncmp(nameFull.c_str(), "o_", 2) == 0) {
+		// load an existing model
 		std::size_t nameExtraStart = nameFull.find("_ncl");
 		std::string name = nameExtraStart == std::string::npos ? nameFull.substr(2) : nameFull.substr(2, nameExtraStart - 2);
 		gameObjects.push_back(GameObject(pos, rot, scale, name));
 	}
-	// convert remaining nodes into new meshes loaded from the map itself
+	else if (strncmp(nameFull.c_str(), "l_", 2) == 0) {
+		// create a light
+		lights.push_back(Light(pos, glm::vec3(1, .25, .25)));
+	}
 	else {
+		// generate a new model from the mesh list
 		std::shared_ptr<Model> baseModel(new Model());
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
@@ -192,11 +197,6 @@ int main() {
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// lighting info
-	// -------------
-	lights.push_back(Light(glm::vec3(2, 2, 2),glm::vec3(1,.25,.25), 0.045f, .0075f));
-	lights.push_back(Light(glm::vec3(-2, 2, 2), glm::vec3(.25, 1, .25), 0.045f, .0075f));
 
 	// shader configuration
 	// --------------------
