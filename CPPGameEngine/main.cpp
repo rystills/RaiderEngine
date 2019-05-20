@@ -66,7 +66,6 @@ void loadMap(std::string mapName) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
 		return;
 	}
-	std::cout << scene->mRootNode->mNumChildren << std::endl;
 
 	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
 	for (unsigned int i = 0; i < scene->mRootNode->mNumChildren; ++i) {
@@ -75,7 +74,8 @@ void loadMap(std::string mapName) {
 		aiVector3D aiPos, aiRot, aiScale;
 		curChild->mTransformation.Decompose(aiScale,aiRot,aiPos);
 		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.y, aiRot.z);
+		// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
+		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
 		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 		std::string nameFull = curChild->mName.C_Str();
 		std::size_t nameExtraStart = nameFull.find("_ncl");
