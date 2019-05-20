@@ -7,6 +7,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "filesystem.h"
 #include "shader.h"
 #include "camera.h"
@@ -39,11 +43,45 @@ float lastFrame = 0.0f;
 #include "inputUtils.h"
 #include "renderUtils.h"
 
-
+/*
+update deltaTime based on the amount of time elapsed since the previous frame
+*/
 void updateTime() {
 	float currentFrame = glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
+}
+
+/*
+load the specified map, instantiating all referenced objects and creating an empty object to house the static geometry
+@param mapName: the name of the map to load
+*/
+void loadMap(std::string mapName) {
+	// TODO: don't use hard-coded map folder
+	std::string path = FileSystem::getPath("maps/" + mapName + ".dae");
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	// check for errors
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+		return;
+	}
+	std::cout << scene->mRootNode->mNumChildren << std::endl;
+
+	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
+	for (unsigned int i = 0; i < scene->mRootNode->mNumChildren; ++i) {
+		aiNode* curChild = scene->mRootNode->mChildren[i];
+		aiMesh* curMesh = scene->mMeshes[curChild->mMeshes[0]];
+		aiVector3D aiPos, aiRot, aiScale;
+		curChild->mTransformation.Decompose(aiScale,aiRot,aiPos);
+		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
+		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.y, aiRot.z);
+		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+		std::string nameFull = curChild->mName.C_Str();
+		std::size_t nameExtraStart = nameFull.find("_ncl");
+		std::string name = nameExtraStart == std::string::npos ? nameFull.substr(2) : nameFull.substr(2,nameExtraStart-2);
+		gameObjects.push_back(GameObject(pos,rot,scale,name));
+	}
 }
 
 int main() {
@@ -93,8 +131,10 @@ int main() {
 
 	// load models
 	// -----------
-	gameObjects.push_back(GameObject(glm::vec3(-3.0, -3.0, -3.0),glm::mat4(),glm::vec3(0.05),"barrel"));
-	gameObjects.push_back(GameObject(glm::vec3(-2.0, -2.0, -3.0), glm::mat4(), glm::vec3(0.05), "barrel"));
+	
+	loadMap("testMapA");
+	//gameObjects.push_back(GameObject(glm::vec3(-3.0, -3.0, -3.0),glm::mat4(),glm::vec3(0.05),"barrel"));
+	//gameObjects.push_back(GameObject(glm::vec3(-2.0, -2.0, -3.0), glm::mat4(), glm::vec3(0.05), "barrel"));
 
 	// configure g-buffer framebuffer
 	// ------------------------------
@@ -139,8 +179,8 @@ int main() {
 
 	// lighting info
 	// -------------
-	lights.push_back(Light(glm::vec3(2, 2, 2),glm::vec3(1,.25,.25)));
-	lights.push_back(Light(glm::vec3(-2, 2, 2), glm::vec3(.25, 1, .25)));
+	lights.push_back(Light(glm::vec3(2, 2, 2),glm::vec3(1,.25,.25), 0.045f, .0075f));
+	lights.push_back(Light(glm::vec3(-2, 2, 2), glm::vec3(.25, 1, .25), 0.045f, .0075f));
 
 	// shader configuration
 	// --------------------
@@ -173,8 +213,7 @@ int main() {
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, gameObjects[i].position);
-			//TODO: rotation
-			//model = glm::rotate(model, gameObjects[i].rotation);
+			model *= gameObjects[i].rotation;
 			model = glm::scale(model, gameObjects[i].scale);
 			shaderGeometryPass.setMat4("model", model);
 			(*gameObjects[i].model).draw(shaderGeometryPass);
@@ -197,8 +236,8 @@ int main() {
 			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i].color);
 			// update attenuation parameters and calculate radius
 			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-			const float linear = 0.045;
-			const float quadratic = .0075;
+			const float linear = lights[i].linear;
+			const float quadratic = lights[i].quadratic;
 			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
 			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
 			// then calculate radius of light volume/sphere
@@ -213,10 +252,7 @@ int main() {
 		// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
 		// ----------------------------------------------------------------------------------
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-												   // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-												   // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
-												   // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // TODO: internal format of FBO and default framebuffer must match (implementation defined?)
 		glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
