@@ -23,3 +23,6 @@
 
 ~Physics~
 -integrate bullet physics
+
+~Optimization~
+-add automatic object instancing

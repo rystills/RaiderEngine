@@ -44,6 +44,9 @@
     <ClInclude Include="shader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="wall.jpg">
