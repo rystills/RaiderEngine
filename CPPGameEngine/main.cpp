@@ -52,35 +52,55 @@ void updateTime() {
 	lastFrame = currentFrame;
 }
 
+void processMapNode(std::shared_ptr<Model> baseModel, aiNode *node, const aiScene *scene, std::string directory) {
+	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
+	// convert nodes starting with o_ into GameObject instances using the named model
+	std::string nameFull = node->mName.C_Str();
+	std::cout << nameFull << std::endl;
+	if (strncmp(nameFull.c_str(), "o_", 2) == 0) {
+		aiVector3D aiPos, aiRot, aiScale;
+		node->mTransformation.Decompose(aiScale, aiRot, aiPos);
+		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
+		// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
+		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
+		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+		std::size_t nameExtraStart = nameFull.find("_ncl");
+		std::string name = nameExtraStart == std::string::npos ? nameFull.substr(2) : nameFull.substr(2, nameExtraStart - 2);
+		gameObjects.push_back(GameObject(pos, rot, scale, name));
+	}
+	// convert remaining nodes into new meshes loaded from the map itself
+	else {
+		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+		for (unsigned int i = 0; i < node->mNumChildren; ++i)
+			processMapNode(baseModel, node->mChildren[i], scene, directory);
+	}
+}
 /*
 load the specified map, instantiating all referenced objects and creating an empty object to house the static geometry
 @param mapName: the name of the map to load
 */
 void loadMap(std::string mapName) {
 	// TODO: don't use hard-coded map folder
-	std::string path = FileSystem::getPath("maps/" + mapName + ".dae");
+	// load the map as a typical model via ASSIMP
+	std::string directory = FileSystem::getPath("maps/" + mapName + ".dae");
+	std::string path = directory.substr(0, directory.find_last_of('/'));
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(directory, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
 		return;
 	}
 
-	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
-	for (unsigned int i = 0; i < scene->mRootNode->mNumChildren; ++i) {
-		aiNode* curChild = scene->mRootNode->mChildren[i];
-		aiMesh* curMesh = scene->mMeshes[curChild->mMeshes[0]];
-		aiVector3D aiPos, aiRot, aiScale;
-		curChild->mTransformation.Decompose(aiScale,aiRot,aiPos);
-		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-		// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
-		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
-		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
-		std::string nameFull = curChild->mName.C_Str();
-		std::size_t nameExtraStart = nameFull.find("_ncl");
-		std::string name = nameExtraStart == std::string::npos ? nameFull.substr(2) : nameFull.substr(2,nameExtraStart-2);
-		gameObjects.push_back(GameObject(pos,rot,scale,name));
+	// construct GameObjects from named map nodes
+	std::shared_ptr<Model> baseModel(new Model());
+	processMapNode(baseModel, scene->mRootNode, scene, path);
+	// if the map also contained static geometry, give it an entry in the model dict and store it in another GameObject
+	if (baseModel->meshes.size() > 0) {
+		models.insert({path, baseModel});
+		// apply default scaling factor of 0.01 to static meshes
+		gameObjects.push_back(GameObject(glm::vec3(0), glm::vec3(-glm::half_pi<float>(),0,0), glm::vec3(.01), path));
 	}
 }
 
