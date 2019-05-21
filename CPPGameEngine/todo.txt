@@ -1,7 +1,6 @@
 ﻿~Rendering~
 -implement gamma correct option on model load
 -reimplement forward rendering techniques in deferred renderer
-	-parallax occlusion mapping
 	-HDR
 	-bloom
 	-blending (using forward pass)
