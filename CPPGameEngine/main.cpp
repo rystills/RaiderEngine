@@ -31,7 +31,7 @@ const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -56,7 +56,6 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
 	// convert nodes starting with o_ into GameObject instances using the named model
 	std::string nameFull = node->mName.C_Str();
-	std::cout << nameFull << std::endl;
 	aiVector3D aiPos, aiRot, aiScale;
 	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
 	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
@@ -71,7 +70,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	}
 	else if (strncmp(nameFull.c_str(), "l_", 2) == 0) {
 		// create a light
-		lights.push_back(Light(pos, glm::vec3(1, .25, .25)));
+		lights.push_back(Light(pos, glm::vec3(1, 1, 1)));
 	}
 	else {
 		// generate a new model from the mesh list
@@ -153,7 +152,7 @@ int main() {
 	// load models
 	// -----------
 	
-	loadMap("testMapA");
+	loadMap("testMapB");
 	//gameObjects.push_back(GameObject(glm::vec3(-3.0, -3.0, -3.0),glm::mat4(),glm::vec3(0.05),"barrel"));
 	//gameObjects.push_back(GameObject(glm::vec3(-2.0, -2.0, -3.0), glm::mat4(), glm::vec3(0.05), "barrel"));
 
@@ -280,7 +279,7 @@ int main() {
 		for (unsigned int i = 0; i < lights.size(); i++) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, lights[i].position);
-			model = glm::scale(model, glm::vec3(0.125f));
+			model = glm::scale(model, glm::vec3(0.05f));
 			shaderLightBox.setMat4("model", model);
 			shaderLightBox.setVec3("lightColor", lights[i].color);
 			renderCube();
