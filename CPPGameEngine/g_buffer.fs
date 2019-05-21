@@ -20,6 +20,7 @@ void main()
     
 	// also store the per-fragment normals into the gbuffer
 	// TODO: revert to standard normal calculation if no normal map is provided
+	// TODO: support a variable number of maps of each type
 	// for correct normals, make sure your crazybump settings are configured to y-axis up, x-axis right
     gNormal = normalize( 2.0 * texture(texture_normal1, fs_in.TexCoords).rgb - vec3(1.0)) * fs_in.TBN;
 	

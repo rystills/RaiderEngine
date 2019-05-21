@@ -252,6 +252,17 @@ private:
 					textures_loaded.push_back(textureNrm);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 					std::cout << "loaded file: '" << normalName << "'" << std::endl;
 				}
+				std::string specName = str.C_Str();
+				specName = specName.substr(0, specName.find_last_of('.')) + "_SPEC.png";
+				if (std::experimental::filesystem::exists(directory + "/" + specName)) {
+					Texture textureSpec;
+					textureSpec.id = textureFromFile(specName.c_str(), directory);
+					textureSpec.type = "texture_specular";
+					textureSpec.path = specName.c_str();
+					textures.push_back(textureSpec);
+					textures_loaded.push_back(textureSpec);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+					std::cout << "loaded file: '" << specName << "'" << std::endl;
+				}
             }
         }
         return textures;
