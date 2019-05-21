@@ -225,6 +225,7 @@ int main() {
 		shaderGeometryPass.use();
 		shaderGeometryPass.setMat4("projection", projection);
 		shaderGeometryPass.setMat4("view", view);
+		shaderGeometryPass.setVec3("viewPos", camera.Position);
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, gameObjects[i].position);

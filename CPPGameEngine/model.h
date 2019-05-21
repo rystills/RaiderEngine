@@ -263,6 +263,17 @@ private:
 					textures_loaded.push_back(textureSpec);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 					std::cout << "loaded file: '" << specName << "'" << std::endl;
 				}
+				std::string heightName = str.C_Str();
+				heightName = heightName.substr(0, heightName.find_last_of('.')) + "_DISP.png";
+				if (std::experimental::filesystem::exists(directory + "/" + heightName)) {
+					Texture textureHeight;
+					textureHeight.id = textureFromFile(heightName.c_str(), directory);
+					textureHeight.type = "texture_height";
+					textureHeight.path = heightName.c_str();
+					textures.push_back(textureHeight);
+					textures_loaded.push_back(textureHeight);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+					std::cout << "loaded file: '" << heightName << "'" << std::endl;
+				}
             }
         }
         return textures;
