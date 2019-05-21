@@ -72,8 +72,8 @@ void main() {
     gPosition = fs_in.FragPos;
     
 	// also store the per-fragment normals into the gbuffer
-	// TODO: revert to standard normal calculation if no normal map is provided
-	// TODO: support a variable number of maps of each type
+	// TODO: support a variable number of maps of each type per model
+	// TODO: use another shader for models that use the default (blank) heightMap so as not to waste performance on useless POM calculations (same with other maps)
 	// for correct normals, make sure your crazybump settings are configured to y-axis up, x-axis right
 	// if using materialize instead, you'll need to flip the x axis (r channel) in gimp
     gNormal = normalize( 2.0 * texture(texture_normal1, texCoords).rgb - vec3(1.0)) * fs_in.TBN;

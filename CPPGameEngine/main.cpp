@@ -151,6 +151,10 @@ int main() {
 
 	// load models
 	// -----------
+	Model::defaultHeightMap.id = textureFromFile("defaultHeightMap.png", ".");
+	Model::defaultHeightMap.type = "texture_height";
+	Model::defaultHeightMap.path = "defaultHeightMap.png";
+	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
 	loadMap("testMapB");
 	//gameObjects.push_back(GameObject(glm::vec3(-3.0, -3.0, -3.0),glm::mat4(),glm::vec3(0.05),"barrel"));

@@ -68,6 +68,7 @@ unsigned int textureFromFile(const char *path, const std::string &directory, boo
 class Model {
 public:
 	static std::vector<Texture> textures_loaded;  // store all textures loaded for re-use across models
+	static Texture defaultHeightMap;  // blank heightMap for textures which do not utilize POM
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 
@@ -274,10 +275,15 @@ private:
 					textures_loaded.push_back(textureHeight);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 					std::cout << "loaded file: '" << heightName << "'" << std::endl;
 				}
+				else {
+					textures.push_back(defaultHeightMap);
+					std::cout << "unable to find heightMap for texture: '" << str.C_Str() << "'; falling back to default heightMap" << std::endl;
+				}
             }
         }
         return textures;
     }
 };
 std::vector<Texture> Model::textures_loaded;
+Texture Model::defaultHeightMap;
 #endif
