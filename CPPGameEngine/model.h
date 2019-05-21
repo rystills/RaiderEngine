@@ -18,6 +18,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <experimental/filesystem>
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 
 /*
@@ -236,6 +237,21 @@ private:
                 texture.path = str.C_Str();
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+				std::cout << "loaded file: '" << str.C_Str() << "'" << std::endl;
+
+				// TODO: currently we manually check for maps other than diffuse due to collada export issues; down the line this should become unnecessary
+				std::string normalName = str.C_Str();
+				// TODO: don't hardcode png as extension
+				normalName = normalName.substr(0, normalName.find_last_of('.')) + "_NRM.png";
+				if (std::experimental::filesystem::exists(directory + "/" + normalName)) {
+					Texture textureNrm;
+					textureNrm.id = textureFromFile(normalName.c_str(), directory);
+					textureNrm.type = "texture_normal";
+					textureNrm.path = normalName.c_str();
+					textures.push_back(textureNrm);
+					textures_loaded.push_back(textureNrm);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+					std::cout << "loaded file: '" << normalName << "'" << std::endl;
+				}
             }
         }
         return textures;
