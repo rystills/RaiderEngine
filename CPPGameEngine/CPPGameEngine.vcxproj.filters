@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
+    <Text Include="installInstructions.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="deferred_light_box.fs">

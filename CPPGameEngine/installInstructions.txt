@@ -1,0 +1,7 @@
+1. Clone repo and pull latest changes
+2. Set Visual Studio target to Release x86
+3. Add the dependencies (assimp, glad, glfw, glm, SOIL) to the appropriate folders in CPPGameEngine\CPPGameEngine\libs  //TODO: more on this / simplify later
+	-for windows developers, just unzip this folder and place the contents in CPPGameEngine\CPPGameEngine: https://www.dropbox.com/s/6lsmoo60bdvxqsy/libs%20and%20dlls.zip?dl=0 
+4. Build the project in Visual Studio
+5. Move the 3 dlls in the dlls folder provided with the above download (glfw3.dll, zlib.dll, assimp-vc140-mt.dll) into the root level Release folder
+6. for current test map/models, unzip this folder and place the contents in CPPGameEngine\CPPGameEngine: https://www.dropbox.com/s/b0ousm8gkcit2zl/maps%20and%20models.zip?dl=0

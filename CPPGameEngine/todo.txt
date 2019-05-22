@@ -7,6 +7,8 @@
 	-shadows
 -SSAO
 -Text rendering
+-implement either deferred lighting or tile-based deferred shading so that light volumes can be utilized properly
+-reimplement spotlights / directional lights
 
 ~Usage~
 -document install requirements

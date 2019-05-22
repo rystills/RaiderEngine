@@ -77,12 +77,12 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glm\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glad\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\lib;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\glad\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\glfw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glm\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\include;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glad\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\assimp\lib;C:\Users\Ryan\Documents\git-projects\CPPGameEngine\CPPGameEngine\libs\glfw\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\glad\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\glfw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -153,6 +153,7 @@
     <Image Include="wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="installInstructions.txt" />
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
