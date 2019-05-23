@@ -31,7 +31,7 @@ public:
 
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
-		rotation = glm::toMat4(glm::quat(rotationEA));
+		setRotation(rotationEA);
 		std::unordered_map<std::string, std::shared_ptr<Model>>::iterator search = models.find(modelName);
 		if (search != models.end())
 			model = search->second;
@@ -41,6 +41,10 @@ public:
 			models.insert({modelName, m});
 			model = m;
 		}
+	}
+
+	void setRotation(glm::vec3 rotationEA) {
+		rotation = glm::toMat4(glm::quat(rotationEA));
 	}
 };
 #endif

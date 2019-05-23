@@ -10,6 +10,21 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+unsigned int aiMapProcessFlags =
+	aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
+	aiProcess_JoinIdenticalVertices | // join identical vertices/ optimize indexing
+	aiProcess_Triangulate | // Ensure all verticies are triangulated (each 3 vertices are triangle)
+	aiProcess_ImproveCacheLocality | // improve the cache locality of the output vertices
+	aiProcess_RemoveRedundantMaterials | // remove redundant materials
+	aiProcess_FindInvalidData | // detect invalid model data, such as invalid normal vectors
+	aiProcess_GenUVCoords | // convert spherical, cylindrical, box and planar mapping to proper UVs
+	aiProcess_TransformUVCoords | // preprocess UV transformations (scaling, translation ...)
+	aiProcess_FindInstances | // search for instanced meshes and remove them by references to one master
+	aiProcess_LimitBoneWeights | // limit bone weights to 4 per vertex
+	aiProcess_OptimizeMeshes | // join small meshes, if possible;
+	aiProcess_SplitByBoneCount | // split meshes with too many bones. Necessary for our (limited) hardware skinning shader
+	0;
+unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
 #include "filesystem.h"
 #include "shader.h"
@@ -27,8 +42,8 @@ std::vector<GameObject> gameObjects;
 std::vector<Light> lights;
 
 // settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -52,36 +67,75 @@ void updateTime() {
 	lastFrame = currentFrame;
 }
 
+struct ProcessObjectProperties {
+	glm::vec3 pos, rot, scale;
+	std::string fullName;
+};
+ProcessObjectProperties tempProp;
+
+/*
+assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
+// TODO: document me
+// TODO: do something more elegant than using a global temp struct
+*/
 void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
-	// convert nodes starting with o_ into GameObject instances using the named model
-	std::string nameFull = node->mName.C_Str();
+	tempProp.fullName = node->mName.C_Str();
 	aiVector3D aiPos, aiRot, aiScale;
 	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
 	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
 	// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
-	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
+	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, aiRot.y);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
-	if (strncmp(nameFull.c_str(), "o_", 2) == 0) {
-		// load an existing model
-		std::size_t nameExtraStart = nameFull.find("_ncl");
-		std::string name = nameExtraStart == std::string::npos ? nameFull.substr(2) : nameFull.substr(2, nameExtraStart - 2);
-		gameObjects.push_back(GameObject(pos, rot, scale, name));
+
+	bool finalTransformNode = false;
+	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
+		tempProp.pos = pos;
 	}
-	else if (strncmp(nameFull.c_str(), "l_", 2) == 0) {
-		// create a light
-		lights.push_back(Light(pos, glm::vec3(1, 1, 1)));
+	else if (tempProp.fullName.find("$_Rotation") != std::string::npos)
+		tempProp.rot = rot;
+	else if (tempProp.fullName.find("$_Scaling") != std::string::npos) {
+		tempProp.scale = scale;
+		finalTransformNode = true;
 	}
-	else {
+
+	if (finalTransformNode) {
+		// convert nodes starting with o_ into GameObject instances using the named model
+		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
+			// load an existing model
+			std::size_t nameExtraStart = tempProp.fullName.find("_$Assimp");
+			std::string name = nameExtraStart == std::string::npos ? tempProp.fullName.substr(2) : tempProp.fullName.substr(2, nameExtraStart - 2);
+			// strip trailing numbers applied to duplicate object names in the newest version of assimp
+			while (isdigit(name[name.length() - 1])) {
+				name = name.substr(0, name.length() - 1);
+			}
+			std::cout << "generating instance of object: " << name << std::endl;
+			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
+			std::cout << "position: " << tempProp.pos.x << "," << tempProp.pos.y << "," << tempProp.pos.z << std::endl;
+			std::cout << "rotation: " << tempProp.rot.x << "," << tempProp.rot.y << "," << tempProp.rot.z << std::endl;
+			std::cout << "scale:    " << tempProp.scale.x << "," << tempProp.scale.y << "," << tempProp.scale.z << std::endl;
+		}
+		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
+			// create a light
+			std::cout << "generating light: " << tempProp.fullName << std::endl;
+			std::cout << "position: " << tempProp.pos.x << "," << tempProp.pos.y << "," << tempProp.pos.z << std::endl;
+			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
+		}
+	}
+	if (node->mNumMeshes > 0 && !(strncmp(tempProp.fullName.c_str(), "l_", 2) == 0 || strncmp(tempProp.fullName.c_str(), "os_", 2) == 0)) {
 		// generate a new model from the mesh list
+		std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
+		std::cout << "position: " << tempProp.pos.x << "," << tempProp.pos.y << "," << tempProp.pos.z << std::endl;
+		std::cout << "rotation: " << tempProp.rot.x << "," << tempProp.rot.y << "," << tempProp.rot.z << std::endl;
+		std::cout << "scale:    " << tempProp.scale.x << "," << tempProp.scale.y << "," << tempProp.scale.z << std::endl;
 		std::shared_ptr<Model> baseModel(new Model());
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
-		models.insert({nameFull, baseModel});
-		gameObjects.push_back(GameObject(pos,rot,scale,nameFull));
-		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processMapNode(node->mChildren[i], scene, directory);
+		models.insert({ tempProp.fullName, baseModel });
+		gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
 	}
+	for (unsigned int i = 0; i < node->mNumChildren; ++i)
+		processMapNode(node->mChildren[i], scene, directory);
 }
 /*
 load the specified map, instantiating all referenced objects and creating an empty object to house the static geometry
@@ -90,10 +144,10 @@ load the specified map, instantiating all referenced objects and creating an emp
 void loadMap(std::string mapName) {
 	// TODO: don't use hard-coded map folder
 	// load the map as a typical model via ASSIMP
-	std::string directory = FileSystem::getPath("maps/" + mapName + ".dae");
+	std::string directory = FileSystem::getPath("maps/" + mapName + ".fbx");
 	std::string path = directory.substr(0, directory.find_last_of('/'));
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(directory, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
@@ -118,7 +172,7 @@ int main() {
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CPPGameEngine", 0, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -156,9 +210,8 @@ int main() {
 	Model::defaultHeightMap.path = "defaultHeightMap.png";
 	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
+	// load map
 	loadMap("testMapB");
-	//gameObjects.push_back(GameObject(glm::vec3(-3.0, -3.0, -3.0),glm::mat4(),glm::vec3(0.05),"barrel"));
-	//gameObjects.push_back(GameObject(glm::vec3(-2.0, -2.0, -3.0), glm::mat4(), glm::vec3(0.05), "barrel"));
 
 	// configure g-buffer framebuffer
 	// ------------------------------
