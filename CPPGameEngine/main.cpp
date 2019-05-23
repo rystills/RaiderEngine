@@ -26,6 +26,7 @@ unsigned int aiMapProcessFlags =
 	0;
 unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
+#include <bullet/btBulletDynamicsCommon.h>
 #include "filesystem.h"
 #include "shader.h"
 #include "camera.h"
