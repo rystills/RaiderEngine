@@ -1,5 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -30,6 +32,7 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include "filesystem.h"
 #include "shader.h"
 #include "camera.h"
+float anisoFilterAmount = 0.0f;
 #include "model.h"
 
 #include <iostream>
@@ -256,6 +259,10 @@ int main() {
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
+	// enable anisotropic filtering if supported
+	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);
+
 	// build and compile shaders
 	// -------------------------
 	Shader shaderGeometryPass("g_buffer.vs", "g_buffer.fs");
@@ -271,6 +278,15 @@ int main() {
 	
 	// load map
 	loadMap("testMapB");
+
+	// apply anisotropic filtering to textures
+	if (anisoFilterAmount > 0) {
+		for (int i = 0; i < Model::textures_loaded.size(); ++i) {
+			glBindTexture(GL_TEXTURE_2D, Model::textures_loaded[i].id);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoFilterAmount);
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+	};
 
 	// shader configuration
 	// --------------------
