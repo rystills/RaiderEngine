@@ -78,21 +78,25 @@ struct GBuffer {
 } gBuffer;
 
 
-/*
-assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
-// TODO: document me
+// TODO: assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
 // TODO: do something more elegant than using a global temp struct
+/*
+process the current node while loading a map, either extracting a single piece of transform data or finalizing the current object / static mesh
+@param node: the node we are currently processing
+@param scene: the overall scene returned by ASSIMP when loading the initial map model
+@param directory: the directory in which the map resides
 */
 void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
+	// extract the transform data from the current node
 	tempProp.fullName = node->mName.C_Str();
 	aiVector3D aiPos, aiRot, aiScale;
 	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
 	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-	// note: collada (.dae) exported with y-up appears to render correctly with the following adjustments applied to its rotation
 	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, aiRot.y);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 
+	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
 	bool finalTransformNode = false;
 	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
 		tempProp.pos = pos;
@@ -104,6 +108,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		finalTransformNode = true;
 	}
 
+	// once we've reached the final transform node, we can instantiate our object
 	if (finalTransformNode) {
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
@@ -123,7 +128,9 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
 	}
-	if (node->mNumMeshes > 0 && !(strncmp(tempProp.fullName.c_str(), "l_", 2) == 0 || strncmp(tempProp.fullName.c_str(), "os_", 2) == 0)) {
+
+	// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
+	if (node->mNumMeshes > 0 && !(strncmp(tempProp.fullName.c_str(), "l_", 2) == 0 || strncmp(tempProp.fullName.c_str(), "o_", 2) == 0)) {
 		// generate a new model from the mesh list
 		std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 		std::shared_ptr<Model> baseModel(new Model());
@@ -132,6 +139,8 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		models.insert({ tempProp.fullName, baseModel });
 		gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
 	}
+
+	// recurse over child nodes regardless of current node type
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
 		processMapNode(node->mChildren[i], scene, directory);
 }
