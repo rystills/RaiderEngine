@@ -71,8 +71,8 @@ void updateTime() {
 struct ProcessObjectProperties {
 	glm::vec3 pos, rot, scale;
 	std::string fullName;
-};
-ProcessObjectProperties tempProp;
+} tempProp;
+
 
 /*
 assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
@@ -112,23 +112,16 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			}
 			std::cout << "generating instance of object: " << name << std::endl;
 			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
-			std::cout << "position: " << tempProp.pos.x << "," << tempProp.pos.y << "," << tempProp.pos.z << std::endl;
-			std::cout << "rotation: " << tempProp.rot.x << "," << tempProp.rot.y << "," << tempProp.rot.z << std::endl;
-			std::cout << "scale:    " << tempProp.scale.x << "," << tempProp.scale.y << "," << tempProp.scale.z << std::endl;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			// create a light
 			std::cout << "generating light: " << tempProp.fullName << std::endl;
-			std::cout << "position: " << tempProp.pos.x << "," << tempProp.pos.y << "," << tempProp.pos.z << std::endl;
 			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
 	}
 	if (node->mNumMeshes > 0 && !(strncmp(tempProp.fullName.c_str(), "l_", 2) == 0 || strncmp(tempProp.fullName.c_str(), "os_", 2) == 0)) {
 		// generate a new model from the mesh list
 		std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
-		std::cout << "position: " << tempProp.pos.x << "," << tempProp.pos.y << "," << tempProp.pos.z << std::endl;
-		std::cout << "rotation: " << tempProp.rot.x << "," << tempProp.rot.y << "," << tempProp.rot.z << std::endl;
-		std::cout << "scale:    " << tempProp.scale.x << "," << tempProp.scale.y << "," << tempProp.scale.z << std::endl;
 		std::shared_ptr<Model> baseModel(new Model());
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
@@ -159,7 +152,10 @@ void loadMap(std::string mapName) {
 	processMapNode(scene->mRootNode, scene, path);
 }
 
-int main() {
+/*
+initialize our game window, creating the window itself and setting input callbacks
+*/
+GLFWwindow* initWindow() {
 	// glfw: initialize and configure
 	// ------------------------------
 	glfwInit();
@@ -177,7 +173,7 @@ int main() {
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
-		return -1;
+		exit(EXIT_FAILURE);
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -191,8 +187,14 @@ int main() {
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
+		exit(EXIT_FAILURE);
 	}
+	
+	return window;
+}
+
+int main() {
+	GLFWwindow* window = initWindow();
 
 	// configure global opengl state
 	// -----------------------------
@@ -267,6 +269,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
 		updateTime();
+		glfwPollEvents();
 		processInput(window);
 
 		// render
@@ -279,18 +282,13 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 model = glm::mat4(1.0f);
 		shaderGeometryPass.use();
 		shaderGeometryPass.setMat4("projection", projection);
 		shaderGeometryPass.setMat4("view", view);
 		shaderGeometryPass.setVec3("viewPos", camera.Position);
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, gameObjects[i].position);
-			model *= gameObjects[i].rotation;
-			model = glm::scale(model, gameObjects[i].scale);
-			shaderGeometryPass.setMat4("model", model);
-			(*gameObjects[i].model).draw(shaderGeometryPass);
+			shaderGeometryPass.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i].position) * gameObjects[i].rotation, gameObjects[i].scale));
+			gameObjects[i].model->draw(shaderGeometryPass);
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -308,16 +306,9 @@ int main() {
 		for (unsigned int i = 0; i < lights.size(); ++i) {
 			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lights[i].position);
 			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i].color);
-			// update attenuation parameters and calculate radius
-			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-			const float linear = lights[i].linear;
-			const float quadratic = lights[i].quadratic;
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
-			// then calculate radius of light volume/sphere
-			const float maxBrightness = std::fmaxf(std::fmaxf(lights[i].color.r, lights[i].color.g), lights[i].color.b);
-			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", radius);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i].linear);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i].quadratic);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", lights[i].radius);
 		}
 		shaderLightingPass.setVec3("viewPos", camera.Position);
 		// finally render quad
@@ -336,10 +327,7 @@ int main() {
 		shaderLightBox.setMat4("projection", projection);
 		shaderLightBox.setMat4("view", view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, lights[i].position);
-			model = glm::scale(model, glm::vec3(0.05f));
-			shaderLightBox.setMat4("model", model);
+			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i].position), glm::vec3(0.05f)));
 			shaderLightBox.setVec3("lightColor", lights[i].color);
 			renderCube();
 		}
@@ -348,9 +336,7 @@ int main() {
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 
 	glfwTerminate();
-	return 0;
 }

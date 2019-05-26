@@ -25,9 +25,28 @@ class Light {
 public:
 	glm::vec3 position, color;
 	float linear, quadratic;
+	int constant = 1;
+	float radius;
+	float maxBrightness;
 	Light(glm::vec3 position, glm::vec3 color, float strength = 10) : position(position), color(color) {
 		linear = 7/strength*.7f;
 		quadratic = 7/strength*1.8;
+		calculateMaxBrightness();
+		calculateRadius();
+	}
+
+private:
+	/*
+	calculate the lights maximum brightness using its rgb components
+	*/
+	void calculateMaxBrightness() {
+		maxBrightness = std::fmaxf(std::fmaxf(color.r, color.g), color.b);
+	}
+	/*
+	calcuate the light's radius given linear and quadratic constants and its max brightness
+	*/
+	void calculateRadius() {
+		radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (1 - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
 	}
 };
 #endif
