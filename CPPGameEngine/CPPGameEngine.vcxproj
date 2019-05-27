@@ -159,6 +159,8 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="debugLineShader.fs" />
+    <None Include="debugLineShader.vs" />
     <None Include="deferred_light_box.fs" />
     <None Include="deferred_light_box.vs" />
     <None Include="deferred_shading.fs" />

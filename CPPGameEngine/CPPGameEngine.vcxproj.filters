@@ -85,5 +85,11 @@
     <None Include="g_buffer.vs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="debugLineShader.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="debugLineShader.fs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
