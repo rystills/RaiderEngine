@@ -28,7 +28,7 @@ public:
 	int constant = 1;
 	float radius;
 	float maxBrightness;
-	Light(glm::vec3 position, glm::vec3 color, float strength = 10) : position(position), color(color) {
+	Light(glm::vec3 position, glm::vec3 color, float strength = 100) : position(position), color(color) {
 		linear = 7/strength*.7f;
 		quadratic = 7/strength*1.8;
 		calculateMaxBrightness();

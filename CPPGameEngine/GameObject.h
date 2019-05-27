@@ -30,7 +30,6 @@ public:
 	std::shared_ptr<Model> model;
 
 	// bullet data
-	btCollisionShape* trimeshShape;
 	btRigidBody* body;
 	int bodyIndex;
 
@@ -43,7 +42,7 @@ public:
 		else {
 			// TODO: don't use hard-coded model folder
 			std::shared_ptr<Model> m(new Model(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx")));
-			models.insert({modelName, m});
+			models.insert({ modelName, m });
 			model = m;
 		}
 
@@ -53,12 +52,19 @@ public:
 			Mesh mesh = model->meshes[j];
 			for (int i = 0; i < mesh.indices.size(); i += 3) {
 				btVector3 vertex_1{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-				btVector3 vertex_2{ mesh.vertices[mesh.indices[i+1]].Position.x, mesh.vertices[mesh.indices[i+1]].Position.y, mesh.vertices[mesh.indices[i+1]].Position.z };
-				btVector3 vertex_3{ mesh.vertices[mesh.indices[i+2]].Position.x, mesh.vertices[mesh.indices[i+2]].Position.y, mesh.vertices[mesh.indices[i+2]].Position.z };
+				btVector3 vertex_2{ mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z };
+				btVector3 vertex_3{ mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z };
 				trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
 			}
 		}
-		trimeshShape = new btBvhTriangleMeshShape{ trimesh, true };
+		btConvexShape *trimeshShape = new btConvexTriangleMeshShape{ trimesh };
+		btVector3 btscale(scale.x, scale.y, scale.z);
+		trimeshShape->setLocalScaling(btscale);
+		btShapeHull *hull = new btShapeHull(trimeshShape);
+		btScalar margin = trimeshShape->getMargin();
+		hull->buildHull(margin);
+		trimeshShape->setUserPointer(hull);
+
 		bulletData.collisionShapes.push_back(trimeshShape);
 
 		// Create Dynamic Objects
@@ -69,8 +75,8 @@ public:
 		btVector3 localInertia(0, 0, 0);
 		if (!isStaticMesh)
 			trimeshShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(position.x,position.y,position.z));
+		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
+		std::cout << position.x << ", " << position.y << ", " << position.z << std::endl;
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);

@@ -28,7 +28,8 @@ unsigned int aiMapProcessFlags =
 	0;
 unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include "filesystem.h"
 #include "shader.h"
 #include "camera.h"
@@ -279,7 +280,7 @@ void initBullet() {
 
 	bulletData.dynamicsWorld = new btDiscreteDynamicsWorld(bulletData.dispatcher, bulletData.overlappingPairCache, bulletData.solver, bulletData.collisionConfiguration);
 
-	bulletData.dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	bulletData.dynamicsWorld->setGravity(btVector3(0, -1, 0));
 }
 
 /*
@@ -352,7 +353,7 @@ int main() {
 	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
 	// load map
-	loadMap("testMapPhysics");
+	loadMap("testMapPhysicsB");
 
 	// enable anisotropic filtering if supported
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
