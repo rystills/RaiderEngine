@@ -80,6 +80,15 @@ struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } gBuffer;
 
+struct BulletData {
+	btDiscreteDynamicsWorld* dynamicsWorld;
+	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+	btSequentialImpulseConstraintSolver* solver;
+	btBroadphaseInterface* overlappingPairCache;
+	btCollisionDispatcher* dispatcher;
+	btDefaultCollisionConfiguration* collisionConfiguration;
+} bulletData;
+
 
 // TODO: assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
 // TODO: do something more elegant than using a global temp struct
@@ -250,9 +259,72 @@ void initGBuffer() {
 		std::cout << "Framebuffer not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+/*
+initialize bullet physics
+*/
+void initBullet() {
+	// collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
+	bulletData.collisionConfiguration = new btDefaultCollisionConfiguration();
+
+	// use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
+	bulletData.dispatcher = new btCollisionDispatcher(bulletData.collisionConfiguration);
+
+	// btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
+	bulletData.overlappingPairCache = new btDbvtBroadphase();
+
+	// the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
+	bulletData.solver = new btSequentialImpulseConstraintSolver;
+
+	bulletData.dynamicsWorld = new btDiscreteDynamicsWorld(bulletData.dispatcher, bulletData.overlappingPairCache, bulletData.solver, bulletData.collisionConfiguration);
+
+	bulletData.dynamicsWorld->setGravity(btVector3(0, -10, 0));
+}
+
+/*
+cleanup the data allocated by bullet physics
+*/
+void cleanupBullet() {
+	// remove the rigidbodies from the dynamics world and delete them
+	for (int i = bulletData.dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; --i) {
+		btCollisionObject* obj = bulletData.dynamicsWorld->getCollisionObjectArray()[i];
+		btRigidBody* body = btRigidBody::upcast(obj);
+		if (body && body->getMotionState()) {
+			delete body->getMotionState();
+		}
+		bulletData.dynamicsWorld->removeCollisionObject(obj);
+		delete obj;
+	}
+
+	// delete collision shapes
+	for (int j = 0; j < bulletData.collisionShapes.size(); j++) {
+		btCollisionShape* shape = bulletData.collisionShapes[j];
+		bulletData.collisionShapes[j] = 0;
+		delete shape;
+	}
+
+	// delete dynamics world
+	delete bulletData.dynamicsWorld;
+
+	// delete solver
+	delete bulletData.solver;
+
+	// delete broadphase
+	delete bulletData.overlappingPairCache;
+
+	// delete dispatcher
+	delete bulletData.dispatcher;
+
+	delete bulletData.collisionConfiguration;
+
+	// next line is optional: it will be cleared by the destructor when the array goes out of scope
+	bulletData.collisionShapes.clear();
+}
+
 int main() {
 	GLFWwindow* window = initWindow();
 	initGBuffer();
+	initBullet();
 	glEnable(GL_DEPTH_TEST);
 
 	// build and compile shaders
@@ -368,5 +440,6 @@ int main() {
 		}
 		glfwSwapBuffers(window);
 	}
+	cleanupBullet();
 	glfwTerminate();
 }
