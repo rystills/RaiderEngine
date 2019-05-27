@@ -76,7 +76,7 @@ public:
 		quat.setEulerZYX(rotationEA.z,rotationEA.y,rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
 		startTransform.setRotation(quat);
 
-		std::cout << position.x << ", " << position.y << ", " << position.z << std::endl;
+		std::cout << rotationEA.x << ", " << rotationEA.y << ", " << rotationEA.z << std::endl;
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
@@ -98,6 +98,9 @@ public:
 		position.x = float(trans.getOrigin().getX());
 		position.y = float(trans.getOrigin().getY());
 		position.z = float(trans.getOrigin().getZ());
+		float z, y, x;
+		trans.getRotation().getEulerZYX(z, y, x);
+		setRotation(glm::vec3(x,y,z));
 	}
 
 	void setRotation(glm::vec3 rotationEA) {

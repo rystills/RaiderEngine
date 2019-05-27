@@ -115,8 +115,10 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
 		tempProp.pos = pos;
 	}
-	else if (tempProp.fullName.find("$_Rotation") != std::string::npos)
+	else if (tempProp.fullName.find("$_Rotation") != std::string::npos) {
+		// TODO: rotation is being applied to wrong objects; rotation nodes don't seem to be getting parsed enough (experiment with 1 / all diamonds in testMapPhysicsB)
 		tempProp.rot = rot;
+	}
 	else if (tempProp.fullName.find("$_Scaling") != std::string::npos) {
 		tempProp.scale = scale;
 		finalTransformNode = true;
@@ -280,7 +282,7 @@ void initBullet() {
 
 	bulletData.dynamicsWorld = new btDiscreteDynamicsWorld(bulletData.dispatcher, bulletData.overlappingPairCache, bulletData.solver, bulletData.collisionConfiguration);
 
-	bulletData.dynamicsWorld->setGravity(btVector3(0, -1, 0));
+	bulletData.dynamicsWorld->setGravity(btVector3(0, -10, 0));
 }
 
 /*
