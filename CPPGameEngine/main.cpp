@@ -386,7 +386,7 @@ public:
 	virtual void setDebugMode(int p) {
 		m = p;
 	}
-	int getDebugMode(void) const { return 3; }
+	int getDebugMode(void) const { return m; }
 	int m;
 };
 
@@ -421,7 +421,7 @@ int main() {
 	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
 	// load map
-	loadMap("testMapPhysicsB");
+	loadMap("testMapPhysics");
 
 	// enable anisotropic filtering if supported
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
@@ -522,9 +522,9 @@ int main() {
 		}
 
 		// debug render bullet data
-		debugLineShader.use();
+		/*debugLineShader.use();
 		debugDrawer->SetMatrices(debugLineShader, view, projection);
-		bulletData.dynamicsWorld->debugDrawWorld();
+		bulletData.dynamicsWorld->debugDrawWorld();*/
 
 		glfwSwapBuffers(window);
 	}

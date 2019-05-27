@@ -63,7 +63,7 @@ public:
 
 			btVector3 btscale(scale.x, scale.y, scale.z);
 			trimeshShape->setLocalScaling(btscale);
-
+			trimeshShape->setMargin(0);
 			bulletData.collisionShapes.push_back(trimeshShape);
 
 			// Create Dynamic Objects
@@ -103,6 +103,8 @@ public:
 
 			btVector3 btscale(scale.x, scale.y, scale.z);
 			convexShape->setLocalScaling(btscale);
+			// TODO: use a larger margin (default 0.04) and shrink shape to fit margin (see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
+			convexShape->setMargin(0.01f);
 			// convexShape->setMargin(isStaticMesh ? btScalar(0) : btScalar(0.04f));
 			bulletData.collisionShapes.push_back(convexShape);
 
