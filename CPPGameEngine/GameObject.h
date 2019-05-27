@@ -47,25 +47,20 @@ public:
 		}
 
 		// create bullet physics collider from model
-		btTriangleMesh* trimesh = new btTriangleMesh();
+		btConvexHullShape *convexShape = new btConvexHullShape();
 		for (int j = 0; j < model->meshes.size(); ++j) {
 			Mesh mesh = model->meshes[j];
-			for (int i = 0; i < mesh.indices.size(); i += 3) {
-				btVector3 vertex_1{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-				btVector3 vertex_2{ mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z };
-				btVector3 vertex_3{ mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z };
-				trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
+			for (int i = 0; i < mesh.indices.size(); ++i) {
+				btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
+				convexShape->addPoint(vertex);
 			}
 		}
-		btConvexShape *trimeshShape = new btConvexTriangleMeshShape{ trimesh };
-		btVector3 btscale(scale.x, scale.y, scale.z);
-		trimeshShape->setLocalScaling(btscale);
-		btShapeHull *hull = new btShapeHull(trimeshShape);
-		btScalar margin = trimeshShape->getMargin();
-		hull->buildHull(margin);
-		trimeshShape->setUserPointer(hull);
+		bulletData.collisionShapes.push_back(convexShape);
 
-		bulletData.collisionShapes.push_back(trimeshShape);
+		btVector3 btscale(scale.x, scale.y, scale.z);
+		convexShape->setLocalScaling(btscale);
+
+		bulletData.collisionShapes.push_back(convexShape);
 
 		// Create Dynamic Objects
 		btTransform startTransform;
@@ -74,13 +69,18 @@ public:
 		btScalar mass(isStaticMesh ? 0.0f : 1.0f);
 		btVector3 localInertia(0, 0, 0);
 		if (!isStaticMesh)
-			trimeshShape->calculateLocalInertia(mass, localInertia);
+			convexShape->calculateLocalInertia(mass, localInertia);
 		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
+		
+		btQuaternion quat;
+		quat.setEulerZYX(rotationEA.z,rotationEA.y,rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
+		startTransform.setRotation(quat);
+
 		std::cout << position.x << ", " << position.y << ", " << position.z << std::endl;
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, trimeshShape, localInertia);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, convexShape, localInertia);
 		body = new btRigidBody(rbInfo);
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body);
