@@ -40,6 +40,16 @@ float anisoFilterAmount = 0.0f;
 #include <memory>
 
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
+
+struct BulletData {
+	btDiscreteDynamicsWorld* dynamicsWorld;
+	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+	btSequentialImpulseConstraintSolver* solver;
+	btBroadphaseInterface* overlappingPairCache;
+	btCollisionDispatcher* dispatcher;
+	btDefaultCollisionConfiguration* collisionConfiguration;
+} bulletData;
+
 #include "GameObject.h"
 #include "Light.h"
 std::vector<GameObject> gameObjects;
@@ -79,15 +89,6 @@ struct ProcessObjectProperties {
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } gBuffer;
-
-struct BulletData {
-	btDiscreteDynamicsWorld* dynamicsWorld;
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
-	btSequentialImpulseConstraintSolver* solver;
-	btBroadphaseInterface* overlappingPairCache;
-	btCollisionDispatcher* dispatcher;
-	btDefaultCollisionConfiguration* collisionConfiguration;
-} bulletData;
 
 
 // TODO: assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
@@ -149,7 +150,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
 		models.insert({ tempProp.fullName, baseModel });
-		gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
+		gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true));
 	}
 
 	// recurse over child nodes regardless of current node type
@@ -378,6 +379,14 @@ int main() {
 		updateTime();
 		glfwPollEvents();
 		processInput(window);
+
+		// update physics
+		// TODO: don't hardcode 60fps physics
+		bulletData.dynamicsWorld->stepSimulation(1.f / 60.f, 10);
+
+		// update objects
+		for (int i = 0; i < gameObjects.size(); ++i)
+			gameObjects[i].update();
 
 		// render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
