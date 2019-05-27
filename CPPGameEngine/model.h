@@ -68,7 +68,7 @@ unsigned int textureFromFile(const char *path, const std::string &directory, boo
 class Model {
 public:
 	static std::vector<Texture> textures_loaded;  // store all textures loaded for re-use across models
-	static Texture defaultHeightMap;  // blank heightMap for textures which do not utilize POM
+	static Texture defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 
@@ -253,6 +253,10 @@ private:
 					textures_loaded.push_back(textureNrm);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 					std::cout << "loaded file: '" << normalName << "'" << std::endl;
 				}
+				else {
+					textures.push_back(defaultNormalMap);
+					std::cout << "unable to find normal map for texture: '" << str.C_Str() << "'; falling back to default normal map" << std::endl;
+				}
 				std::string specName = str.C_Str();
 				specName = specName.substr(0, specName.find_last_of('.')) + "_SPEC.png";
 				if (std::experimental::filesystem::exists(directory + "/" + specName)) {
@@ -263,6 +267,10 @@ private:
 					textures.push_back(textureSpec);
 					textures_loaded.push_back(textureSpec);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 					std::cout << "loaded file: '" << specName << "'" << std::endl;
+				}
+				else {
+					textures.push_back(defaultSpecularMap);
+					std::cout << "unable to find specular map for texture: '" << str.C_Str() << "'; falling back to default specular map" << std::endl;
 				}
 				std::string heightName = str.C_Str();
 				heightName = heightName.substr(0, heightName.find_last_of('.')) + "_DISP.png";
@@ -277,7 +285,7 @@ private:
 				}
 				else {
 					textures.push_back(defaultHeightMap);
-					std::cout << "unable to find heightMap for texture: '" << str.C_Str() << "'; falling back to default heightMap" << std::endl;
+					std::cout << "unable to find height map for texture: '" << str.C_Str() << "'; falling back to default height map" << std::endl;
 				}
             }
         }
@@ -285,5 +293,5 @@ private:
     }
 };
 std::vector<Texture> Model::textures_loaded;
-Texture Model::defaultHeightMap;
+Texture Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap;
 #endif

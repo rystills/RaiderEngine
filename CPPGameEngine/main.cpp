@@ -250,18 +250,10 @@ void initGBuffer() {
 		std::cout << "Framebuffer not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
 int main() {
 	GLFWwindow* window = initWindow();
 	initGBuffer();
-
-	// configure global opengl state
-	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-
-	// enable anisotropic filtering if supported
-	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);
 
 	// build and compile shaders
 	// -------------------------
@@ -271,15 +263,27 @@ int main() {
 
 	// load models
 	// -----------
+	Model::defaultNormalMap.id = textureFromFile("defaultNormalMap.png", ".");
+	Model::defaultNormalMap.type = "texture_normal";
+	Model::defaultNormalMap.path = "defaultNormalMap.png";
+	std::cout << "loaded default normal map: 'defaultNormalMap.png'" << std::endl;
+
+	Model::defaultSpecularMap.id = textureFromFile("defaultSpecularMap.png", ".");
+	Model::defaultSpecularMap.type = "texture_specular";
+	Model::defaultSpecularMap.path = "defaultSpecularMap.png";
+	std::cout << "loaded default specular map: 'defaultSpecularMap.png'" << std::endl;
+
 	Model::defaultHeightMap.id = textureFromFile("defaultHeightMap.png", ".");
 	Model::defaultHeightMap.type = "texture_height";
 	Model::defaultHeightMap.path = "defaultHeightMap.png";
 	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
 	// load map
-	loadMap("testMapB");
+	loadMap("testMapPhysics");
 
-	// apply anisotropic filtering to textures
+	// enable anisotropic filtering if supported
+	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);
 	if (anisoFilterAmount > 0) {
 		for (int i = 0; i < Model::textures_loaded.size(); ++i) {
 			glBindTexture(GL_TEXTURE_2D, Model::textures_loaded[i].id);
