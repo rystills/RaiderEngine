@@ -282,7 +282,7 @@ void initBullet() {
 
 	bulletData.dynamicsWorld = new btDiscreteDynamicsWorld(bulletData.dispatcher, bulletData.overlappingPairCache, bulletData.solver, bulletData.collisionConfiguration);
 
-	bulletData.dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	bulletData.dynamicsWorld->setGravity(btVector3(0, -2, 0));
 }
 
 /*
@@ -355,7 +355,7 @@ int main() {
 	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
 	// load map
-	loadMap("testMapPhysicsB");
+	loadMap("testMapPhysics");
 
 	// enable anisotropic filtering if supported
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))

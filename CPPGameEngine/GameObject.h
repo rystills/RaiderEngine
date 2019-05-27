@@ -46,44 +46,89 @@ public:
 			model = m;
 		}
 
-		// create bullet physics collider from model
-		btConvexHullShape *convexShape = new btConvexHullShape();
-		for (int j = 0; j < model->meshes.size(); ++j) {
-			Mesh mesh = model->meshes[j];
-			for (int i = 0; i < mesh.indices.size(); ++i) {
-				btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-				convexShape->addPoint(vertex);
+		if (isStaticMesh) {
+			// create bullet physics collider from model
+			btTriangleMesh* trimesh = new btTriangleMesh();
+			for (int j = 0; j < model->meshes.size(); ++j) {
+				Mesh mesh = model->meshes[j];
+				for (int i = 0; i < mesh.indices.size(); i += 3) {
+					btVector3 vertex_1{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
+					btVector3 vertex_2{ mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z };
+					btVector3 vertex_3{ mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z };
+					trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
+				}
 			}
+			btCollisionShape* trimeshShape = new btBvhTriangleMeshShape{ trimesh, true };
+			bulletData.collisionShapes.push_back(trimeshShape);
+
+			btVector3 btscale(scale.x, scale.y, scale.z);
+			trimeshShape->setLocalScaling(btscale);
+
+			bulletData.collisionShapes.push_back(trimeshShape);
+
+			// Create Dynamic Objects
+			btTransform startTransform;
+			startTransform.setIdentity();
+
+			btScalar mass(isStaticMesh ? 0.0f : 1.0f);
+			btVector3 localInertia(0, 0, 0);
+			if (!isStaticMesh)
+				trimeshShape->calculateLocalInertia(mass, localInertia);
+			startTransform.setOrigin(btVector3(position.x, position.y, position.z));
+
+			btQuaternion quat;
+			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
+			startTransform.setRotation(quat);
+
+			std::cout << rotationEA.x << ", " << rotationEA.y << ", " << rotationEA.z << std::endl;
+
+			// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, trimeshShape, localInertia);
+			body = new btRigidBody(rbInfo);
+			bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
+			bulletData.dynamicsWorld->addRigidBody(body);
 		}
-		bulletData.collisionShapes.push_back(convexShape);
+		else {
+			// create bullet physics collider from model
+			btConvexHullShape *convexShape = new btConvexHullShape();
+			for (int j = 0; j < model->meshes.size(); ++j) {
+				Mesh mesh = model->meshes[j];
+				for (int i = 0; i < mesh.indices.size(); ++i) {
+					btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
+					convexShape->addPoint(vertex);
+				}
+			}
+			bulletData.collisionShapes.push_back(convexShape);
 
-		btVector3 btscale(scale.x, scale.y, scale.z);
-		convexShape->setLocalScaling(btscale);
+			btVector3 btscale(scale.x, scale.y, scale.z);
+			convexShape->setLocalScaling(btscale);
+			// convexShape->setMargin(isStaticMesh ? btScalar(0) : btScalar(0.04f));
+			bulletData.collisionShapes.push_back(convexShape);
 
-		bulletData.collisionShapes.push_back(convexShape);
+			// Create Dynamic Objects
+			btTransform startTransform;
+			startTransform.setIdentity();
 
-		// Create Dynamic Objects
-		btTransform startTransform;
-		startTransform.setIdentity();
+			btScalar mass(isStaticMesh ? 0.0f : 1.0f);
+			btVector3 localInertia(0, 0, 0);
+			if (!isStaticMesh)
+				convexShape->calculateLocalInertia(mass, localInertia);
+			startTransform.setOrigin(btVector3(position.x, position.y, position.z));
 
-		btScalar mass(isStaticMesh ? 0.0f : 1.0f);
-		btVector3 localInertia(0, 0, 0);
-		if (!isStaticMesh)
-			convexShape->calculateLocalInertia(mass, localInertia);
-		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
-		
-		btQuaternion quat;
-		quat.setEulerZYX(rotationEA.z,rotationEA.y,rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
-		startTransform.setRotation(quat);
+			btQuaternion quat;
+			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
+			startTransform.setRotation(quat);
 
-		std::cout << rotationEA.x << ", " << rotationEA.y << ", " << rotationEA.z << std::endl;
+			std::cout << rotationEA.x << ", " << rotationEA.y << ", " << rotationEA.z << std::endl;
 
-		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, convexShape, localInertia);
-		body = new btRigidBody(rbInfo);
-		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
-		bulletData.dynamicsWorld->addRigidBody(body);
+			// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, convexShape, localInertia);
+			body = new btRigidBody(rbInfo);
+			bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
+			bulletData.dynamicsWorld->addRigidBody(body);
+		}
 	}
 
 	void update() {
@@ -100,7 +145,7 @@ public:
 		position.z = float(trans.getOrigin().getZ());
 		float z, y, x;
 		trans.getRotation().getEulerZYX(z, y, x);
-		setRotation(glm::vec3(x,y,z));
+		setRotation(glm::vec3(x, y, z));
 	}
 
 	void setRotation(glm::vec3 rotationEA) {
