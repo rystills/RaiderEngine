@@ -121,14 +121,15 @@ public:
 			convexShape->setLocalScaling(btscale);
 			// since we shrink the convex hull by the margin independently of scaling, multiply the applied margin by the average scale to compensate
 			// TODO: multiplying by the average scale won't work well for non-uniform scaled objects; such objects need their own convex mesh with baked per-axis margins
-			convexShape->setMargin(collisionMargin*((scale.x + scale.y + scale.z) / 3));
+			float averageScale = (scale.x + scale.y + scale.z) / 3;
+			convexShape->setMargin(collisionMargin*averageScale);
 
 
 			// Create Dynamic Objects
 			btTransform startTransform;
 			startTransform.setIdentity();
-
-			btScalar mass(isStaticMesh ? 0.0f : 1.0f);
+			float volume = calcVolume(model->meshes);
+			btScalar mass(isStaticMesh ? 0.0f : volume*averageScale);
 			btVector3 localInertia(0, 0, 0);
 			if (!isStaticMesh)
 				convexShape->calculateLocalInertia(mass, localInertia);
@@ -145,6 +146,21 @@ public:
 			bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 			bulletData.dynamicsWorld->addRigidBody(body);
 		}
+	}
+
+	/*
+	calculate the volume of a vector of meshes
+	@param meshes: the meshes whose combined volume we wish to calculate
+	@returns: the volume of the mesh vector meshes
+	*/
+	float calcVolume(std::vector<Mesh> meshes) {
+		float volume = 0;
+		for (int j = 0; j < meshes.size(); ++j) {
+			Mesh mesh = meshes[j];
+			for (int i = 0; i < mesh.indices.size()-2; i+=3)
+				volume += glm::determinant(glm::mat3(mesh.vertices[mesh.indices[i]].Position, mesh.vertices[mesh.indices[i+1]].Position, mesh.vertices[mesh.indices[i+2]].Position));
+		}
+		return volume / 6.0f;  // since the determinant give 6 times tetra volume
 	}
 
 	void update() {
