@@ -91,6 +91,16 @@ struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } gBuffer;
 
+std::string stripNodeName(std::string fullName) {
+	std::size_t nameExtraStart = fullName.find("_$Assimp");
+	std::string name = nameExtraStart == std::string::npos ? fullName.substr(2) : fullName.substr(2, nameExtraStart - 2);
+	// strip trailing numbers applied to duplicate object names in the newest version of assimp
+	while (isdigit(name[name.length() - 1])) {
+		name = name.substr(0, name.length() - 1);
+	}
+	return name;
+}
+
 
 // TODO: assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
 // TODO: do something more elegant than using a global temp struct
@@ -102,8 +112,11 @@ process the current node while loading a map, either extracting a single piece o
 */
 void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
-	// extract the transform data from the current node
+	// determine the full name and real name of the current node
 	tempProp.fullName = node->mName.C_Str();
+	std::string name = stripNodeName(tempProp.fullName);
+
+	// extract the transform data from the current node
 	aiVector3D aiPos, aiRot, aiScale;
 	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
 	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
@@ -111,49 +124,53 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
-	bool finalTransformNode = false;
+	bool isTransformNode = false;
 	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
 		tempProp.pos = pos;
+		isTransformNode = true;
+		// not all objects have a rot or scale node, but all objects start with a transform node, so reset rot and scale here
+		tempProp.rot = glm::vec3(0, 0, 0);
+		tempProp.scale = glm::vec3(1, 1, 1);
+	}
+	else if (tempProp.fullName.find("$_PreRotation") != std::string::npos) {
+		// TODO: we should probably use the data from PreRotation nodes too 
+		isTransformNode = true;
 	}
 	else if (tempProp.fullName.find("$_Rotation") != std::string::npos) {
 		// TODO: rotation is being applied to wrong objects; rotation nodes don't seem to be getting parsed enough (experiment with 1 / all diamonds in testMapPhysicsB)
 		tempProp.rot = rot;
+		isTransformNode = true;
 	}
 	else if (tempProp.fullName.find("$_Scaling") != std::string::npos) {
 		tempProp.scale = scale;
-		finalTransformNode = true;
+		isTransformNode = true;
 	}
 
-	// once we've reached the final transform node, we can instantiate our object
-	if (finalTransformNode) {
+	if (!isTransformNode) {
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load an existing model
-			std::size_t nameExtraStart = tempProp.fullName.find("_$Assimp");
-			std::string name = nameExtraStart == std::string::npos ? tempProp.fullName.substr(2) : tempProp.fullName.substr(2, nameExtraStart - 2);
-			// strip trailing numbers applied to duplicate object names in the newest version of assimp
-			while (isdigit(name[name.length() - 1])) {
-				name = name.substr(0, name.length() - 1);
-			}
+
 			std::cout << "generating instance of object: " << name << std::endl;
 			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			// create a light
-			std::cout << "generating light: " << tempProp.fullName << std::endl;
+			std::cout << "generating light: " << name << std::endl;
 			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
-	}
-
-	// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
-	if (node->mNumMeshes > 0 && !(strncmp(tempProp.fullName.c_str(), "l_", 2) == 0 || strncmp(tempProp.fullName.c_str(), "o_", 2) == 0)) {
-		// generate a new model from the mesh list
-		std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
-		std::shared_ptr<Model> baseModel(new Model());
-		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-			baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
-		models.insert({ tempProp.fullName, baseModel });
-		gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true));
+		else {
+			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
+			if (node->mNumMeshes > 0) {
+				// generate a new model from the mesh list
+				std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
+				std::shared_ptr<Model> baseModel(new Model());
+				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+				models.insert({ tempProp.fullName, baseModel });
+				gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true));
+			}
+		}
 	}
 
 	// recurse over child nodes regardless of current node type
@@ -282,7 +299,7 @@ void initBullet() {
 
 	bulletData.dynamicsWorld = new btDiscreteDynamicsWorld(bulletData.dispatcher, bulletData.overlappingPairCache, bulletData.solver, bulletData.collisionConfiguration);
 
-	bulletData.dynamicsWorld->setGravity(btVector3(0, -2, 0));
+	bulletData.dynamicsWorld->setGravity(btVector3(0, -10, 0));
 }
 
 /*
@@ -469,7 +486,7 @@ int main() {
 		// -----------------------------------------------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		shaderGeometryPass.use();
 		shaderGeometryPass.setMat4("projection", projection);
@@ -516,7 +533,7 @@ int main() {
 		shaderLightBox.setMat4("projection", projection);
 		shaderLightBox.setMat4("view", view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
-			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i].position), glm::vec3(0.05f)));
+			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i].position), glm::vec3(1)));
 			shaderLightBox.setVec3("lightColor", lights[i].color);
 			renderCube();
 		}
