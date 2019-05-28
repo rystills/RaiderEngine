@@ -55,10 +55,10 @@ unsigned int textureFromFile(const char *path, const std::string &directory, boo
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		else
-			std::cout << "Error Loading texture '" << path << "': invalid number of components '" << nrComponents << "'" << std::endl;
+			ERROR(std::cout << "Error Loading texture '" << path << "': invalid number of components '" << nrComponents << "'" << std::endl);
 	}
 	else
-		std::cout << "Texture failed to load at path: " << path << std::endl;
+		ERROR(std::cout << "Texture failed to load at path: " << path << std::endl);
 	
 	// cleanup
 	stbi_image_free(data);
@@ -180,7 +180,7 @@ private:
         const aiScene* scene = importer.ReadFile(path, aiModelProcessFlags);
         // check for errors
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+            ERROR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
             return;
         }
         // retrieve the directory path of the filepath
@@ -238,9 +238,10 @@ private:
                 texture.path = str.C_Str();
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-				std::cout << "loaded file: '" << str.C_Str() << "'" << std::endl;
+				SUCCESS(std::cout << "loaded file: '" << str.C_Str() << "'" << std::endl);
 
 				// TODO: currently we manually check for maps other than diffuse due to collada export issues; down the line this should become unnecessary
+				// TODO: combine all this repeat logic
 				std::string normalName = str.C_Str();
 				// TODO: don't hardcode png as extension
 				normalName = normalName.substr(0, normalName.find_last_of('.')) + "_NRM.png";
@@ -251,11 +252,11 @@ private:
 					textureNrm.path = normalName.c_str();
 					textures.push_back(textureNrm);
 					textures_loaded.push_back(textureNrm);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					std::cout << "loaded file: '" << normalName << "'" << std::endl;
+					SUCCESS(std::cout << "loaded file: '" << normalName << "'" << std::endl);
 				}
 				else {
 					textures.push_back(defaultNormalMap);
-					std::cout << "unable to find normal map for texture: '" << str.C_Str() << "'; falling back to default normal map" << std::endl;
+					WARNING(std::cout << "unable to find normal map for texture: '" << str.C_Str() << "'; falling back to default normal map" << std::endl);
 				}
 				std::string specName = str.C_Str();
 				specName = specName.substr(0, specName.find_last_of('.')) + "_SPEC.png";
@@ -266,11 +267,11 @@ private:
 					textureSpec.path = specName.c_str();
 					textures.push_back(textureSpec);
 					textures_loaded.push_back(textureSpec);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					std::cout << "loaded file: '" << specName << "'" << std::endl;
+					SUCCESS(std::cout << "loaded file: '" << specName << "'" << std::endl);
 				}
 				else {
 					textures.push_back(defaultSpecularMap);
-					std::cout << "unable to find specular map for texture: '" << str.C_Str() << "'; falling back to default specular map" << std::endl;
+					WARNING(std::cout << "unable to find specular map for texture: '" << str.C_Str() << "'; falling back to default specular map" << std::endl);
 				}
 				std::string heightName = str.C_Str();
 				heightName = heightName.substr(0, heightName.find_last_of('.')) + "_DISP.png";
@@ -281,11 +282,11 @@ private:
 					textureHeight.path = heightName.c_str();
 					textures.push_back(textureHeight);
 					textures_loaded.push_back(textureHeight);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					std::cout << "loaded file: '" << heightName << "'" << std::endl;
+					SUCCESS(std::cout << "loaded file: '" << heightName << "'" << std::endl);
 				}
 				else {
 					textures.push_back(defaultHeightMap);
-					std::cout << "unable to find height map for texture: '" << str.C_Str() << "'; falling back to default height map" << std::endl;
+					WARNING(std::cout << "unable to find height map for texture: '" << str.C_Str() << "'; falling back to default height map" << std::endl);
 				}
             }
         }

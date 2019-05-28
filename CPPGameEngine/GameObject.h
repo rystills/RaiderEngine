@@ -46,6 +46,7 @@ public:
 			model = m;
 		}
 
+		// TODO: share collision shapes between gameObject instances
 		if (isStaticMesh) {
 			// create bullet physics collider from model
 			btTriangleMesh* trimesh = new btTriangleMesh();
@@ -80,8 +81,6 @@ public:
 			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
 			startTransform.setRotation(quat);
 
-			std::cout << rotationEA.x << ", " << rotationEA.y << ", " << rotationEA.z << std::endl;
-
 			// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, trimeshShape, localInertia);
@@ -103,8 +102,8 @@ public:
 
 			btVector3 btscale(scale.x, scale.y, scale.z);
 			convexShape->setLocalScaling(btscale);
-			// TODO: use a larger margin (default 0.04) and shrink shape to fit margin (see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
-			convexShape->setMargin(0.01f);
+			// TODO: shrink shape to fit margin (see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
+			convexShape->setMargin(0.04f);
 			// convexShape->setMargin(isStaticMesh ? btScalar(0) : btScalar(0.04f));
 			bulletData.collisionShapes.push_back(convexShape);
 
@@ -121,8 +120,6 @@ public:
 			btQuaternion quat;
 			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
 			startTransform.setRotation(quat);
-
-			std::cout << rotationEA.x << ", " << rotationEA.y << ", " << rotationEA.z << std::endl;
 
 			// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);

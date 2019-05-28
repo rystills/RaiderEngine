@@ -1,3 +1,22 @@
+// terminal colors
+#include <stdio.h>
+#ifdef _WIN32
+#include <windows.h>
+CONSOLE_SCREEN_BUFFER_INFO cbInfo;
+HANDLE hConsole;
+int originalColor;
+#define WARNING(msg) { SetConsoleTextAttribute(hConsole, 14); msg; SetConsoleTextAttribute(hConsole, originalColor); }
+#define ERROR(msg) { SetConsoleTextAttribute(hConsole, 12); msg; SetConsoleTextAttribute(hConsole, originalColor); }
+#define SUCCESS(msg) { SetConsoleTextAttribute(hConsole, 10); msg; SetConsoleTextAttribute(hConsole, originalColor); }
+#else
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+#define WARNING(msg) { printf(ANSI_COLOR_YELLOW); msg; printf(ANSI_COLOR_RESET); }
+#define ERROR(msg) { printf(ANSI_COLOR_RED); msg; printf(ANSI_COLOR_RESET); }
+#define SUCCESS(msg) { printf(ANSI_COLOR_GREEN); msg; printf(ANSI_COLOR_RESET); }
+#endif
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
@@ -91,6 +110,11 @@ struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } gBuffer;
 
+/*
+extract the base mesh name from an assimp node name, removing $_transform information and trailing numbers
+@param fullName: the node name provided by assimp that we wish to strip
+@returns: a stripped version of the input node name with trailing transform and numbering info removed
+*/
 std::string stripNodeName(std::string fullName) {
 	std::size_t nameExtraStart = fullName.find("_$Assimp");
 	std::string name = nameExtraStart == std::string::npos ? fullName.substr(2) : fullName.substr(2, nameExtraStart - 2);
@@ -150,20 +174,16 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load an existing model
-
-			std::cout << "generating instance of object: " << name << std::endl;
 			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			// create a light
-			std::cout << "generating light: " << name << std::endl;
 			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
 		else {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
 			if (node->mNumMeshes > 0) {
 				// generate a new model from the mesh list
-				std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 				std::shared_ptr<Model> baseModel(new Model());
 				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
@@ -190,7 +210,7 @@ void loadMap(std::string mapName) {
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+		ERROR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
 		return;
 	}
 
@@ -209,15 +229,22 @@ GLFWwindow* initWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	// setup windows console colors here since the original console color doesn't appear to be accessible prior to main
+#ifdef _WIN32
+hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+GetConsoleScreenBufferInfo(hConsole, &cbInfo);
+originalColor = cbInfo.wAttributes;
+#endif
+
 #ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
 	// glfw window creation
 	// --------------------
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CPPGameEngine", 0, NULL);
 	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
+		ERROR(std::cout << "Failed to create GLFW window" << std::endl);
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
@@ -232,7 +259,7 @@ GLFWwindow* initWindow() {
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		ERROR(std::cout << "Failed to initialize GLAD" << std::endl);
 		exit(EXIT_FAILURE);
 	}
 	
@@ -277,7 +304,7 @@ void initGBuffer() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 	// finally check if framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
+		ERROR(std::cout << "Framebuffer not complete!" << std::endl);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -425,21 +452,17 @@ int main() {
 	Model::defaultNormalMap.id = textureFromFile("defaultNormalMap.png", ".");
 	Model::defaultNormalMap.type = "texture_normal";
 	Model::defaultNormalMap.path = "defaultNormalMap.png";
-	std::cout << "loaded default normal map: 'defaultNormalMap.png'" << std::endl;
 
 	Model::defaultSpecularMap.id = textureFromFile("defaultSpecularMap.png", ".");
 	Model::defaultSpecularMap.type = "texture_specular";
 	Model::defaultSpecularMap.path = "defaultSpecularMap.png";
-	std::cout << "loaded default specular map: 'defaultSpecularMap.png'" << std::endl;
 
 	Model::defaultHeightMap.id = textureFromFile("defaultHeightMap.png", ".");
 	Model::defaultHeightMap.type = "texture_height";
 	Model::defaultHeightMap.path = "defaultHeightMap.png";
-	std::cout << "loaded default height map: 'defaultHeightMap.png'" << std::endl;
 	
 	// load map
 	loadMap("testMapPhysics");
-
 	// enable anisotropic filtering if supported
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);
