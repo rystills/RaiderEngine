@@ -238,7 +238,7 @@ private:
                 texture.path = str.C_Str();
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-				SUCCESS(std::cout << "loaded file: '" << str.C_Str() << "'" << std::endl);
+				SUCCESS(std::cout << "loaded diffuse texture: '" << str.C_Str() << "'" << std::endl);
 
 				// TODO: currently we manually check for maps other than diffuse due to collada export issues; down the line this should become unnecessary
 				// TODO: combine all this repeat logic
@@ -252,7 +252,7 @@ private:
 					textureNrm.path = normalName.c_str();
 					textures.push_back(textureNrm);
 					textures_loaded.push_back(textureNrm);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESS(std::cout << "loaded file: '" << normalName << "'" << std::endl);
+					SUCCESS(std::cout << "loaded normal texture: '" << normalName << "'" << std::endl);
 				}
 				else {
 					textures.push_back(defaultNormalMap);
@@ -267,7 +267,7 @@ private:
 					textureSpec.path = specName.c_str();
 					textures.push_back(textureSpec);
 					textures_loaded.push_back(textureSpec);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESS(std::cout << "loaded file: '" << specName << "'" << std::endl);
+					SUCCESS(std::cout << "loaded specular texture: '" << specName << "'" << std::endl);
 				}
 				else {
 					textures.push_back(defaultSpecularMap);
@@ -282,7 +282,7 @@ private:
 					textureHeight.path = heightName.c_str();
 					textures.push_back(textureHeight);
 					textures_loaded.push_back(textureHeight);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESS(std::cout << "loaded file: '" << heightName << "'" << std::endl);
+					SUCCESS(std::cout << "loaded height map texture: '" << heightName << "'" << std::endl);
 				}
 				else {
 					textures.push_back(defaultHeightMap);

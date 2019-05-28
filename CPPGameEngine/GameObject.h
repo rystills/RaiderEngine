@@ -21,6 +21,7 @@
 #include <vector>
 #include <memory>
 #include <glm/gtx/quaternion.hpp>
+#include <LinearMath/btGeometryUtil.h>
 
 class GameObject {
 public:
@@ -90,22 +91,38 @@ public:
 		}
 		else {
 			// create bullet physics collider from model
-			btConvexHullShape *convexShape = new btConvexHullShape();
+			btAlignedObjectArray<btVector3> vertices;
 			for (int j = 0; j < model->meshes.size(); ++j) {
 				Mesh mesh = model->meshes[j];
 				for (int i = 0; i < mesh.indices.size(); ++i) {
 					btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-					convexShape->addPoint(vertex);
+					vertices.push_back(vertex);
 				}
 			}
+			
+			// shrink convex hull by margin to cancel it out (this isn't a perfect solution, but it works well enough - see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
+			float collisionMargin = 0.04f;
+			btAlignedObjectArray<btVector3> planeEquations;
+			btGeometryUtil::getPlaneEquationsFromVertices(vertices, planeEquations);
+
+			btAlignedObjectArray<btVector3> shiftedPlaneEquations;
+			for (int p = 0; p<planeEquations.size(); ++p) {
+				btVector3 plane = planeEquations[p];
+				plane[3] += collisionMargin;
+				shiftedPlaneEquations.push_back(plane);
+			}
+			btAlignedObjectArray<btVector3> shiftedVertices;
+			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
+
+			btCollisionShape* convexShape = new btConvexHullShape(&(shiftedVertices[0].getX()), shiftedVertices.size());
 			bulletData.collisionShapes.push_back(convexShape);
 
 			btVector3 btscale(scale.x, scale.y, scale.z);
 			convexShape->setLocalScaling(btscale);
-			// TODO: shrink shape to fit margin (see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
-			convexShape->setMargin(0.04f);
-			// convexShape->setMargin(isStaticMesh ? btScalar(0) : btScalar(0.04f));
-			bulletData.collisionShapes.push_back(convexShape);
+			// since we shrink the convex hull by the margin independently of scaling, multiply the applied margin by the average scale to compensate
+			// TODO: multiplying by the average scale won't work well for non-uniform scaled objects; such objects need their own convex mesh with baked per-axis margins
+			convexShape->setMargin(collisionMargin*((scale.x + scale.y + scale.z) / 3));
+
 
 			// Create Dynamic Objects
 			btTransform startTransform;

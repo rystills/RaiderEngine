@@ -174,9 +174,11 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load an existing model
+			std::cout << "generating instance of object: " << name << std::endl;
 			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
+			std::cout << "generating light: " << name << std::endl;
 			// create a light
 			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
@@ -184,6 +186,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
 			if (node->mNumMeshes > 0) {
 				// generate a new model from the mesh list
+				std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 				std::shared_ptr<Model> baseModel(new Model());
 				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
@@ -213,9 +216,10 @@ void loadMap(std::string mapName) {
 		ERROR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
 		return;
 	}
-
+	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
 	processMapNode(scene->mRootNode, scene, path);
+	std::cout << "Finished loading map '" << mapName << "'" << std::endl;
 }
 
 /*
