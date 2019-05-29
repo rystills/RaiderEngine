@@ -219,7 +219,7 @@ void loadMap(std::string mapName) {
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
 	processMapNode(scene->mRootNode, scene, path);
-	std::cout << "Finished loading map '" << mapName << "'" << std::endl;
+	SUCCESS(std::cout << "Finished loading map '" << mapName << "'" << std::endl);
 }
 
 /*
@@ -438,6 +438,46 @@ public:
 	int m;
 };
 
+/*
+cast a ray from the specified NDC coordinates using the given proj/view matrices, returning the first hit object
+@param projection: the projection matrix to cast frrom
+@param view: the view ematrix to cast from
+@param x: the x coordinate of the raycast (in NDC space)
+@param y: the y coordinate of the raycast (in NDC space)
+@returns: a pointer to the hit collision object (from whom you can get more useful info via getUserPointer) or NULL if no object was hit
+*/
+const btCollisionObject* rayCast(glm::mat4 projection, glm::mat4 view, float x=0, float y=0) {
+	// object picking
+	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
+	glm::vec4 lRayStart_NDC(x,y, -1.0, 1.0f);
+	glm::vec4 lRayEnd_NDC(x, y, 0.0, 1.0f);
+
+	// inverse transform matrices to camera space
+	glm::mat4 M = glm::inverse(projection*view);
+	glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world /= lRayStart_world.w;
+	glm::vec4 lRayEnd_world = M * lRayEnd_NDC; lRayEnd_world /= lRayEnd_world.w;
+
+	// get ray direction
+	glm::vec3 lRayDir_world(lRayEnd_world - lRayStart_world);
+	lRayDir_world = glm::normalize(lRayDir_world);
+	glm::vec3 out_origin = glm::vec3(lRayStart_world);
+	glm::vec3 out_direction = glm::normalize(lRayDir_world);
+
+	// ray test
+	glm::vec3 out_end = out_origin + out_direction*1000.0f;
+
+	btCollisionWorld::ClosestRayResultCallback RayCallback(
+		btVector3(out_origin.x, out_origin.y, out_origin.z),
+		btVector3(out_end.x, out_end.y, out_end.z)
+	);
+	bulletData.dynamicsWorld->rayTest(
+		btVector3(out_origin.x, out_origin.y, out_origin.z),
+		btVector3(out_end.x, out_end.y, out_end.z),
+		RayCallback
+	);
+	return RayCallback.hasHit() ? RayCallback.m_collisionObject : NULL;
+}
+
 int main() {
 	GLFWwindow* window = initWindow();
 	initGBuffer();
@@ -505,6 +545,14 @@ int main() {
 		for (int i = 0; i < gameObjects.size(); ++i)
 			gameObjects[i].update();
 
+		// get updated view / projection matrices
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+
+		// raycast test
+		const btCollisionObject* hit = rayCast(projection, view);
+		std::cout << "hit object index: " << (hit != NULL ? (int)hit->getUserPointer() : -1) << std::endl;
+
 		// render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -513,8 +561,6 @@ int main() {
 		// -----------------------------------------------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-		glm::mat4 view = camera.GetViewMatrix();
 		shaderGeometryPass.use();
 		shaderGeometryPass.setMat4("projection", projection);
 		shaderGeometryPass.setMat4("view", view);

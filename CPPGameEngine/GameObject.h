@@ -145,6 +145,8 @@ public:
 			body = new btRigidBody(rbInfo);
 			bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 			bulletData.dynamicsWorld->addRigidBody(body);
+			// TODO: set user pointer to this gameObject, set to bodyIndex for now just for testing
+			body->setUserPointer((void*)bodyIndex);
 		}
 	}
 
