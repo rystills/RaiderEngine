@@ -126,7 +126,6 @@ std::string stripNodeName(std::string fullName) {
 }
 
 
-// TODO: assimp seems to split fbx models into sub-nodes for each transform, so we have to hack things a bit to load fbx maps
 // TODO: do something more elegant than using a global temp struct
 /*
 process the current node while loading a map, either extracting a single piece of transform data or finalizing the current object / static mesh
@@ -161,7 +160,6 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		isTransformNode = true;
 	}
 	else if (tempProp.fullName.find("$_Rotation") != std::string::npos) {
-		// TODO: rotation is being applied to wrong objects; rotation nodes don't seem to be getting parsed enough (experiment with 1 / all diamonds in testMapPhysicsB)
 		tempProp.rot = rot;
 		isTransformNode = true;
 	}
@@ -446,7 +444,7 @@ cast a ray from the specified NDC coordinates using the given proj/view matrices
 @param y: the y coordinate of the raycast (in NDC space)
 @returns: a pointer to the hit collision object (from whom you can get more useful info via getUserPointer) or NULL if no object was hit
 */
-const btCollisionObject* rayCast(glm::mat4 projection, glm::mat4 view, float x=0, float y=0) {
+std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 projection, glm::mat4 view, float x=0, float y=0) {
 	// object picking
 	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
 	glm::vec4 lRayStart_NDC(x,y, -1.0, 1.0f);
@@ -466,16 +464,16 @@ const btCollisionObject* rayCast(glm::mat4 projection, glm::mat4 view, float x=0
 	// ray test
 	glm::vec3 out_end = out_origin + out_direction*1000.0f;
 
-	btCollisionWorld::ClosestRayResultCallback RayCallback(
+	std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> RayCallback(new btCollisionWorld::ClosestRayResultCallback(
 		btVector3(out_origin.x, out_origin.y, out_origin.z),
 		btVector3(out_end.x, out_end.y, out_end.z)
-	);
+	));
 	bulletData.dynamicsWorld->rayTest(
 		btVector3(out_origin.x, out_origin.y, out_origin.z),
 		btVector3(out_end.x, out_end.y, out_end.z),
-		RayCallback
+		*RayCallback
 	);
-	return RayCallback.hasHit() ? RayCallback.m_collisionObject : NULL;
+	return RayCallback;
 }
 
 int main() {
@@ -550,8 +548,8 @@ int main() {
 		glm::mat4 view = camera.GetViewMatrix();
 
 		// raycast test
-		const btCollisionObject* hit = rayCast(projection, view);
-		std::cout << "hit object index: " << (hit != NULL ? (int)hit->getUserPointer() : -1) << std::endl;
+		std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
+		std::cout << "hit object index: " << (hit->hasHit() ? (int)hit->m_collisionObject->getUserPointer() : -1) << std::endl;
 
 		// render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
