@@ -80,7 +80,7 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -163,6 +163,10 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		// TODO: we should probably use the data from PreRotation nodes too 
 		isTransformNode = true;
 	}
+	else if (tempProp.fullName.find("$_GeometricTranslation") != std::string::npos) {
+		// TODO: look into geometric transformations and decide whether or not we need to use the data from them
+		isTransformNode = true;
+	}
 	else if (tempProp.fullName.find("$_Rotation") != std::string::npos) {
 		tempProp.rot = rot;
 		isTransformNode = true;
@@ -173,10 +177,11 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	}
 
 	if (!isTransformNode) {
+		SUCCESS(std::cout << tempProp.fullName << std::endl);
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load an existing model
-			std::cout << "generating instance of object: " << name << std::endl;
+			//std::cout << "generating instance of object: " << name << std::endl;
 			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
@@ -529,7 +534,7 @@ int main() {
 	shaderLightingPass.setInt("gAlbedoSpec", 2);
 
 	BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
-	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
 	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);
 
 	// render loop
@@ -542,8 +547,9 @@ int main() {
 
 		// update physics
 		// TODO: don't hardcode 60fps physics
-		bulletData.dynamicsWorld->stepSimulation(1.f / 60.f, 10);
-		
+		//bulletData.dynamicsWorld->stepSimulation(1.f / 60.f, 10);
+		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
+
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
 			gameObjects[i].update();
@@ -554,7 +560,7 @@ int main() {
 
 		// raycast test
 		std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
-		std::cout << "hit object index: " << (hit->hasHit() ? (int)hit->m_collisionObject->getUserPointer() : -1) << std::endl;
+		//std::cout << "hit object index: " << (hit->hasHit() ? (int)hit->m_collisionObject->getUserPointer() : -1) << std::endl;
 
 		// render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

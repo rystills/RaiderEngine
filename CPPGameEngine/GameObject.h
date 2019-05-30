@@ -101,7 +101,8 @@ public:
 			}
 			
 			// shrink convex hull by margin to cancel it out (this isn't a perfect solution, but it works well enough - see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
-			float collisionMargin = 0.04f;
+			// TODO: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
+			float collisionMargin = 0.02f;
 			btAlignedObjectArray<btVector3> planeEquations;
 			btGeometryUtil::getPlaneEquationsFromVertices(vertices, planeEquations);
 
@@ -134,7 +135,6 @@ public:
 			if (!isStaticMesh)
 				convexShape->calculateLocalInertia(mass, localInertia);
 			startTransform.setOrigin(btVector3(position.x, position.y, position.z));
-
 			btQuaternion quat;
 			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
 			startTransform.setRotation(quat);
