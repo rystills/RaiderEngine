@@ -152,9 +152,6 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="wall.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="installInstructions.txt" />
     <Text Include="todo.txt" />
   </ItemGroup>

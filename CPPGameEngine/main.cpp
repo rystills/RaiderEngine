@@ -103,7 +103,7 @@ void updateTime() {
 
 struct ProcessObjectProperties {
 	glm::vec3 pos, rot, scale;
-	std::string fullName;
+	std::string fullName, prevName;
 } tempProp;
 
 struct GBuffer {
@@ -138,6 +138,13 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// determine the full name and real name of the current node
 	tempProp.fullName = node->mName.C_Str();
 	std::string name = stripNodeName(tempProp.fullName);
+	// reset the accumulated transform properties first thing if we're on a new object
+	if (name != tempProp.prevName) {
+		tempProp.prevName = name;
+		tempProp.pos = glm::vec3(0, 0, 0);
+		tempProp.rot = glm::vec3(0, 0, 0);
+		tempProp.scale = glm::vec3(1, 1, 1);
+	}
 
 	// extract the transform data from the current node
 	aiVector3D aiPos, aiRot, aiScale;
@@ -151,9 +158,6 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
 		tempProp.pos = pos;
 		isTransformNode = true;
-		// not all objects have a rot or scale node, but all objects start with a transform node, so reset rot and scale here
-		tempProp.rot = glm::vec3(0, 0, 0);
-		tempProp.scale = glm::vec3(1, 1, 1);
 	}
 	else if (tempProp.fullName.find("$_PreRotation") != std::string::npos) {
 		// TODO: we should probably use the data from PreRotation nodes too 
@@ -216,6 +220,7 @@ void loadMap(std::string mapName) {
 	}
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
+	tempProp.prevName = "";
 	processMapNode(scene->mRootNode, scene, path);
 	SUCCESS(std::cout << "Finished loading map '" << mapName << "'" << std::endl);
 }
@@ -504,7 +509,7 @@ int main() {
 	Model::defaultHeightMap.path = "defaultHeightMap.png";
 	
 	// load map
-	loadMap("testMapPhysics");
+	loadMap("bookshelf");
 	// enable anisotropic filtering if supported
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);

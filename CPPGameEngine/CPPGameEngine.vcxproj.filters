@@ -58,11 +58,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="wall.jpg">
-      <Filter>Source Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="todo.txt" />
     <Text Include="installInstructions.txt" />
   </ItemGroup>
