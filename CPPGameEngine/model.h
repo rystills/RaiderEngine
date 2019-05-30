@@ -19,6 +19,7 @@
 #include <map>
 #include <vector>
 #include <experimental/filesystem>
+#include <LinearMath/btGeometryUtil.h>
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 
 /*
@@ -71,6 +72,10 @@ public:
 	static Texture defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
+	btCollisionShape* collisionShape;
+	bool isStaticMesh = false;
+	float volume;
+	float collisionMargin;
 
 	/*
 	Model default constructor: create a new empty model
@@ -84,7 +89,78 @@ public:
 	*/
     Model(std::string const &path, bool gamma = false) : gammaCorrection(gamma) {
         loadModel(path);
+		calculateCollisionShape();
     }
+
+	/*
+	calculate the collision shape for this mesh, to be used by bullet physics
+	@param isStatic: whether this is a static model (and therefore can use a triangle mesh) or a dynamic model (and therefore should default to a convex hull)
+	*/
+	void calculateCollisionShape(bool isStatic = false) {
+		isStaticMesh = isStatic;
+		// TODO: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
+		collisionMargin = isStaticMesh ? 0 : 0.02f;
+		if (isStaticMesh) {
+			// create mesh collider from model tris
+			// TODO: free trimesh after use
+			btTriangleMesh* trimesh = new btTriangleMesh();
+			for (int j = 0; j < meshes.size(); ++j) {
+				Mesh mesh = meshes[j];
+				for (int i = 0; i < mesh.indices.size(); i += 3) {
+					btVector3 vertex_1{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
+					btVector3 vertex_2{ mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z };
+					btVector3 vertex_3{ mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z };
+					trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
+				}
+			}
+			collisionShape = new btBvhTriangleMeshShape{ trimesh, true };
+		}
+		else {
+			// create convex hull collider from mesh verts
+			btAlignedObjectArray<btVector3> vertices;
+			for (int j = 0; j < meshes.size(); ++j) {
+				Mesh mesh = meshes[j];
+				for (int i = 0; i < mesh.indices.size(); ++i) {
+					btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
+					vertices.push_back(vertex);
+				}
+			}
+
+			// shrink convex hull by margin to cancel it out (this isn't a perfect solution, but it works well enough - see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
+			btAlignedObjectArray<btVector3> planeEquations;
+			btGeometryUtil::getPlaneEquationsFromVertices(vertices, planeEquations);
+
+			btAlignedObjectArray<btVector3> shiftedPlaneEquations;
+			for (int p = 0; p<planeEquations.size(); ++p) {
+				btVector3 plane = planeEquations[p];
+				plane[3] += collisionMargin;
+				shiftedPlaneEquations.push_back(plane);
+			}
+			btAlignedObjectArray<btVector3> shiftedVertices;
+			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
+
+			collisionShape = new btConvexHullShape(&(shiftedVertices[0].getX()), shiftedVertices.size());
+
+		}
+		collisionShape->setMargin(collisionMargin);
+		volume = calcVolume();
+		// push back a single instance of the default collision shape so objects with no scaling can share it
+		bulletData.collisionShapes.push_back(collisionShape);
+	}
+
+	/*
+	calculate the volume of the current Model's meshes
+	@returns: the volume of the mesh vector meshes
+	*/
+	float calcVolume() {
+		float volume = 0;
+		for (int j = 0; j < meshes.size(); ++j) {
+			Mesh mesh = meshes[j];
+			for (int i = 0; i < mesh.indices.size() - 2; i += 3)
+				volume += glm::determinant(glm::mat3(mesh.vertices[mesh.indices[i]].Position, mesh.vertices[mesh.indices[i + 1]].Position, mesh.vertices[mesh.indices[i + 2]].Position));
+		}
+		return volume / 6.0f;  // since the determinant give 6 times tetra volume
+	}
 
 	/*
 	draw the model using the specified shader

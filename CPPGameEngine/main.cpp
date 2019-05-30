@@ -52,14 +52,9 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include "filesystem.h"
 #include "shader.h"
 #include "camera.h"
-float anisoFilterAmount = 0.0f;
-#include "model.h"
-
 #include <iostream>
 #include <unordered_map>
 #include <memory>
-
-std::unordered_map<std::string, std::shared_ptr<Model>> models;
 
 struct BulletData {
 	btDiscreteDynamicsWorld* dynamicsWorld;
@@ -70,6 +65,9 @@ struct BulletData {
 	btDefaultCollisionConfiguration* collisionConfiguration;
 } bulletData;
 
+float anisoFilterAmount = 0.0f;
+#include "model.h"
+std::unordered_map<std::string, std::shared_ptr<Model>> models;
 #include "GameObject.h"
 #include "Light.h"
 std::vector<GameObject> gameObjects;
@@ -193,12 +191,14 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
 			if (node->mNumMeshes > 0) {
 				// generate a new model from the mesh list
+				//TODO: consider using name here rather than fullName so we can re-use static geometry too
 				std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 				std::shared_ptr<Model> baseModel(new Model());
 				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+				baseModel->calculateCollisionShape(true);
 				models.insert({ tempProp.fullName, baseModel });
-				gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true));
+				gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
 			}
 		}
 	}

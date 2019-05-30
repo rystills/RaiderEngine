@@ -21,7 +21,6 @@
 #include <vector>
 #include <memory>
 #include <glm/gtx/quaternion.hpp>
-#include <LinearMath/btGeometryUtil.h>
 
 class GameObject {
 public:
@@ -31,10 +30,12 @@ public:
 	std::shared_ptr<Model> model;
 
 	// bullet data
+	// TODO: convert collision shape and body into shared pointers so we don't have to worry about memory leaks
+	btCollisionShape* collisionShape;
 	btRigidBody* body;
 	int bodyIndex;
 
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool isStaticMesh = false) : position(position), scale(scale) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
 		std::unordered_map<std::string, std::shared_ptr<Model>>::iterator search = models.find(modelName);
@@ -46,123 +47,48 @@ public:
 			models.insert({ modelName, m });
 			model = m;
 		}
-
-		// TODO: share collision shapes between gameObject instances
-		if (isStaticMesh) {
-			// create bullet physics collider from model
-			btTriangleMesh* trimesh = new btTriangleMesh();
-			for (int j = 0; j < model->meshes.size(); ++j) {
-				Mesh mesh = model->meshes[j];
-				for (int i = 0; i < mesh.indices.size(); i += 3) {
-					btVector3 vertex_1{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-					btVector3 vertex_2{ mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z };
-					btVector3 vertex_3{ mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z };
-					trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
-				}
-			}
-			btCollisionShape* trimeshShape = new btBvhTriangleMeshShape{ trimesh, true };
-			bulletData.collisionShapes.push_back(trimeshShape);
-
-			btVector3 btscale(scale.x, scale.y, scale.z);
-			trimeshShape->setLocalScaling(btscale);
-			trimeshShape->setMargin(0);
-			bulletData.collisionShapes.push_back(trimeshShape);
-
-			// Create Dynamic Objects
-			btTransform startTransform;
-			startTransform.setIdentity();
-
-			btScalar mass(isStaticMesh ? 0.0f : 1.0f);
-			btVector3 localInertia(0, 0, 0);
-			if (!isStaticMesh)
-				trimeshShape->calculateLocalInertia(mass, localInertia);
-			startTransform.setOrigin(btVector3(position.x, position.y, position.z));
-
-			btQuaternion quat;
-			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
-			startTransform.setRotation(quat);
-
-			// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, trimeshShape, localInertia);
-			body = new btRigidBody(rbInfo);
-			bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
-			bulletData.dynamicsWorld->addRigidBody(body);
-		}
-		else {
-			// create bullet physics collider from model
-			btAlignedObjectArray<btVector3> vertices;
-			for (int j = 0; j < model->meshes.size(); ++j) {
-				Mesh mesh = model->meshes[j];
-				for (int i = 0; i < mesh.indices.size(); ++i) {
-					btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-					vertices.push_back(vertex);
-				}
-			}
-			
-			// shrink convex hull by margin to cancel it out (this isn't a perfect solution, but it works well enough - see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
-			// TODO: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
-			float collisionMargin = 0.02f;
-			btAlignedObjectArray<btVector3> planeEquations;
-			btGeometryUtil::getPlaneEquationsFromVertices(vertices, planeEquations);
-
-			btAlignedObjectArray<btVector3> shiftedPlaneEquations;
-			for (int p = 0; p<planeEquations.size(); ++p) {
-				btVector3 plane = planeEquations[p];
-				plane[3] += collisionMargin;
-				shiftedPlaneEquations.push_back(plane);
-			}
-			btAlignedObjectArray<btVector3> shiftedVertices;
-			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
-
-			btCollisionShape* convexShape = new btConvexHullShape(&(shiftedVertices[0].getX()), shiftedVertices.size());
-			bulletData.collisionShapes.push_back(convexShape);
-
-			btVector3 btscale(scale.x, scale.y, scale.z);
-			convexShape->setLocalScaling(btscale);
-			// since we shrink the convex hull by the margin independently of scaling, multiply the applied margin by the average scale to compensate
-			// TODO: multiplying by the average scale won't work well for non-uniform scaled objects; such objects need their own convex mesh with baked per-axis margins
-			float averageScale = (scale.x + scale.y + scale.z) / 3;
-			convexShape->setMargin(collisionMargin*averageScale);
-
-
-			// Create Dynamic Objects
-			btTransform startTransform;
-			startTransform.setIdentity();
-			float volume = calcVolume(model->meshes);
-			btScalar mass(isStaticMesh ? 0.0f : volume*averageScale);
-			btVector3 localInertia(0, 0, 0);
-			if (!isStaticMesh)
-				convexShape->calculateLocalInertia(mass, localInertia);
-			startTransform.setOrigin(btVector3(position.x, position.y, position.z));
-			btQuaternion quat;
-			quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
-			startTransform.setRotation(quat);
-
-			// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, convexShape, localInertia);
-			body = new btRigidBody(rbInfo);
-			bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
-			bulletData.dynamicsWorld->addRigidBody(body);
-			// TODO: set user pointer to this gameObject, set to bodyIndex for now just for testing
-			body->setUserPointer((void*)bodyIndex);
-		}
+		addPhysics(rotationEA);
 	}
 
-	/*
-	calculate the volume of a vector of meshes
-	@param meshes: the meshes whose combined volume we wish to calculate
-	@returns: the volume of the mesh vector meshes
-	*/
-	float calcVolume(std::vector<Mesh> meshes) {
-		float volume = 0;
-		for (int j = 0; j < meshes.size(); ++j) {
-			Mesh mesh = meshes[j];
-			for (int i = 0; i < mesh.indices.size()-2; i+=3)
-				volume += glm::determinant(glm::mat3(mesh.vertices[mesh.indices[i]].Position, mesh.vertices[mesh.indices[i+1]].Position, mesh.vertices[mesh.indices[i+2]].Position));
+
+	void addPhysics(glm::vec3 rotationEA) {
+		float averageScale = (scale.x + scale.y + scale.z) / 3;
+		// if we don't have any scaling we can just use our mesh's collision shape directly
+		if (scale.x == 1 && scale.y == 1 && scale.z == 1)
+			collisionShape = model->collisionShape;
+		else {
+			// create a scaled container for our mesh's collision shape
+			if (model->isStaticMesh)
+				// triangle meshes can be shared with non-uniform scaling
+				collisionShape = new btScaledBvhTriangleMeshShape((btBvhTriangleMeshShape*)(model->collisionShape), btVector3(scale.x, scale.y, scale.z));
+			else {
+				// TODO: convex hulls can only be shared with uniform scaling, so the scale average will have to be good enough
+				collisionShape = new btUniformScalingShape((btConvexHullShape*)(model->collisionShape), btScalar(averageScale));
+				collisionShape->setMargin(model->collisionMargin * averageScale);
+			}
+			// push back our scaled collision shape
+			bulletData.collisionShapes.push_back(collisionShape);
 		}
-		return volume / 6.0f;  // since the determinant give 6 times tetra volume
+
+		btTransform startTransform;
+		startTransform.setIdentity();
+		btScalar mass(model->isStaticMesh ? 0.0f : model->volume*averageScale);
+		btVector3 localInertia(0, 0, 0);
+		if (!model->isStaticMesh)
+			collisionShape->calculateLocalInertia(mass, localInertia);
+		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
+		btQuaternion quat;
+		quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
+		startTransform.setRotation(quat);
+
+		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, collisionShape, localInertia);
+		body = new btRigidBody(rbInfo);
+		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
+		bulletData.dynamicsWorld->addRigidBody(body);
+		// TODO: set user pointer to this gameObject, set to bodyIndex for now just for testing
+		body->setUserPointer((void*)bodyIndex);
 	}
 
 	void update() {
