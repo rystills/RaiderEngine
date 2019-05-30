@@ -30,10 +30,10 @@ public:
 	std::shared_ptr<Model> model;
 
 	// bullet data
-	// TODO: convert collision shape and body into shared pointers so we don't have to worry about memory leaks
-	btCollisionShape* collisionShape;
-	btRigidBody* body;
+	std::shared_ptr<btCollisionShape> collisionShape;
+	std::shared_ptr<btRigidBody> body;
 	int bodyIndex;
+	std::shared_ptr<btDefaultMotionState> myMotionState;
 
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
@@ -43,14 +43,16 @@ public:
 			model = search->second;
 		else {
 			// TODO: don't use hard-coded model folder
-			std::shared_ptr<Model> m(new Model(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx")));
-			models.insert({ modelName, m });
-			model = m;
+			model = std::make_shared<Model>(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx"),false);
+			models.insert({ modelName, model });
 		}
 		addPhysics(rotationEA);
 	}
 
-
+	/*
+	grant physics information to this GameObject (collision shape and rigidbody) and add it to the bullet physics simulation
+	@param rotationEA: the euler angles rotation vector passed into our constructor
+	*/
 	void addPhysics(glm::vec3 rotationEA) {
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		// if we don't have any scaling we can just use our mesh's collision shape directly
@@ -60,14 +62,14 @@ public:
 			// create a scaled container for our mesh's collision shape
 			if (model->isStaticMesh)
 				// triangle meshes can be shared with non-uniform scaling
-				collisionShape = new btScaledBvhTriangleMeshShape((btBvhTriangleMeshShape*)(model->collisionShape), btVector3(scale.x, scale.y, scale.z));
+				collisionShape = std::make_shared<btScaledBvhTriangleMeshShape>((btBvhTriangleMeshShape*)(model->collisionShape.get()), btVector3(scale.x, scale.y, scale.z));
 			else {
-				// TODO: convex hulls can only be shared with uniform scaling, so the scale average will have to be good enough
-				collisionShape = new btUniformScalingShape((btConvexHullShape*)(model->collisionShape), btScalar(averageScale));
+				// note: convex hulls can only be shared with uniform scaling, so the scale average will have to be good enough
+				collisionShape = std::make_shared<btUniformScalingShape>((btConvexHullShape*)(model->collisionShape.get()), btScalar(averageScale));
 				collisionShape->setMargin(model->collisionMargin * averageScale);
 			}
 			// push back our scaled collision shape
-			bulletData.collisionShapes.push_back(collisionShape);
+			bulletData.collisionShapes.push_back(collisionShape.get());
 		}
 
 		btTransform startTransform;
@@ -82,11 +84,11 @@ public:
 		startTransform.setRotation(quat);
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, collisionShape, localInertia);
-		body = new btRigidBody(rbInfo);
+		myMotionState = std::make_shared<btDefaultMotionState>(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), collisionShape.get(), localInertia);
+		body = std::make_shared<btRigidBody>(rbInfo);
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
-		bulletData.dynamicsWorld->addRigidBody(body);
+		bulletData.dynamicsWorld->addRigidBody(body.get());
 		// TODO: set user pointer to this gameObject, set to bodyIndex for now just for testing
 		body->setUserPointer((void*)bodyIndex);
 	}

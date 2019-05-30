@@ -193,10 +193,10 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 				// generate a new model from the mesh list
 				//TODO: consider using name here rather than fullName so we can re-use static geometry too
 				std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
-				std::shared_ptr<Model> baseModel(new Model());
+				std::shared_ptr<Model> baseModel = std::make_shared<Model>();
 				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
-				baseModel->calculateCollisionShape(true);
+				baseModel->calculateCollisionShape();
 				models.insert({ tempProp.fullName, baseModel });
 				gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
 			}
@@ -345,23 +345,14 @@ void initBullet() {
 cleanup the data allocated by bullet physics
 */
 void cleanupBullet() {
-	// remove the rigidbodies from the dynamics world and delete them
+	// remove the rigidbodies from the dynamics world
 	for (int i = bulletData.dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; --i) {
 		btCollisionObject* obj = bulletData.dynamicsWorld->getCollisionObjectArray()[i];
-		btRigidBody* body = btRigidBody::upcast(obj);
-		if (body && body->getMotionState()) {
-			delete body->getMotionState();
-		}
 		bulletData.dynamicsWorld->removeCollisionObject(obj);
-		delete obj;
 	}
 
-	// delete collision shapes
-	for (int j = 0; j < bulletData.collisionShapes.size(); j++) {
-		btCollisionShape* shape = bulletData.collisionShapes[j];
-		bulletData.collisionShapes[j] = 0;
-		delete shape;
-	}
+	// remove collision shapes
+	bulletData.collisionShapes.clear();
 
 	// delete dynamics world
 	delete bulletData.dynamicsWorld;
@@ -376,9 +367,6 @@ void cleanupBullet() {
 	delete bulletData.dispatcher;
 
 	delete bulletData.collisionConfiguration;
-
-	// next line is optional: it will be cleared by the destructor when the array goes out of scope
-	bulletData.collisionShapes.clear();
 }
 
 // Helper class; draws the world as seen by Bullet.

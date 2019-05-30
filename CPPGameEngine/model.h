@@ -72,38 +72,37 @@ public:
 	static Texture defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	btCollisionShape* collisionShape;
+	std::shared_ptr<btCollisionShape> collisionShape;
 	bool isStaticMesh = false;
 	float volume;
 	float collisionMargin;
+	std::shared_ptr<btTriangleMesh> trimesh;
 
 	/*
 	Model default constructor: create a new empty model
 	*/
-	Model(bool gamma = false) : gammaCorrection(gamma) {};
+	Model(bool isStatic = true, bool gamma = false) : isStaticMesh(isStatic), gammaCorrection(gamma) {};
 
     /*
 	Model constructor: creates a new model with the specified path, optionally performing gamma correction
 	@param path: the path to the model we should load
+	@param isStatic: whether this is a static model (and therefore can use a triangle mesh) or a dynamic model (and therefore should default to a convex hull)
 	@param gamma: whether to apply gamma correction (true) or not (false)
 	*/
-    Model(std::string const &path, bool gamma = false) : gammaCorrection(gamma) {
+    Model(std::string const &path, bool isStatic = false, bool gamma = false) : isStaticMesh(isStatic), gammaCorrection(gamma) {
         loadModel(path);
 		calculateCollisionShape();
     }
 
 	/*
 	calculate the collision shape for this mesh, to be used by bullet physics
-	@param isStatic: whether this is a static model (and therefore can use a triangle mesh) or a dynamic model (and therefore should default to a convex hull)
 	*/
-	void calculateCollisionShape(bool isStatic = false) {
-		isStaticMesh = isStatic;
-		// TODO: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
+	void calculateCollisionShape() {
+		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
 		collisionMargin = isStaticMesh ? 0 : 0.02f;
 		if (isStaticMesh) {
 			// create mesh collider from model tris
-			// TODO: free trimesh after use
-			btTriangleMesh* trimesh = new btTriangleMesh();
+			trimesh = std::make_shared<btTriangleMesh>();
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
 				for (int i = 0; i < mesh.indices.size(); i += 3) {
@@ -113,7 +112,7 @@ public:
 					trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
 				}
 			}
-			collisionShape = new btBvhTriangleMeshShape{ trimesh, true };
+			collisionShape = std::make_shared<btBvhTriangleMeshShape>(trimesh.get(), true);
 		}
 		else {
 			// create convex hull collider from mesh verts
@@ -139,13 +138,13 @@ public:
 			btAlignedObjectArray<btVector3> shiftedVertices;
 			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
 
-			collisionShape = new btConvexHullShape(&(shiftedVertices[0].getX()), shiftedVertices.size());
+			collisionShape = std::make_shared<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
 
 		}
 		collisionShape->setMargin(collisionMargin);
 		volume = calcVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it
-		bulletData.collisionShapes.push_back(collisionShape);
+		bulletData.collisionShapes.push_back(collisionShape.get());
 	}
 
 	/*
@@ -184,7 +183,7 @@ public:
 		std::vector<unsigned int> indices;
 		std::vector<Texture> textures;  // TODO: textures should be stored in a hash map for quick lookup during the loading phase
 
-										// Walk through each of the mesh's vertices
+		// Walk through each of the mesh's vertices
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 			Vertex vertex;
 			glm::vec3 vector; // store data in a temporary glm vector as ASSIMP vectors cannot be directly converted
