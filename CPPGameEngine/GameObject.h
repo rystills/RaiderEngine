@@ -30,10 +30,11 @@ public:
 	std::shared_ptr<Model> model;
 
 	// bullet data
-	std::shared_ptr<btCollisionShape> collisionShape;
-	std::shared_ptr<btRigidBody> body;
+	std::unique_ptr<btCollisionShape> collisionShape;
+	bool useModelCollider = false;
+	std::unique_ptr<btRigidBody> body;
 	int bodyIndex;
-	std::shared_ptr<btDefaultMotionState> myMotionState;
+	std::unique_ptr<btDefaultMotionState> myMotionState;
 
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
@@ -57,15 +58,15 @@ public:
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		// if we don't have any scaling we can just use our mesh's collision shape directly
 		if (scale.x == 1 && scale.y == 1 && scale.z == 1)
-			collisionShape = model->collisionShape;
+			useModelCollider = true;
 		else {
 			// create a scaled container for our mesh's collision shape
 			if (model->isStaticMesh)
 				// triangle meshes can be shared with non-uniform scaling
-				collisionShape = std::make_shared<btScaledBvhTriangleMeshShape>((btBvhTriangleMeshShape*)(model->collisionShape.get()), btVector3(scale.x, scale.y, scale.z));
+				collisionShape = std::make_unique<btScaledBvhTriangleMeshShape>((btBvhTriangleMeshShape*)(model->collisionShape.get()), btVector3(scale.x, scale.y, scale.z));
 			else {
 				// note: convex hulls can only be shared with uniform scaling, so the scale average will have to be good enough
-				collisionShape = std::make_shared<btUniformScalingShape>((btConvexHullShape*)(model->collisionShape.get()), btScalar(averageScale));
+				collisionShape = std::make_unique<btUniformScalingShape>((btConvexHullShape*)(model->collisionShape.get()), btScalar(averageScale));
 				collisionShape->setMargin(model->collisionMargin * averageScale);
 			}
 			// push back our scaled collision shape
@@ -77,16 +78,16 @@ public:
 		btScalar mass(model->isStaticMesh ? 0.0f : model->volume*averageScale);
 		btVector3 localInertia(0, 0, 0);
 		if (!model->isStaticMesh)
-			collisionShape->calculateLocalInertia(mass, localInertia);
+			(useModelCollider ? model->collisionShape : collisionShape)->calculateLocalInertia(mass, localInertia);
 		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
 		btQuaternion quat;
 		quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
 		startTransform.setRotation(quat);
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		myMotionState = std::make_shared<btDefaultMotionState>(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), collisionShape.get(), localInertia);
-		body = std::make_shared<btRigidBody>(rbInfo);
+		myMotionState = std::make_unique<btDefaultMotionState>(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), (useModelCollider ? model->collisionShape : collisionShape).get(), localInertia);
+		body = std::make_unique<btRigidBody>(rbInfo);
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body.get());
 		body->setUserPointer((void*)this);

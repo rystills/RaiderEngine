@@ -447,7 +447,7 @@ cast a ray from the specified NDC coordinates using the given proj/view matrices
 @param y: the y coordinate of the raycast (in NDC space)
 @returns: a pointer to the hit collision object (from whom you can get more useful info via getUserPointer) or NULL if no object was hit
 */
-std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 projection, glm::mat4 view, float x=0, float y=0) {
+std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 projection, glm::mat4 view, float x=0, float y=0) {
 	// object picking
 	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
 	glm::vec4 lRayStart_NDC(x,y, -1.0, 1.0f);
@@ -467,7 +467,7 @@ std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 pr
 	// ray test
 	glm::vec3 out_end = out_origin + out_direction*1000.0f;
 
-	std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> RayCallback(new btCollisionWorld::ClosestRayResultCallback(
+	std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> RayCallback(new btCollisionWorld::ClosestRayResultCallback(
 		btVector3(out_origin.x, out_origin.y, out_origin.z),
 		btVector3(out_end.x, out_end.y, out_end.z)
 	));
@@ -561,7 +561,7 @@ int main() {
 		glm::mat4 view = camera.GetViewMatrix();
 
 		// raycast on click
-		std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
+		std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
 		btRayTo = hit->m_rayToWorld;
 		btRayFrom = hit->m_rayFromWorld;
 		if (mousePressed && m_pickConstraint == NULL) {
@@ -702,4 +702,7 @@ int main() {
 	}
 	cleanupBullet();
 	glfwTerminate();
+	// delete object and model data
+	gameObjects.clear();
+	models.clear();
 }

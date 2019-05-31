@@ -72,11 +72,11 @@ public:
 	static Texture defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	std::shared_ptr<btCollisionShape> collisionShape;
+	std::unique_ptr<btCollisionShape> collisionShape;
 	bool isStaticMesh;
 	float volume;
 	float collisionMargin;
-	std::shared_ptr<btTriangleMesh> trimesh;
+	std::unique_ptr<btTriangleMesh> trimesh;
 
 	/*
 	Model default constructor: create a new empty model
@@ -102,7 +102,7 @@ public:
 		collisionMargin = isStaticMesh ? 0 : 0.02f;
 		if (isStaticMesh) {
 			// create mesh collider from model tris
-			trimesh = std::make_shared<btTriangleMesh>();
+			trimesh = std::make_unique<btTriangleMesh>();
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
 				for (int i = 0; i < mesh.indices.size(); i += 3) {
@@ -112,7 +112,7 @@ public:
 					trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
 				}
 			}
-			collisionShape = std::make_shared<btBvhTriangleMeshShape>(trimesh.get(), true);
+			collisionShape = std::make_unique<btBvhTriangleMeshShape>(trimesh.get(), true);
 		}
 		else {
 			// create convex hull collider from mesh verts
@@ -139,7 +139,7 @@ public:
 			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
 
 			// TODO: constructing this btConvexHullShape seems to cause a memory access violation when using std::make_shared. Please check this with a memory debugger
-			collisionShape = std::make_shared<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
+			collisionShape = std::make_unique<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
 		}
 		collisionShape->setMargin(collisionMargin);
 		volume = calcVolume();
