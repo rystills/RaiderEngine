@@ -139,9 +139,7 @@ public:
 			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
 
 			// TODO: constructing this btConvexHullShape seems to cause a memory access violation when using std::make_shared. Please check this with a memory debugger
-			std::shared_ptr<btConvexHullShape> c(new btConvexHullShape(&(shiftedVertices[0].getX()), shiftedVertices.size()));
-			collisionShape = c;
-
+			collisionShape = std::make_shared<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
 		}
 		collisionShape->setMargin(collisionMargin);
 		volume = calcVolume();

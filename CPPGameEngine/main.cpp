@@ -1,5 +1,6 @@
 // terminal colors
 #include <stdio.h>
+#include <direct.h>
 #ifdef _WIN32
 #include <windows.h>
 CONSOLE_SCREEN_BUFFER_INFO cbInfo;
@@ -479,6 +480,7 @@ std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 pr
 }
 
 int main() {
+	_chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
 	GLFWwindow* window = initWindow();
 	initGBuffer();
 	initBullet();
@@ -525,9 +527,9 @@ int main() {
 	shaderLightingPass.setInt("gNormal", 1);
 	shaderLightingPass.setInt("gAlbedoSpec", 2);
 
-	BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
+	/*BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);
+	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);*/
 
 	btGeneric6DofConstraint* dof6 = NULL;
 	btGeneric6DofConstraint *m_pickConstraint = NULL;
