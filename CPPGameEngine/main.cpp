@@ -531,9 +531,8 @@ int main() {
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
 	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);*/
 
-	btGeneric6DofConstraint* dof6 = NULL;
-	btGeneric6DofConstraint *m_pickConstraint = NULL;
-	btRigidBody* pBody = NULL;
+	btGeneric6DofConstraint* holdConstraint = NULL;
+	btRigidBody* holdBody = NULL;
 	btVector3 btRayTo;
 	btVector3 btRayFrom;
 	btScalar m_pickDist;
@@ -564,75 +563,45 @@ int main() {
 		std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
 		btRayTo = hit->m_rayToWorld;
 		btRayFrom = hit->m_rayFromWorld;
-		if (mousePressed && m_pickConstraint == NULL) {
-			if (hit->hasHit()) {
-				GameObject* go = (GameObject*)hit->m_collisionObject->getUserPointer();
-				// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
-				if (!go->model->isStaticMesh) {
-					pBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
-					btRigidBody* m_pickedBody = pBody;
+		if (mousePressed && (holdBody == NULL) && hit->hasHit()) {
+			GameObject* go = (GameObject*)hit->m_collisionObject->getUserPointer();
+			// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
+			if (!go->model->isStaticMesh) {
+				holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
+				btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
 
-					btVector3 m_pickPos = hit->m_hitPointWorld;
-
-					btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * m_pickPos;
-
-					btTransform tr;
-					tr.setIdentity();
-					tr.setOrigin(localPivot);
-					dof6 = new btGeneric6DofConstraint(*pBody, tr, false);
-					dof6->setLinearLowerLimit(btVector3(0, 0, 0));
-					dof6->setLinearUpperLimit(btVector3(0, 0, 0));
-					dof6->setAngularLowerLimit(btVector3(0, 0, 0));
-					dof6->setAngularUpperLimit(btVector3(0, 0, 0));
-
-					bulletData.dynamicsWorld->addConstraint(dof6);
-					m_pickConstraint = dof6;
-
-					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 0);
-					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 1);
-					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 2);
-					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 3);
-					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 4);
-					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 5);
-
-					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 0);
-					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 1);
-					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 2);
-					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 3);
-					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 4);
-					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 5);
-
-					//save mouse position for dragging
-					m_pickDist = (m_pickPos - hit->m_rayFromWorld).length();
+				btTransform tr;
+				tr.setIdentity();
+				tr.setOrigin(localPivot);
+				holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, false);
+				holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
+				holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
+				holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
+				holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
+				bulletData.dynamicsWorld->addConstraint(holdConstraint);
+				for (int i = 0; i < 6; ++i) {
+					holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
+					holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, i);
 				}
+				
+				//save mouse position for dragging
+				m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
 			}
 		}
-		else if (mouseReleased) {
-			if (m_pickConstraint) {
-				bulletData.dynamicsWorld->removeConstraint(m_pickConstraint);
-				delete m_pickConstraint;
-				m_pickConstraint = NULL;
-				pBody->setDeactivationTime(0.f);
-				pBody = NULL;
-			}
+		else if (mouseReleased && (holdBody != NULL)) {
+			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
+			delete holdConstraint;
+			holdConstraint = NULL;
+			holdBody->setDeactivationTime(0.f);
+			holdBody = NULL;
 		}
 
-		btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(m_pickConstraint);
-		if (pickCon) {
+		if (holdConstraint != NULL) {
 			//keep it at the same picking distance
-
-			btVector3 oldPivotInB = pickCon->getFrameOffsetA().getOrigin();
-
-			btVector3 newPivotB;
-
 			btVector3 dir = btRayTo - btRayFrom;
 			dir.normalize();
 			dir *= m_pickDist;
-
-			newPivotB = btRayFrom + dir;
-			std::cout << newPivotB.getX() << ", " << newPivotB.getY() << ", " << newPivotB.getZ() << std::endl;
-
-			pickCon->getFrameOffsetA().setOrigin(newPivotB);
+			holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
 		}
 
 		// render
