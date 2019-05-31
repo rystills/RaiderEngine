@@ -570,19 +570,22 @@ int main() {
 			if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
 				holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
 				btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
+				holdBody->setActivationState(DISABLE_DEACTIVATION);
 
 				btTransform tr;
 				tr.setIdentity();
 				tr.setOrigin(localPivot);
-				holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, false);
+				holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, true);
 				holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
 				holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
 				holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
 				holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
-				bulletData.dynamicsWorld->addConstraint(holdConstraint);
+				bulletData.dynamicsWorld->addConstraint(holdConstraint,true);
 				for (int i = 0; i < 6; ++i) {
+					// CFM (constraint force mixing): increase this to make the constraint softer
+					// ERP (error reduction parameter): increase this to fix a greater proportion of the accumulated error each step
 					holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
-					holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, i);
+					holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
 				}
 				
 				//save mouse position for dragging
@@ -606,7 +609,6 @@ int main() {
 			dir.normalize();
 			dir *= m_pickDist;
 			holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
-			std::cout << (btRayFrom + dir).getX() << ", " << (btRayFrom + dir).getY() << ", " << (btRayFrom + dir).getZ() << std::endl;
 		}
 
 		// render
