@@ -31,12 +31,20 @@ public:
 
 	// bullet data
 	std::unique_ptr<btCollisionShape> collisionShape;
-	bool useModelCollider = false;
+	bool useModelCollisionShape = false;  // in some instances we don't need our own collision shape; the model shape suffices. Always use the model shape if this flag is true
 	std::unique_ptr<btRigidBody> body;
 	int bodyIndex;
 	int gameObjectIndex;
 	std::unique_ptr<btDefaultMotionState> myMotionState;
 
+	/*
+	GameObject constructor: creates a new GameObject with the specified transforms and model
+	@param position: the initial tranlation of this GameObject
+	@param rotationEA: the inital rotation (in Euler Angles) of this GameObject
+	@param scale: the initial scale of this GameObject
+	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
+	@param gameObjectIndex: the index of this GameObject in the gameObjects vector
+	*/
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int gameObjectIndex) : position(position), scale(scale), gameObjectIndex(gameObjectIndex) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
@@ -59,7 +67,7 @@ public:
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		// if we don't have any scaling we can just use our mesh's collision shape directly
 		if (scale.x == 1 && scale.y == 1 && scale.z == 1)
-			useModelCollider = true;
+			useModelCollisionShape = true;
 		else {
 			// create a scaled container for our mesh's collision shape
 			if (model->isStaticMesh)
@@ -79,7 +87,7 @@ public:
 		btScalar mass(model->isStaticMesh ? 0.0f : model->volume*averageScale);
 		btVector3 localInertia(0, 0, 0);
 		if (!model->isStaticMesh)
-			(useModelCollider ? model->collisionShape : collisionShape)->calculateLocalInertia(mass, localInertia);
+			(useModelCollisionShape ? model->collisionShape : collisionShape)->calculateLocalInertia(mass, localInertia);
 		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
 		btQuaternion quat;
 		quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
@@ -87,7 +95,7 @@ public:
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 		myMotionState = std::make_unique<btDefaultMotionState>(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), (useModelCollider ? model->collisionShape : collisionShape).get(), localInertia);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), (useModelCollisionShape ? model->collisionShape : collisionShape).get(), localInertia);
 		body = std::make_unique<btRigidBody>(rbInfo);
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body.get());

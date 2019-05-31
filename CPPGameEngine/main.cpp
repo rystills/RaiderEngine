@@ -1,8 +1,8 @@
 // terminal colors
 #include <stdio.h>
-#include <direct.h>
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
 CONSOLE_SCREEN_BUFFER_INFO cbInfo;
 HANDLE hConsole;
 int originalColor;
@@ -480,7 +480,8 @@ std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 pr
 }
 
 int main() {
-	_chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
+	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
+	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
 	GLFWwindow* window = initWindow();
 	initGBuffer();
 	initBullet();
@@ -559,10 +560,10 @@ int main() {
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 
-		// raycast on click
 		std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
 		btRayTo = hit->m_rayToWorld;
 		btRayFrom = hit->m_rayFromWorld;
+		// if we click onn an object, attempt to grab it
 		if (mousePressed && (holdBody == NULL) && hit->hasHit()) {
 			// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
 			if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
@@ -587,6 +588,8 @@ int main() {
 				m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
 			}
 		}
+
+		// release held object on mouse button release
 		else if (mouseReleased && (holdBody != NULL)) {
 			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
 			delete holdConstraint;
@@ -595,6 +598,7 @@ int main() {
 			holdBody = NULL;
 		}
 
+		// update held object
 		if (holdConstraint != NULL) {
 			//keep it at the same picking distance
 			btVector3 dir = btRayTo - btRayFrom;
