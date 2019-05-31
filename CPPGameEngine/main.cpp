@@ -486,6 +486,7 @@ int main() {
 	initGBuffer();
 	initBullet();
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
 	// build and compile shaders
 	// -------------------------
@@ -528,9 +529,9 @@ int main() {
 	shaderLightingPass.setInt("gNormal", 1);
 	shaderLightingPass.setInt("gAlbedoSpec", 2);
 
-	/*BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
-	debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);*/
+	BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
+	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawConstraints);
+	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);
 
 	btGeneric6DofConstraint* holdConstraint = NULL;
 	btRigidBody* holdBody = NULL;
@@ -605,6 +606,7 @@ int main() {
 			dir.normalize();
 			dir *= m_pickDist;
 			holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
+			std::cout << (btRayFrom + dir).getX() << ", " << (btRayFrom + dir).getY() << ", " << (btRayFrom + dir).getZ() << std::endl;
 		}
 
 		// render
@@ -665,10 +667,42 @@ int main() {
 			renderCube();
 		}
 
+		// 4. render UI
+		// centered point to indicate mouse position for precise object grabbing / interaction
+		// TODO: stick me in a "render point" method
+		glDisable(GL_DEPTH_TEST);
+		debugLineShader.use();
+		GLfloat points[6];
+		points[0] = btRayTo.getX();
+		points[1] = btRayTo.getY();
+		points[2] = btRayTo.getZ();
+		points[3] = 0;
+		points[4] = 0;
+		points[5] = 255;
+
+		glDeleteBuffers(1, &VBO);
+		glDeleteVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+		glGenVertexArrays(1, &VAO);
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glBindVertexArray(0);
+
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_POINTS, 0, 1);
+		glBindVertexArray(0);
+
 		// debug render bullet data
-		/*debugLineShader.use();
 		debugDrawer->SetMatrices(debugLineShader, view, projection);
-		bulletData.dynamicsWorld->debugDrawWorld();*/
+		//bulletData.dynamicsWorld->getDebugDrawer()->drawLine(btRayFrom, btRayTo*.5f, btVector3(0, 0, 255));
+		bulletData.dynamicsWorld->debugDrawWorld();
+
+		glEnable(GL_DEPTH_TEST);
 
 		glfwSwapBuffers(window);
 	}
