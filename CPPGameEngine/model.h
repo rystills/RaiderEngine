@@ -73,7 +73,7 @@ public:
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 	std::shared_ptr<btCollisionShape> collisionShape;
-	bool isStaticMesh = false;
+	bool isStaticMesh;
 	float volume;
 	float collisionMargin;
 	std::shared_ptr<btTriangleMesh> trimesh;
@@ -138,7 +138,9 @@ public:
 			btAlignedObjectArray<btVector3> shiftedVertices;
 			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
 
-			collisionShape = std::make_shared<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
+			// TODO: constructing this btConvexHullShape seems to cause a memory access violation when using std::make_shared. Please check this with a memory debugger
+			std::shared_ptr<btConvexHullShape> c(new btConvexHullShape(&(shiftedVertices[0].getX()), shiftedVertices.size()));
+			collisionShape = c;
 
 		}
 		collisionShape->setMargin(collisionMargin);

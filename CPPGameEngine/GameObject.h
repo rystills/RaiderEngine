@@ -89,8 +89,7 @@ public:
 		body = std::make_shared<btRigidBody>(rbInfo);
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body.get());
-		// TODO: set user pointer to this gameObject, set to bodyIndex for now just for testing
-		body->setUserPointer((void*)bodyIndex);
+		body->setUserPointer((void*)this);
 	}
 
 	void update() {

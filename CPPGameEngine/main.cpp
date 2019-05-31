@@ -74,14 +74,18 @@ std::vector<GameObject> gameObjects;
 std::vector<Light> lights;
 
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 1366;
+const unsigned int SCR_HEIGHT = 768;
 
 // camera
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
+// mouse
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
+bool mousePressed = false;  // whether or not the mouse was just pressed
+bool mouseHeld = false;  // whether or not the mouse is currently being held down
+bool mouseReleased = false;  // whether or not the mouse was just released 
 
 // timing
 float deltaTime = 0.0f;
@@ -175,11 +179,10 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	}
 
 	if (!isTransformNode) {
-		SUCCESS(std::cout << tempProp.fullName << std::endl);
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load an existing model
-			//std::cout << "generating instance of object: " << name << std::endl;
+			std::cout << "generating instance of object: " << name << std::endl;
 			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
@@ -263,6 +266,7 @@ originalColor = cbInfo.wAttributes;
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
@@ -525,11 +529,19 @@ int main() {
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
 	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);
 
+	btGeneric6DofConstraint* dof6 = NULL;
+	btGeneric6DofConstraint *m_pickConstraint = NULL;
+	btRigidBody* pBody = NULL;
+	btVector3 btRayTo;
+	btVector3 btRayFrom;
+	btScalar m_pickDist;
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
 		updateTime();
+		mousePressed = false;
+		mouseReleased = false;
 		glfwPollEvents();
 		processInput(window);
 
@@ -546,9 +558,80 @@ int main() {
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 
-		// raycast test
+		// raycast on click
 		std::shared_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
-		//std::cout << "hit object index: " << (hit->hasHit() ? (int)hit->m_collisionObject->getUserPointer() : -1) << std::endl;
+		btRayTo = hit->m_rayToWorld;
+		btRayFrom = hit->m_rayFromWorld;
+		if (mousePressed && m_pickConstraint == NULL) {
+			if (hit->hasHit()) {
+				GameObject* go = (GameObject*)hit->m_collisionObject->getUserPointer();
+				// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
+				if (!go->model->isStaticMesh) {
+					pBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
+					btRigidBody* m_pickedBody = pBody;
+
+					btVector3 m_pickPos = hit->m_hitPointWorld;
+
+					btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * m_pickPos;
+
+					btTransform tr;
+					tr.setIdentity();
+					tr.setOrigin(localPivot);
+					dof6 = new btGeneric6DofConstraint(*pBody, tr, false);
+					dof6->setLinearLowerLimit(btVector3(0, 0, 0));
+					dof6->setLinearUpperLimit(btVector3(0, 0, 0));
+					dof6->setAngularLowerLimit(btVector3(0, 0, 0));
+					dof6->setAngularUpperLimit(btVector3(0, 0, 0));
+
+					bulletData.dynamicsWorld->addConstraint(dof6);
+					m_pickConstraint = dof6;
+
+					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 0);
+					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 1);
+					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 2);
+					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 3);
+					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 4);
+					dof6->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, 5);
+
+					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 0);
+					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 1);
+					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 2);
+					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 3);
+					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 4);
+					dof6->setParam(BT_CONSTRAINT_STOP_ERP, 0.1f, 5);
+
+					//save mouse position for dragging
+					m_pickDist = (m_pickPos - hit->m_rayFromWorld).length();
+				}
+			}
+		}
+		else if (mouseReleased) {
+			if (m_pickConstraint) {
+				bulletData.dynamicsWorld->removeConstraint(m_pickConstraint);
+				delete m_pickConstraint;
+				m_pickConstraint = NULL;
+				pBody->setDeactivationTime(0.f);
+				pBody = NULL;
+			}
+		}
+
+		btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(m_pickConstraint);
+		if (pickCon) {
+			//keep it at the same picking distance
+
+			btVector3 oldPivotInB = pickCon->getFrameOffsetA().getOrigin();
+
+			btVector3 newPivotB;
+
+			btVector3 dir = btRayTo - btRayFrom;
+			dir.normalize();
+			dir *= m_pickDist;
+
+			newPivotB = btRayFrom + dir;
+			std::cout << newPivotB.getX() << ", " << newPivotB.getY() << ", " << newPivotB.getZ() << std::endl;
+
+			pickCon->getFrameOffsetA().setOrigin(newPivotB);
+		}
 
 		// render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
