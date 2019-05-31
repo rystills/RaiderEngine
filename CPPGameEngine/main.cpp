@@ -184,12 +184,12 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load an existing model
 			std::cout << "generating instance of object: " << name << std::endl;
-			gameObjects.push_back(GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
+			gameObjects.emplace_back(tempProp.pos, tempProp.rot, tempProp.scale, name,gameObjects.size());
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			std::cout << "generating light: " << name << std::endl;
 			// create a light
-			lights.push_back(Light(tempProp.pos, glm::vec3(1, 1, 1)));
+			lights.emplace_back(tempProp.pos, glm::vec3(1, 1, 1));
 		}
 		else {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
@@ -202,7 +202,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
 				baseModel->calculateCollisionShape();
 				models.insert({ tempProp.fullName, baseModel });
-				gameObjects.push_back(GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
+				gameObjects.emplace_back(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,gameObjects.size());
 			}
 		}
 	}
@@ -564,9 +564,8 @@ int main() {
 		btRayTo = hit->m_rayToWorld;
 		btRayFrom = hit->m_rayFromWorld;
 		if (mousePressed && (holdBody == NULL) && hit->hasHit()) {
-			GameObject* go = (GameObject*)hit->m_collisionObject->getUserPointer();
 			// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
-			if (!go->model->isStaticMesh) {
+			if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
 				holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
 				btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
 

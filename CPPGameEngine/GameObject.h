@@ -34,9 +34,10 @@ public:
 	bool useModelCollider = false;
 	std::unique_ptr<btRigidBody> body;
 	int bodyIndex;
+	int gameObjectIndex;
 	std::unique_ptr<btDefaultMotionState> myMotionState;
 
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int gameObjectIndex) : position(position), scale(scale), gameObjectIndex(gameObjectIndex) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
 		std::unordered_map<std::string, std::shared_ptr<Model>>::iterator search = models.find(modelName);
@@ -90,7 +91,8 @@ public:
 		body = std::make_unique<btRigidBody>(rbInfo);
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body.get());
-		body->setUserPointer((void*)this);
+		// store our index in the gameObjects vector in userPointer for easy lookup later
+		body->setUserPointer((void*)gameObjectIndex);
 	}
 
 	void update() {
