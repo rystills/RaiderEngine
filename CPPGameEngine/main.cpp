@@ -570,8 +570,6 @@ int main() {
 			if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
 				holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
 				btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
-				holdBody->setActivationState(DISABLE_DEACTIVATION);
-
 				btTransform tr;
 				tr.setIdentity();
 				tr.setOrigin(localPivot);
@@ -598,13 +596,13 @@ int main() {
 			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
 			delete holdConstraint;
 			holdConstraint = NULL;
-			holdBody->setDeactivationTime(0.f);
 			holdBody = NULL;
 		}
 
 		// update held object
 		if (holdConstraint != NULL) {
 			//keep it at the same picking distance
+			holdBody->activate(true);
 			btVector3 dir = btRayTo - btRayFrom;
 			dir.normalize();
 			dir *= m_pickDist;
