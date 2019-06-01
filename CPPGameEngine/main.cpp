@@ -552,6 +552,7 @@ int main() {
 	btVector3 btRayTo;
 	btVector3 btRayFrom;
 	btScalar m_pickDist;
+	float maxPickDist = 2.5f;
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window)) {
@@ -579,28 +580,27 @@ int main() {
 		btRayFrom = hit->m_rayFromWorld;
 		// if we click onn an object, attempt to grab it
 		if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
-			// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
-			if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
-				holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
-				btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
-				btTransform tr;
-				tr.setIdentity();
-				tr.setOrigin(localPivot);
-				holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, true);
-				holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
-				holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
-				holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
-				holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
-				bulletData.dynamicsWorld->addConstraint(holdConstraint,true);
-				for (int i = 0; i < 6; ++i) {
-					// CFM (constraint force mixing): increase this to make the constraint softer
-					// ERP (error reduction parameter): increase this to fix a greater proportion of the accumulated error each step
-					holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
-					holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
+			m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
+			if (m_pickDist < maxPickDist) {
+				if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
+					holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
+					btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
+					btTransform tr;
+					tr.setIdentity();
+					tr.setOrigin(localPivot);
+					holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, true);
+					holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
+					holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
+					holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
+					holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
+					bulletData.dynamicsWorld->addConstraint(holdConstraint, true);
+					for (int i = 0; i < 6; ++i) {
+						// CFM (constraint force mixing): increase this to make the constraint softer
+						// ERP (error reduction parameter): increase this to fix a greater proportion of the accumulated error each step
+						holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
+						holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
+					}
 				}
-				
-				//save mouse position for dragging
-				m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
 			}
 		}
 
