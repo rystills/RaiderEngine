@@ -604,8 +604,17 @@ int main() {
 			}
 		}
 
+		// throw held object on right mouse button
+		if (mousePressedRight && (holdBody != NULL)) {
+			float force = .1f;
+			btVector3 dir = (btRayTo - btRayFrom).normalize() * force;
+			holdBody->applyCentralImpulse(dir);
+			goto letGo;
+		}
+
 		// release held object on mouse button release
-		else if (mouseReleasedLeft && (holdBody != NULL)) {
+		if (mouseReleasedLeft && (holdBody != NULL)) {
+			letGo:
 			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
 			delete holdConstraint;
 			holdConstraint = NULL;
@@ -616,8 +625,7 @@ int main() {
 		if (holdConstraint != NULL) {
 			//keep it at the same picking distance
 			holdBody->activate(true);
-			btVector3 dir = btRayTo - btRayFrom;
-			dir.normalize();
+			btVector3 dir = (btRayTo - btRayFrom).normalize();
 			dir *= m_pickDist;
 			holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
 		}
@@ -675,7 +683,7 @@ int main() {
 		shaderLightBox.setMat4("projection", projection);
 		shaderLightBox.setMat4("view", view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
-			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i].position), glm::vec3(1)));
+			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i].position), glm::vec3(.1f)));
 			shaderLightBox.setVec3("lightColor", lights[i].color);
 			renderCube();
 		}
