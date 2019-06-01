@@ -99,7 +99,7 @@ public:
 	*/
 	void calculateCollisionShape() {
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
-		collisionMargin = isStaticMesh ? 0 : 0.02f;
+		collisionMargin = isStaticMesh ? 0 : 0.025f;
 		if (isStaticMesh) {
 			// create mesh collider from model tris
 			trimesh = std::make_unique<btTriangleMesh>();

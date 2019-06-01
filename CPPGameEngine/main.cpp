@@ -84,9 +84,12 @@ Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
-bool mousePressed = false;  // whether or not the mouse was just pressed
-bool mouseHeld = false;  // whether or not the mouse is currently being held down
-bool mouseReleased = false;  // whether or not the mouse was just released 
+bool mousePressedLeft = false;  // whether or not the left mouse button was just pressed
+bool mouseHeldLeft = false;  // whether or not the left mouse button is currently being held down
+bool mouseReleasedLeft = false;  // whether or not the left mouse button was just released 
+bool mousePressedRight = false;  // whether or not the right mouse button was just pressed
+bool mouseHeldRight = false;  // whether or not the right mouse button is currently being held down
+bool mouseReleasedRight = false;  // whether or not the right mouse button was just released 
 
 // timing
 float deltaTime = 0.0f;
@@ -479,6 +482,17 @@ std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 pr
 	return RayCallback;
 }
 
+/*
+reset all input events that occur for a single frame only
+*/
+void resetSingleFrameInput() {
+	// reset mouse events
+	mousePressedLeft = false;
+	mouseReleasedLeft = false;
+	mousePressedRight = false;
+	mouseReleasedRight = false;
+}
+
 int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
@@ -543,8 +557,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
 		updateTime();
-		mousePressed = false;
-		mouseReleased = false;
+		resetSingleFrameInput();
 		glfwPollEvents();
 		processInput(window);
 
@@ -565,7 +578,7 @@ int main() {
 		btRayTo = hit->m_rayToWorld;
 		btRayFrom = hit->m_rayFromWorld;
 		// if we click onn an object, attempt to grab it
-		if (mousePressed && (holdBody == NULL) && hit->hasHit()) {
+		if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
 			// Code for adding a constraint from Bullet Demo's DemoApplication.cpp
 			if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
 				holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
@@ -592,7 +605,7 @@ int main() {
 		}
 
 		// release held object on mouse button release
-		else if (mouseReleased && (holdBody != NULL)) {
+		else if (mouseReleasedLeft && (holdBody != NULL)) {
 			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
 			delete holdConstraint;
 			holdConstraint = NULL;
@@ -672,6 +685,7 @@ int main() {
 		// TODO: stick me in a "render point" method
 		glDisable(GL_DEPTH_TEST);
 		debugLineShader.use();
+		debugDrawer->SetMatrices(debugLineShader, view, projection);
 		GLfloat points[6];
 		points[0] = btRayTo.getX();
 		points[1] = btRayTo.getY();
@@ -698,8 +712,6 @@ int main() {
 		glBindVertexArray(0);
 
 		// debug render bullet data
-		debugDrawer->SetMatrices(debugLineShader, view, projection);
-		//bulletData.dynamicsWorld->getDebugDrawer()->drawLine(btRayFrom, btRayTo*.5f, btVector3(0, 0, 255));
 		bulletData.dynamicsWorld->debugDrawWorld();
 
 		glEnable(GL_DEPTH_TEST);

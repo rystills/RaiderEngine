@@ -23,12 +23,22 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (action == GLFW_PRESS) {
-			mousePressed = true;
-			mouseHeld = true;
+			mousePressedLeft = true;
+			mouseHeldLeft = true;
 		}
 		else {
-			mouseReleased = true;
-			mouseHeld = false;
+			mouseReleasedLeft = true;
+			mouseHeldLeft = false;
+		}
+	}
+	else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+		if (action == GLFW_PRESS) {
+			mousePressedRight = true;
+			mouseHeldRight = true;
+		}
+		else {
+			mouseReleasedRight = true;
+			mouseHeldRight = false;
 		}
 	}
 }
