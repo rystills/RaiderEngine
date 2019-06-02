@@ -50,9 +50,9 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include "filesystem.h"
-#include "shader.h"
-#include "camera.h"
+#include "filesystem.hpp"
+#include "shader.hpp"
+#include "camera.hpp"
 #include <iostream>
 #include <unordered_map>
 #include <memory>
@@ -67,12 +67,12 @@ struct BulletData {
 } bulletData;
 
 float anisoFilterAmount = 0.0f;
-#include "model.h"
+#include "model.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
-#include "GameObject.h"
-#include "Light.h"
+#include "GameObject.hpp"
+#include "Light.hpp"
 std::vector<std::unique_ptr<GameObject>> gameObjects;
-#include "GameObjectRegistry.h"
+#include "GameObjectRegistry.hpp"
 std::vector<std::unique_ptr<Light>> lights;
 
 // settings
@@ -96,8 +96,8 @@ bool mouseReleasedRight = false;  // whether or not the right mouse button was j
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-#include "inputUtils.h"
-#include "renderUtils.h"
+#include "inputUtils.hpp"
+#include "renderUtils.hpp"
 
 /*
 update deltaTime based on the amount of time elapsed since the previous frame

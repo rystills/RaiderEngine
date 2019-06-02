@@ -140,17 +140,17 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="filesystem.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GameObjectRegistry.h" />
-    <ClInclude Include="inputUtils.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="model.h" />
-    <ClInclude Include="MovingPlatform.h" />
-    <ClInclude Include="renderUtils.h" />
-    <ClInclude Include="shader.h" />
+    <ClInclude Include="camera.hpp" />
+    <ClInclude Include="filesystem.hpp" />
+    <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="GameObjectRegistry.hpp" />
+    <ClInclude Include="inputUtils.hpp" />
+    <ClInclude Include="Light.hpp" />
+    <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="model.hpp" />
+    <ClInclude Include="MovingPlatform.hpp" />
+    <ClInclude Include="renderUtils.hpp" />
+    <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>

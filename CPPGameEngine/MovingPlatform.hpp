@@ -1,7 +1,7 @@
 #ifndef MOVING_PLATFORM_H
 #define MOVING_PLATFORM_H
 
-#include "GameObject.h"
+#include "GameObject.hpp"
 
 class MovingPlatform : public GameObject
 {

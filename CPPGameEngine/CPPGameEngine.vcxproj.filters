@@ -26,37 +26,37 @@
     <ClInclude Include="stb_image.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="filesystem.h">
+    <ClInclude Include="camera.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
+    <ClInclude Include="shader.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="mesh.h">
+    <ClInclude Include="filesystem.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="model.h">
+    <ClInclude Include="GameObjectRegistry.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="shader.h">
+    <ClInclude Include="GameObject.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
+    <ClInclude Include="model.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="inputUtils.h">
+    <ClInclude Include="Light.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderUtils.h">
+    <ClInclude Include="mesh.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
+    <ClInclude Include="MovingPlatform.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameObjectRegistry.h">
+    <ClInclude Include="renderUtils.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="MovingPlatform.h">
+    <ClInclude Include="inputUtils.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
