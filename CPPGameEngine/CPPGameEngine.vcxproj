@@ -143,12 +143,13 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="filesystem.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameObjectRegistry.h" />
     <ClInclude Include="inputUtils.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
+    <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="renderUtils.h" />
-    <ClInclude Include="root_directory.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>

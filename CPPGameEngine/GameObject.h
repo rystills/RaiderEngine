@@ -48,17 +48,25 @@ public:
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int gameObjectIndex) : position(position), scale(scale), gameObjectIndex(gameObjectIndex) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
+		setModel(modelName);
+		addPhysics(rotationEA);
+	}
+
+	/*
+	set this GameObject's model to the specified name, creating a new entry in the model dictionary if the name is not already present
+	@param modelName: the name of the model to use
+	*/
+	void setModel(std::string modelName) {
+		// note: this function should only be called once at initialization, as the object's physics depend on its set model
 		std::unordered_map<std::string, std::shared_ptr<Model>>::iterator search = models.find(modelName);
 		if (search != models.end())
 			model = search->second;
 		else {
 			// TODO: don't use hard-coded model folder
-			model = std::make_shared<Model>(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx"),false);
+			model = std::make_shared<Model>(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx"), false);
 			models.insert({ modelName, model });
 		}
-		addPhysics(rotationEA);
 	}
-
 	/*
 	grant physics information to this GameObject (collision shape and rigidbody) and add it to the bullet physics simulation
 	@param rotationEA: the euler angles rotation vector passed into our constructor
@@ -102,8 +110,8 @@ public:
 		// store our index in the gameObjects vector in userPointer for easy lookup later
 		body->setUserPointer((void*)gameObjectIndex);
 	}
-
-	void update() {
+	
+	virtual void update() {
 		// update transform position to bullet transform position
 		btCollisionObject* obj = bulletData.dynamicsWorld->getCollisionObjectArray()[bodyIndex];
 		btRigidBody* indBody = btRigidBody::upcast(obj);

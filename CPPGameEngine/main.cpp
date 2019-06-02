@@ -72,6 +72,7 @@ std::unordered_map<std::string, std::shared_ptr<Model>> models;
 #include "GameObject.h"
 #include "Light.h"
 std::vector<GameObject> gameObjects;
+#include "GameObjectRegistry.h"
 std::vector<Light> lights;
 
 // settings
@@ -123,7 +124,9 @@ extract the base mesh name from an assimp node name, removing $_transform inform
 */
 std::string stripNodeName(std::string fullName) {
 	std::size_t nameExtraStart = fullName.find("_$Assimp");
-	std::string name = nameExtraStart == std::string::npos ? fullName.substr(2) : fullName.substr(2, nameExtraStart - 2);
+	std::size_t underscorePos = fullName.find("_");
+	int sPos = (underscorePos == std::string::npos ? 0 : underscorePos+1);
+	std::string name = nameExtraStart == std::string::npos ? fullName.substr(sPos) : fullName.substr(sPos, nameExtraStart - sPos);
 	// strip trailing numbers applied to duplicate object names in the newest version of assimp
 	while (isdigit(name[name.length() - 1])) {
 		name = name.substr(0, name.length() - 1);
@@ -185,9 +188,14 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	if (!isTransformNode) {
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
-			// load an existing model
-			std::cout << "generating instance of object: " << name << std::endl;
+			// load a barebones physics enabled model
+			std::cout << "generating object: " << name << std::endl;
 			gameObjects.emplace_back(tempProp.pos, tempProp.rot, tempProp.scale, name,gameObjects.size());
+		}
+		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
+			// load a class
+			std::cout << "generating instance of GameObject: " << name << std::endl;
+			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale, name, gameObjects.size());
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			std::cout << "generating light: " << name << std::endl;

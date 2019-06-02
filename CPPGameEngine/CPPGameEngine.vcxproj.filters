@@ -29,9 +29,6 @@
     <ClInclude Include="filesystem.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="root_directory.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -54,6 +51,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectRegistry.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MovingPlatform.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
