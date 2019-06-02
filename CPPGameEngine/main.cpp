@@ -71,9 +71,9 @@ float anisoFilterAmount = 0.0f;
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
 #include "GameObject.h"
 #include "Light.h"
-std::vector<GameObject> gameObjects;
+std::vector<std::unique_ptr<GameObject>> gameObjects;
 #include "GameObjectRegistry.h"
-std::vector<Light> lights;
+std::vector<std::unique_ptr<Light>> lights;
 
 // settings
 const unsigned int SCR_WIDTH = 1366;
@@ -190,7 +190,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			std::cout << "generating object: " << name << std::endl;
-			gameObjects.emplace_back(tempProp.pos, tempProp.rot, tempProp.scale, name,gameObjects.size());
+			gameObjects.emplace_back(new GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name,gameObjects.size()));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
@@ -200,7 +200,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			std::cout << "generating light: " << name << std::endl;
 			// create a light
-			lights.emplace_back(tempProp.pos, glm::vec3(1, 1, 1));
+			lights.emplace_back(new Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
 		else {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
@@ -213,7 +213,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
 				baseModel->calculateCollisionShape();
 				models.insert({ tempProp.fullName, baseModel });
-				gameObjects.emplace_back(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,gameObjects.size());
+				gameObjects.emplace_back(new GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,gameObjects.size()));
 			}
 		}
 	}
@@ -577,7 +577,7 @@ int main() {
 
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
-			gameObjects[i].update();
+			gameObjects[i]->update();
 
 		// get updated view / projection matrices
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
@@ -590,7 +590,7 @@ int main() {
 		if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
 			m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
 			if (m_pickDist < maxPickDist) {
-				if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()].model->isStaticMesh) {
+				if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()]->model->isStaticMesh) {
 					holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
 					btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
 					btTransform tr;
@@ -651,8 +651,8 @@ int main() {
 		shaderGeometryPass.setMat4("view", view);
 		shaderGeometryPass.setVec3("viewPos", camera.Position);
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-			shaderGeometryPass.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i].position) * gameObjects[i].rotation, gameObjects[i].scale));
-			gameObjects[i].model->draw(shaderGeometryPass);
+			shaderGeometryPass.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+			gameObjects[i]->model->draw(shaderGeometryPass);
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -668,11 +668,11 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, gBuffer.albedoSpec);
 		// send light relevant uniforms
 		for (unsigned int i = 0; i < lights.size(); ++i) {
-			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lights[i].position);
-			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i].color);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i].linear);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i].quadratic);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", lights[i].radius);
+			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
+			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
 		}
 		shaderLightingPass.setVec3("viewPos", camera.Position);
 		// finally render quad
@@ -691,8 +691,8 @@ int main() {
 		shaderLightBox.setMat4("projection", projection);
 		shaderLightBox.setMat4("view", view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
-			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i].position), glm::vec3(.1f)));
-			shaderLightBox.setVec3("lightColor", lights[i].color);
+			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
+			shaderLightBox.setVec3("lightColor", lights[i]->color);
 			renderCube();
 		}
 

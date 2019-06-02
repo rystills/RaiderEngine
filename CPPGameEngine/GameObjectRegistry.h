@@ -5,7 +5,7 @@
 
 //TODO: generic arg packing / unpacking
 void instantiateGameObject(std::string const& classname, glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int gameObjectIndex) {
-	if (classname == "MovingPlatform") gameObjects.push_back(MovingPlatform(position, rotationEA, scale, modelName, gameObjectIndex));
+	if (classname == "MovingPlatform") gameObjects.emplace_back(new MovingPlatform(position, rotationEA, scale, modelName, gameObjectIndex));
 }
 
 #endif
