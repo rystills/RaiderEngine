@@ -28,6 +28,7 @@ public:
 	glm::mat4 rotation;
 	glm::vec3 scale;
 	std::shared_ptr<Model> model;
+	bool grabbable;
 
 	// bullet data
 	std::unique_ptr<btCollisionShape> collisionShape;
@@ -42,8 +43,9 @@ public:
 	@param scale: the initial scale of this GameObject
 	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
 	@param makeStatic: whether or not to force the newly created mesh to be static. Note that this has no effect if the mesh has already been created.
+	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false) : position(position), scale(scale) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true) : position(position), scale(scale), grabbable(grabbable) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
 		setModel(modelName, makeStatic);

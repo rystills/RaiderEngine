@@ -591,7 +591,7 @@ int main() {
 			m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
 			if (m_pickDist < maxPickDist) {
 				GameObject* hitObj = (GameObject*) hit->m_collisionObject->getUserPointer();
-				if (!hitObj->model->isStaticMesh) {
+				if (!(hitObj->model->isStaticMesh) && hitObj->grabbable) {
 					holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
 					btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
 					btTransform tr;
