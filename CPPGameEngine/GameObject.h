@@ -33,7 +33,6 @@ public:
 	std::unique_ptr<btCollisionShape> collisionShape;
 	bool useModelCollisionShape = false;  // in some instances we don't need our own collision shape; the model shape suffices. Always use the model shape if this flag is true
 	std::unique_ptr<btRigidBody> body;
-	int bodyIndex;
 	std::unique_ptr<btDefaultMotionState> myMotionState;
 
 	/*
@@ -42,26 +41,28 @@ public:
 	@param rotationEA: the inital rotation (in Euler Angles) of this GameObject
 	@param scale: the initial scale of this GameObject
 	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
+	@param makeStatic: whether or not to force the newly created mesh to be static. Note that this has no effect if the mesh has already been created.
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false) : position(position), scale(scale) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
-		setModel(modelName);
+		setModel(modelName, makeStatic);
 		addPhysics(rotationEA);
 	}
 
 	/*
 	set this GameObject's model to the specified name, creating a new entry in the model dictionary if the name is not already present
 	@param modelName: the name of the model to use
+	@param makeStatic: whether or not to make the model static, if we create the model
 	*/
-	void setModel(std::string modelName) {
+	void setModel(std::string modelName, bool makeStatic = false) {
 		// note: this function should only be called once at initialization, as the object's physics depend on its set model
 		std::unordered_map<std::string, std::shared_ptr<Model>>::iterator search = models.find(modelName);
 		if (search != models.end())
 			model = search->second;
 		else {
 			// TODO: don't use hard-coded model folder
-			model = std::make_shared<Model>(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx"), false);
+			model = std::make_shared<Model>(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx"), makeStatic);
 			models.insert({ modelName, model });
 		}
 	}
@@ -103,21 +104,19 @@ public:
 		myMotionState = std::make_unique<btDefaultMotionState>(startTransform);
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), (useModelCollisionShape ? model->collisionShape : collisionShape).get(), localInertia);
 		body = std::make_unique<btRigidBody>(rbInfo);
-		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body.get());
 		// store our index in the gameObjects vector in userPointer for easy lookup later
 		body->setUserPointer((void*)this);
 	}
 	
-	virtual void update() {
+	/*
+	update the GameObject instance
+	@param deltaTime: the elapsed time (in seconds) since the previous frame
+	*/
+	virtual void update(float deltaTime) {
 		// update transform position to bullet transform position
-		btCollisionObject* obj = bulletData.dynamicsWorld->getCollisionObjectArray()[bodyIndex];
-		btRigidBody* indBody = btRigidBody::upcast(obj);
 		btTransform trans;
-		if (indBody && indBody->getMotionState())
-			indBody->getMotionState()->getWorldTransform(trans);
-		else
-			trans = obj->getWorldTransform();
+		body->getMotionState()->getWorldTransform(trans);
 		position.x = float(trans.getOrigin().getX());
 		position.y = float(trans.getOrigin().getY());
 		position.z = float(trans.getOrigin().getZ());
@@ -126,6 +125,10 @@ public:
 		setRotation(glm::vec3(x, y, z));
 	}
 
+	/*
+	set the GameObject's rotation from a vec3 of euler angles
+	@param rotationEA: the desired rotation (in euler angles) to set
+	*/
 	void setRotation(glm::vec3 rotationEA) {
 		rotation = glm::toMat4(glm::quat(rotationEA));
 	}

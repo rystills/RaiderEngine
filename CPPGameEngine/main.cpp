@@ -195,7 +195,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			std::cout << "generating instance of GameObject: " << name << std::endl;
-			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale, name);
+			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale);
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			std::cout << "generating light: " << name << std::endl;
@@ -577,7 +577,7 @@ int main() {
 
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
-			gameObjects[i]->update();
+			gameObjects[i]->update(deltaTime);
 
 		// get updated view / projection matrices
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
