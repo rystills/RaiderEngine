@@ -34,7 +34,6 @@ public:
 	bool useModelCollisionShape = false;  // in some instances we don't need our own collision shape; the model shape suffices. Always use the model shape if this flag is true
 	std::unique_ptr<btRigidBody> body;
 	int bodyIndex;
-	int gameObjectIndex;
 	std::unique_ptr<btDefaultMotionState> myMotionState;
 
 	/*
@@ -43,9 +42,8 @@ public:
 	@param rotationEA: the inital rotation (in Euler Angles) of this GameObject
 	@param scale: the initial scale of this GameObject
 	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
-	@param gameObjectIndex: the index of this GameObject in the gameObjects vector
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int gameObjectIndex) : position(position), scale(scale), gameObjectIndex(gameObjectIndex) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName) : position(position), scale(scale) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setRotation(rotationEA);
 		setModel(modelName);
@@ -108,7 +106,7 @@ public:
 		bodyIndex = bulletData.dynamicsWorld->getNumCollisionObjects();
 		bulletData.dynamicsWorld->addRigidBody(body.get());
 		// store our index in the gameObjects vector in userPointer for easy lookup later
-		body->setUserPointer((void*)gameObjectIndex);
+		body->setUserPointer((void*)this);
 	}
 	
 	virtual void update() {

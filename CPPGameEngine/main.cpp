@@ -190,12 +190,12 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			std::cout << "generating object: " << name << std::endl;
-			gameObjects.emplace_back(new GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name,gameObjects.size()));
+			gameObjects.emplace_back(new GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			std::cout << "generating instance of GameObject: " << name << std::endl;
-			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale, name, gameObjects.size());
+			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale, name);
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			std::cout << "generating light: " << name << std::endl;
@@ -213,7 +213,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
 				baseModel->calculateCollisionShape();
 				models.insert({ tempProp.fullName, baseModel });
-				gameObjects.emplace_back(new GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,gameObjects.size()));
+				gameObjects.emplace_back(new GameObject(tempProp.pos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
 			}
 		}
 	}
@@ -590,7 +590,8 @@ int main() {
 		if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
 			m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
 			if (m_pickDist < maxPickDist) {
-				if (!gameObjects[(int)hit->m_collisionObject->getUserPointer()]->model->isStaticMesh) {
+				GameObject* hitObj = (GameObject*) hit->m_collisionObject->getUserPointer();
+				if (!hitObj->model->isStaticMesh) {
 					holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
 					btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
 					btTransform tr;
