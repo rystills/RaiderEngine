@@ -190,16 +190,16 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
-			std::cout << "generating object: " << name << std::endl;
+			//std::cout << "generating object: " << name << std::endl;
 			gameObjects.emplace_back(new GameObject(tempProp.pos, tempProp.rot, tempProp.scale, name));
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
-			std::cout << "generating instance of GameObject: " << name << std::endl;
+			//std::cout << "generating instance of GameObject: " << name << std::endl;
 			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale);
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
-			std::cout << "generating light: " << name << std::endl;
+			//std::cout << "generating light: " << name << std::endl;
 			// create a light
 			lights.emplace_back(new Light(tempProp.pos, glm::vec3(1, 1, 1)));
 		}
@@ -208,7 +208,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			if (node->mNumMeshes > 0) {
 				// generate a new model from the mesh list
 				//TODO: consider using name here rather than fullName so we can re-use static geometry too
-				std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
+				//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 				std::shared_ptr<Model> baseModel = std::make_shared<Model>();
 				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
@@ -520,6 +520,10 @@ int main() {
 
 	// load models
 	// -----------
+	Model::defaultDiffuseMap.id = textureFromFile("defaultDiffuseMap.png", ".");
+	Model::defaultDiffuseMap.type = "texture_diffuse";
+	Model::defaultDiffuseMap.path = "defaultDiffuseMap.png";
+
 	Model::defaultNormalMap.id = textureFromFile("defaultNormalMap.png", ".");
 	Model::defaultNormalMap.type = "texture_normal";
 	Model::defaultNormalMap.path = "defaultNormalMap.png";
@@ -574,8 +578,8 @@ int main() {
 		// update physics
 		// TODO: don't hardcode 60fps physics
 		//bulletData.dynamicsWorld->stepSimulation(1.f / 60.f, 10);
-		//bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
-		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 60.);
+		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
+		//bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 60.);
 
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)

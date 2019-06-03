@@ -69,7 +69,7 @@ unsigned int textureFromFile(const char *path, const std::string &directory, boo
 class Model {
 public:
 	static std::vector<Texture> textures_loaded;  // store all textures loaded for re-use across models
-	static Texture defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
+	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 	std::unique_ptr<btCollisionShape> collisionShape;
@@ -227,19 +227,8 @@ public:
 		// diffuse: texture_diffuseN
 		// specular: texture_specularN
 		// normal: texture_normalN
-
-		// 1. diffuse maps
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		// 2. specular maps
-		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", directory);
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		// 3. normal maps
-		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal", directory);
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-		// 4. height maps
-		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height", directory);
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+		std::vector<Texture> maps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
+		textures.insert(textures.end(), maps.begin(), maps.end());
 
 		// return a mesh object created from the extracted mesh data
 		return Mesh(vertices, indices, textures);
@@ -307,61 +296,28 @@ private:
             }
 			// the texture hasn't been loaded before so load it now
             if(!skip) {
-                Texture texture;
-                texture.id = textureFromFile(str.C_Str(), directory);
-                texture.type = typeName;
-                texture.path = str.C_Str();
-                textures.push_back(texture);
-                textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-				SUCCESS(std::cout << "loaded diffuse texture: '" << str.C_Str() << "'" << std::endl);
-
-				// TODO: currently we manually check for maps other than diffuse due to collada export issues; down the line this should become unnecessary
-				// TODO: combine all this repeat logic
-				std::string normalName = str.C_Str();
-				// TODO: don't hardcode png as extension
-				normalName = normalName.substr(0, normalName.find_last_of('.')) + "_NRM.png";
-				if (std::experimental::filesystem::exists(directory + "/" + normalName)) {
-					Texture textureNrm;
-					textureNrm.id = textureFromFile(normalName.c_str(), directory);
-					textureNrm.type = "texture_normal";
-					textureNrm.path = normalName.c_str();
-					textures.push_back(textureNrm);
-					textures_loaded.push_back(textureNrm);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESS(std::cout << "loaded normal texture: '" << normalName << "'" << std::endl);
-				}
-				else {
-					textures.push_back(defaultNormalMap);
-					WARNING(std::cout << "unable to find normal map for texture: '" << str.C_Str() << "'; falling back to default normal map" << std::endl);
-				}
-				std::string specName = str.C_Str();
-				specName = specName.substr(0, specName.find_last_of('.')) + "_SPEC.png";
-				if (std::experimental::filesystem::exists(directory + "/" + specName)) {
-					Texture textureSpec;
-					textureSpec.id = textureFromFile(specName.c_str(), directory);
-					textureSpec.type = "texture_specular";
-					textureSpec.path = specName.c_str();
-					textures.push_back(textureSpec);
-					textures_loaded.push_back(textureSpec);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESS(std::cout << "loaded specular texture: '" << specName << "'" << std::endl);
-				}
-				else {
-					textures.push_back(defaultSpecularMap);
-					WARNING(std::cout << "unable to find specular map for texture: '" << str.C_Str() << "'; falling back to default specular map" << std::endl);
-				}
-				std::string heightName = str.C_Str();
-				heightName = heightName.substr(0, heightName.find_last_of('.')) + "_DISP.png";
-				if (std::experimental::filesystem::exists(directory + "/" + heightName)) {
-					Texture textureHeight;
-					textureHeight.id = textureFromFile(heightName.c_str(), directory);
-					textureHeight.type = "texture_height";
-					textureHeight.path = heightName.c_str();
-					textures.push_back(textureHeight);
-					textures_loaded.push_back(textureHeight);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESS(std::cout << "loaded height map texture: '" << heightName << "'" << std::endl);
-				}
-				else {
-					textures.push_back(defaultHeightMap);
-					WARNING(std::cout << "unable to find height map for texture: '" << str.C_Str() << "'; falling back to default height map" << std::endl);
+				// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
+				const int numMapTypes = 4;
+				std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png" };
+				std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height" };
+				Texture mapDefaults[numMapTypes] = { defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap };
+				for (int i = 0; i < numMapTypes; ++i) {
+					std::string mapName = str.C_Str();
+					// TODO: don't hardcode png as extension
+					mapName = mapName.substr(0, mapName.find_last_of('.')) + mapExtensions[i];
+					if (std::experimental::filesystem::exists(directory + "/" + mapName)) {
+						Texture extraTex;
+						extraTex.id = textureFromFile(mapName.c_str(), directory);
+						extraTex.type = mapTypes[i];
+						extraTex.path = mapName.c_str();
+						textures.push_back(extraTex);
+						textures_loaded.push_back(extraTex);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+						SUCCESS(std::cout << "loaded " << mapTypes[i] << " texture: '" << mapName << "'" << std::endl);
+					}
+					else {
+						textures.push_back(mapDefaults[i]);
+						WARNING(std::cout << "unable to find " << mapTypes[i] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[i] << " map" << std::endl);
+					}
 				}
             }
         }
@@ -369,5 +325,5 @@ private:
     }
 };
 std::vector<Texture> Model::textures_loaded;
-Texture Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap;
+Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap;
 #endif
