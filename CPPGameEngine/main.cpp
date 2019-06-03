@@ -144,7 +144,6 @@ process the current node while loading a map, either extracting a single piece o
 @param directory: the directory in which the map resides
 */
 void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
-	// TODO: instantiating object base class with specified model rather than instantiating child classes for now
 	// determine the full name and real name of the current node
 	tempProp.fullName = node->mName.C_Str();
 	std::string name = stripNodeName(tempProp.fullName);
@@ -542,7 +541,7 @@ int main() {
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);
 	if (anisoFilterAmount > 0) {
-		for (auto kv : Model::texturesLoaded) {
+		for (std::pair<const std::string, Texture> kv : Model::texturesLoaded) {
 			glBindTexture(GL_TEXTURE_2D, kv.second.id);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoFilterAmount);
 		}

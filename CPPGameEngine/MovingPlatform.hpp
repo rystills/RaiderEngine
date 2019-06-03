@@ -9,8 +9,7 @@ public:
 	float elapsedTime = 0;
 	// TODO: remove this constraint from the world and delete it on death
 	btGeneric6DofConstraint* moveConstraint;
-	MovingPlatform(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale) :
-		GameObject(position, rotationEA, scale, "movingPlatform", false,false) {
+	MovingPlatform(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale) : GameObject(position, rotationEA, scale, "movingPlatform", false,false) {
 		// create a constraint at our starting position, and move that up and down
 		btTransform tr;
 		tr.setIdentity();
