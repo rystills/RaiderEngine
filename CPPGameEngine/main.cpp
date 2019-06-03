@@ -125,7 +125,8 @@ extract the base mesh name from an assimp node name, removing $_transform inform
 std::string stripNodeName(std::string fullName) {
 	std::size_t nameExtraStart = fullName.find("_$Assimp");
 	std::size_t underscorePos = fullName.find("_");
-	int sPos = (underscorePos == std::string::npos ? 0 : underscorePos+1);
+	// fund underscore position, ignoring underscores added in by ASSIMP
+	int sPos = (underscorePos == std::string::npos || (underscorePos != fullName.length()-1 && fullName[underscorePos+1] == '$') ? 0 : underscorePos+1);
 	std::string name = nameExtraStart == std::string::npos ? fullName.substr(sPos) : fullName.substr(sPos, nameExtraStart - sPos);
 	// strip trailing numbers applied to duplicate object names in the newest version of assimp
 	while (isdigit(name[name.length() - 1])) {
@@ -573,7 +574,8 @@ int main() {
 		// update physics
 		// TODO: don't hardcode 60fps physics
 		//bulletData.dynamicsWorld->stepSimulation(1.f / 60.f, 10);
-		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
+		//bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
+		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 60.);
 
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
