@@ -542,8 +542,8 @@ int main() {
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);
 	if (anisoFilterAmount > 0) {
-		for (int i = 0; i < Model::textures_loaded.size(); ++i) {
-			glBindTexture(GL_TEXTURE_2D, Model::textures_loaded[i].id);
+		for (auto kv : Model::texturesLoaded) {
+			glBindTexture(GL_TEXTURE_2D, kv.second.id);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoFilterAmount);
 		}
 		glBindTexture(GL_TEXTURE_2D, 0);

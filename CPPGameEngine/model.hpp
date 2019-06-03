@@ -68,8 +68,8 @@ unsigned int textureFromFile(const char *path, const std::string &directory, boo
 
 class Model {
 public:
-	static std::vector<Texture> textures_loaded;  // store all textures loaded for re-use across models
-	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank heightMap for textures which do not utilize POM
+	static std::unordered_map<std::string, Texture> texturesLoaded;  // store all textures loaded for re-use across models 
+	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 	std::unique_ptr<btCollisionShape> collisionShape;
@@ -181,7 +181,6 @@ public:
 		// data to fill
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
-		std::vector<Texture> textures;  // TODO: textures should be stored in a hash map for quick lookup during the loading phase
 
 		// Walk through each of the mesh's vertices
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
@@ -227,11 +226,9 @@ public:
 		// diffuse: texture_diffuseN
 		// specular: texture_specularN
 		// normal: texture_normalN
-		std::vector<Texture> maps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
-		textures.insert(textures.end(), maps.begin(), maps.end());
 
 		// return a mesh object created from the extracted mesh data
-		return Mesh(vertices, indices, textures);
+		return Mesh(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory));
 	}
     
 private:
@@ -285,45 +282,44 @@ private:
         for(unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
             aiString str;
             mat->GetTexture(type, i, &str);
-            // check all loaded textures to see if the current texture was loaded before
-            bool skip = false;
-            for(unsigned int j = 0; j < textures_loaded.size(); j++) {
-                if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0) {
-                    textures.push_back(textures_loaded[j]);
-                    skip = true;
-                    break;
-                }
-            }
-			// the texture hasn't been loaded before so load it now
-            if(!skip) {
-				// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
-				const int numMapTypes = 4;
-				std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png" };
-				std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height" };
-				Texture mapDefaults[numMapTypes] = { defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap };
-				for (int i = 0; i < numMapTypes; ++i) {
-					std::string mapName = str.C_Str();
-					// TODO: don't hardcode png as extension
-					mapName = mapName.substr(0, mapName.find_last_of('.')) + mapExtensions[i];
+			// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
+			const int numMapTypes = 4;
+			// TODO: don't hardcode png as extension
+			std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png" };
+			std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height" };
+			Texture mapDefaults[numMapTypes] = { defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap };
+			for (int k = 0; k < numMapTypes; ++k) {
+				// get current map name
+				std::string mapName = str.C_Str();
+				mapName = mapName.substr(0, mapName.find_last_of('.')) + mapExtensions[k];
+				
+				// check if the current texture has already been loaded
+				std::unordered_map<std::string, Texture>::iterator search = texturesLoaded.find(mapName);
+				if (search != texturesLoaded.end()) 
+					// texture already exists
+					textures.push_back(search->second);
+				else {
+					// texture does not exist yet; try to load it 
 					if (std::experimental::filesystem::exists(directory + "/" + mapName)) {
 						Texture extraTex;
 						extraTex.id = textureFromFile(mapName.c_str(), directory);
-						extraTex.type = mapTypes[i];
+						extraTex.type = mapTypes[k];
 						extraTex.path = mapName.c_str();
 						textures.push_back(extraTex);
-						textures_loaded.push_back(extraTex);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-						SUCCESS(std::cout << "loaded " << mapTypes[i] << " texture: '" << mapName << "'" << std::endl);
+						texturesLoaded[mapName] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+						SUCCESS(std::cout << "loaded " << mapTypes[k] << " texture: '" << mapName << "'" << std::endl);
 					}
 					else {
-						textures.push_back(mapDefaults[i]);
-						WARNING(std::cout << "unable to find " << mapTypes[i] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[i] << " map" << std::endl);
+						// can't find texture; fall back to default of matching type
+						textures.push_back(mapDefaults[k]);
+						WARNING(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[k] << " map" << std::endl);
 					}
 				}
-            }
-        }
+			}
+		}
         return textures;
     }
 };
-std::vector<Texture> Model::textures_loaded;
+std::unordered_map<std::string, Texture> Model::texturesLoaded;
 Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap;
 #endif
