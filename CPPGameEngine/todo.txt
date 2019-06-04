@@ -16,3 +16,6 @@
 
 ~Optimization~
 -add automatic object instancing
+
+~Structure~
+-organize source files into sub-folders

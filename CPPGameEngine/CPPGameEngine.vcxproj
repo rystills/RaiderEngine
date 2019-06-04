@@ -166,6 +166,9 @@
     <None Include="deferred_shading.vs" />
     <None Include="g_buffer.fs" />
     <None Include="g_buffer.vs" />
+    <None Include="point_shadows_depth.fs" />
+    <None Include="point_shadows_depth.gs" />
+    <None Include="point_shadows_depth.vs" />
     <None Include="textShader.fs" />
     <None Include="textShader.vs" />
   </ItemGroup>

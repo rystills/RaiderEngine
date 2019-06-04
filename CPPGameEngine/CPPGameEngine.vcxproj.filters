@@ -95,5 +95,14 @@
     <None Include="textShader.fs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="point_shadows_depth.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="point_shadows_depth.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="point_shadows_depth.gs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
