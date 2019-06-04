@@ -101,6 +101,7 @@ float lastFrame = 0.0f;
 
 #include "ft2build.h"
 #include FT_FREETYPE_H
+#define numFontCharacters 128
 
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
@@ -258,10 +259,24 @@ struct Character {
 	GLuint     Advance;    // Offset to advance to next glyph
 };
 
-#define numCharacters 128
-Character Characters[numCharacters];
+std::unordered_map<std::string,std::unordered_map<int,Character[numFontCharacters]>> fonts;
 
-void renderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color) {
+/*
+render the specified text with the specified (font,size) pair (if loaded) at the specified position, scale, and color
+@param fontName: the name of the font
+@param fontSize: the size of the font
+@param s: the font shader
+@param text: the text string to render
+@param x: the x coordinate (in screen pixels) at which to render the text
+@param y: the y coordinate (in screen pixels) at which to render the text
+@param scale: the scale at which to render the text
+@param color: the color to use when rendering the text
+*/
+void renderText(std::string fontName, int fontSize, Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color) {
+	if (!fonts[fontName].count(fontSize)) {
+		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
+		return;
+	}
 	// Activate corresponding render state	
 	s.use();
 	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
@@ -271,7 +286,7 @@ void renderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale
 	// Iterate through all characters
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); ++c) {
-		Character ch = Characters[*c];
+		Character ch = fonts[fontName][fontSize][*c];
 
 		GLfloat xpos = x + ch.Bearing.x * scale;
 		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -460,7 +475,7 @@ void initFreetype() {
 }
 
 /*
-load the specified font at the desired size using freetype
+load the specified font at the desired size using freetype, adding the (fontName,size) pair to the fonts map
 @param fontName: the name of the font to load
 @param fontSize: the size at which to load the font
 */
@@ -483,7 +498,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// Load first 128 characters of ASCII set
-	for (GLubyte c = 0; c < numCharacters; ++c) {
+	for (GLubyte c = 0; c < numFontCharacters; ++c) {
 		// Load character glyph 
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
@@ -510,7 +525,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		// Now store character for later use 
-		Characters[c] = {
+		fonts[fontName][fontSize][c] = {
 			texture,
 			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
@@ -884,7 +899,7 @@ int main() {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProjection));
-		renderText(textShader, "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		renderText("Inter-Regular", 24, textShader, "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		
