@@ -99,6 +99,12 @@ float lastFrame = 0.0f;
 #include "inputUtils.hpp"
 #include "renderUtils.hpp"
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
+
+unsigned int VBO, VAO;
+unsigned int textVBO, textVAO;
+
 /*
 update deltaTime based on the amount of time elapsed since the previous frame
 */
@@ -245,6 +251,60 @@ void loadMap(std::string mapName) {
 	SUCCESS(std::cout << "Finished loading map '" << mapName << "'" << std::endl);
 }
 
+struct Character {
+	GLuint     TextureID;  // ID handle of the glyph texture
+	glm::ivec2 Size;       // Size of glyph
+	glm::ivec2 Bearing;    // Offset from baseline to left/top of glyph
+	GLuint     Advance;    // Offset to advance to next glyph
+};
+
+// TODO: allow for multiple sizes and fonts, rather than hard-coding one single character array
+std::map<GLchar, Character> Characters;
+
+void renderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
+{
+	// Activate corresponding render state	
+	s.use();
+	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(textVAO);
+
+	// Iterate through all characters
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++)
+	{
+		Character ch = Characters[*c];
+
+		GLfloat xpos = x + ch.Bearing.x * scale;
+		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+		GLfloat w = ch.Size.x * scale;
+		GLfloat h = ch.Size.y * scale;
+		// Update VBO for each character
+		GLfloat vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0, 0.0 },
+			{ xpos,     ypos,       0.0, 1.0 },
+			{ xpos + w, ypos,       1.0, 1.0 },
+
+			{ xpos,     ypos + h,   0.0, 0.0 },
+			{ xpos + w, ypos,       1.0, 1.0 },
+			{ xpos + w, ypos + h,   1.0, 0.0 }
+		};
+		// Render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+		// Update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// Render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+	}
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 /*
 initialize our game window, creating the window itself and setting input callbacks
 */
@@ -385,6 +445,91 @@ void cleanupBullet() {
 	delete bulletData.collisionConfiguration;
 }
 
+/*
+initialize freetype, creating a VBO and VAO specifically for text rendering
+*/
+void initFreetype() {
+	// Configure VAO/VBO for texture quads
+	glGenVertexArrays(1, &textVAO);
+	glGenBuffers(1, &textVBO);
+	glBindVertexArray(textVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+/*
+load the specified font at the desired size using freetype
+@param fontName: the name of the font to load
+@param fontSize: the size at which to load the font
+*/
+void freetypeLoadFont(std::string fontName, int fontSize) {
+	// FreeType
+	FT_Library ft;
+	// All functions return a value different than 0 whenever an error occurred
+	if (FT_Init_FreeType(&ft))
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
+	// Load font as face
+	FT_Face face;
+	if (FT_New_Face(ft, ("fonts/" + fontName + ".ttf").c_str(), 0, &face))
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+
+	// Set size to load glyphs as
+	FT_Set_Pixel_Sizes(face, 0, fontSize);
+
+	// Disable byte-alignment restriction
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	// Load first 128 characters of ASCII set
+	for (GLubyte c = 0; c < 128; c++)
+	{
+		// Load character glyph 
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		{
+			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+			continue;
+		}
+		// Generate texture
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			face->glyph->bitmap.buffer
+		);
+		// Set texture options
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// Now store character for later use
+		Character character = {
+			texture,
+			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+			face->glyph->advance.x
+		};
+		Characters.insert(std::pair<GLchar, Character>(c, character));
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// reset texture alignment
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	// Destroy FreeType once we're finished
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+}
+
 // Helper class; draws the world as seen by Bullet.
 // This is very handy to see it Bullet's world matches yours
 // How to use this class :
@@ -394,7 +539,6 @@ void cleanupBullet() {
 // Each frame, call it :
 // mydebugdrawer.SetMatrices(ViewMatrix, ProjectionMatrix);
 // dynamicsWorld->debugDrawWorld();
-unsigned int VBO, VAO;
 class BulletDebugDrawer_OpenGL : public btIDebugDraw {
 public:
 	void SetMatrices(Shader s, glm::mat4 pViewMatrix, glm::mat4 pProjectionMatrix)
@@ -507,6 +651,8 @@ int main() {
 	GLFWwindow* window = initWindow();
 	initGBuffer();
 	initBullet();
+	initFreetype();
+	freetypeLoadFont("Inter-Regular", 24);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
@@ -516,6 +662,8 @@ int main() {
 	Shader shaderLightingPass("deferred_shading.vs", "deferred_shading.fs");
 	Shader shaderLightBox("deferred_light_box.vs", "deferred_light_box.fs");
 	Shader debugLineShader("debugLineShader.vs", "debugLineShader.fs");
+	Shader textShader("textShader.vs", "textShader.fs");
+	glm::mat4 orthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
 
 	// load models
 	// -----------
@@ -736,8 +884,15 @@ int main() {
 		// debug render bullet data
 		bulletData.dynamicsWorld->debugDrawWorld();
 
+		// 5. render text
+		textShader.use();
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProjection));
+		renderText(textShader, "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
-
+		
 		glfwSwapBuffers(window);
 	}
 	cleanupBullet();

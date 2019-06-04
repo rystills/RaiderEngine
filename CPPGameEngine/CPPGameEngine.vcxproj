@@ -77,12 +77,12 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(ProjectDir)\libs\freetype\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(ProjectDir)\libs\freetype\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(ProjectDir)\libs\freetype\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(ProjectDir)\libs\freetype\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -92,7 +92,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;BulletDynamics.lib;BulletCollision.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;BulletDynamics.lib;BulletCollision.lib;LinearMath.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -118,7 +118,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;BulletDynamics.lib;BulletCollision.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;BulletDynamics.lib;BulletCollision.lib;LinearMath.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,6 +166,8 @@
     <None Include="deferred_shading.vs" />
     <None Include="g_buffer.fs" />
     <None Include="g_buffer.vs" />
+    <None Include="textShader.fs" />
+    <None Include="textShader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
