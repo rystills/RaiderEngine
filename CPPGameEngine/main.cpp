@@ -258,11 +258,10 @@ struct Character {
 	GLuint     Advance;    // Offset to advance to next glyph
 };
 
-// TODO: allow for multiple sizes and fonts, rather than hard-coding one single character array
-std::map<GLchar, Character> Characters;
+#define numCharacters 128
+Character Characters[numCharacters];
 
-void renderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
-{
+void renderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color) {
 	// Activate corresponding render state	
 	s.use();
 	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
@@ -271,8 +270,7 @@ void renderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale
 
 	// Iterate through all characters
 	std::string::const_iterator c;
-	for (c = text.begin(); c != text.end(); c++)
-	{
+	for (c = text.begin(); c != text.end(); ++c) {
 		Character ch = Characters[*c];
 
 		GLfloat xpos = x + ch.Bearing.x * scale;
@@ -485,11 +483,9 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// Load first 128 characters of ASCII set
-	for (GLubyte c = 0; c < 128; c++)
-	{
+	for (GLubyte c = 0; c < numCharacters; ++c) {
 		// Load character glyph 
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
 			continue;
 		}
@@ -513,14 +509,13 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use
-		Character character = {
+		// Now store character for later use 
+		Characters[c] = {
 			texture,
 			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
+			static_cast<GLuint>(face->glyph->advance.x)
 		};
-		Characters.insert(std::pair<GLchar, Character>(c, character));
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	// reset texture alignment
