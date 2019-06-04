@@ -119,7 +119,8 @@ void main()
             specular *= attenuation;
             lighting += diffuse + specular;
         }
-		lighting = shadow*lighting;
+		// TODO: separate ambient from shadow
+		lighting = (1-shadow)*(lighting);
     }    
     FragColor = vec4(lighting, 1.0);
 }

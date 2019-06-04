@@ -736,6 +736,7 @@ int main() {
 	shaderLightingPass.setInt("gPosition", 0);
 	shaderLightingPass.setInt("gNormal", 1);
 	shaderLightingPass.setInt("gAlbedoSpec", 2);
+	shaderLightingPass.setInt("depthMap", 3);
 
 	BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawConstraints);
@@ -829,8 +830,9 @@ int main() {
 		// render
 		// 0. create depth cubemap transformation matrices
 		// -----------------------------------------------
-		float near_plane = 1.0f;
-		float far_plane = 25.0f;
+		// TODO: share these with the deferred shader
+		float near_plane = 0.1f;
+		float far_plane = 1000;
 		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
 		std::vector<glm::mat4> shadowTransforms;
 		// TODO: support more than one light
