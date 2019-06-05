@@ -670,25 +670,28 @@ int main() {
 	// configure depth map FBO
 	// -----------------------
 	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-	unsigned int depthMapFBO;
-	glGenFramebuffers(1, &depthMapFBO);
-	// create depth cubemap texture
-	unsigned int depthCubemap;
-	glGenTextures(1, &depthCubemap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-	for (unsigned int i = 0; i < 6; ++i)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	// attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#define NR_LIGHTS 4
+	unsigned int depthMapFBO[NR_LIGHTS];
+	unsigned int depthCubemap[NR_LIGHTS];
+	for (int i = 0; i < NR_LIGHTS; ++i) {
+		glGenFramebuffers(1, &depthMapFBO[i]);
+		// create depth cubemap texture
+		glGenTextures(1, &depthCubemap[i]);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[i]);
+		for (unsigned int i = 0; i < 6; ++i)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		// attach depth texture as FBO's depth buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[i]);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap[i], 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 
 	// build and compile shaders
 	// -------------------------
@@ -737,7 +740,10 @@ int main() {
 	shaderLightingPass.setInt("gPosition", 0);
 	shaderLightingPass.setInt("gNormal", 1);
 	shaderLightingPass.setInt("gAlbedoSpec", 2);
-	shaderLightingPass.setInt("depthMap", 3);
+	shaderLightingPass.setInt("depthMap0", 3);
+	shaderLightingPass.setInt("depthMap1", 4);
+	shaderLightingPass.setInt("depthMap2", 5);
+	shaderLightingPass.setInt("depthMap3", 6);
 
 	BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawConstraints);
@@ -834,32 +840,35 @@ int main() {
 		// TODO: share these with the deferred shader
 		float near_plane = 0.1f;
 		float far_plane = 1000;
-		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
-		std::vector<glm::mat4> shadowTransforms;
-		// TODO: support more than one light
-		glm::vec3 lightPos = lights[0]->position;
-		shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-		// 0.5. render scene to depth cubemap
-		// --------------------------------
+		glEnable(GL_BLEND);
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
 		pointShadowsDepth.use();
-		for (unsigned int i = 0; i < 6; ++i)
-			pointShadowsDepth.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 		pointShadowsDepth.setFloat("far_plane", far_plane);
-		pointShadowsDepth.setVec3("lightPos", lightPos);
-		// render scene
-		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-			pointShadowsDepth.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
-			gameObjects[i]->model->draw(pointShadowsDepth);
+		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+		for (int k = 0; k < lights.size(); ++k) {
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glm::vec3 lightPos = lights[k]->position;
+			std::vector<glm::mat4> shadowTransforms;
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+			// 0.5. render scene to depth cubemap
+			// --------------------------------
+			for (unsigned int i = 0; i < 6; ++i)
+				pointShadowsDepth.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+			pointShadowsDepth.setVec3("lightPos", lightPos);
+			// render scene
+			for (unsigned int i = 0; i < gameObjects.size(); ++i) {
+				pointShadowsDepth.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+				gameObjects[i]->model->draw(pointShadowsDepth);
+			}
 		}
+		glDisable(GL_BLEND);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -900,8 +909,15 @@ int main() {
 		shaderLightingPass.setVec3("viewPos", camera.Position);
 		// shadow uniforms
 		shaderLightingPass.setFloat("far_plane", far_plane);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+		glActiveTexture(GL_TEXTURE3);			
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[1]);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[2]);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[3]);
+		
 
 		// finally render quad
 		renderQuad();

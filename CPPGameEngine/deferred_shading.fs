@@ -8,7 +8,10 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 
 // shadows
-uniform samplerCube depthMap;
+uniform samplerCube depthMap0;
+uniform samplerCube depthMap1;
+uniform samplerCube depthMap2;
+uniform samplerCube depthMap3;
 uniform float far_plane;
 
 
@@ -20,8 +23,8 @@ struct Light {
     float Quadratic;
     float Radius;
 };
-// TODO: allow variable # of lights
-const int NR_LIGHTS = 32;
+// TODO: allow variable # of lights rather than fixed 4 light maximum
+const int NR_LIGHTS = 4;
 uniform Light lights[NR_LIGHTS];
 uniform vec3 viewPos;
 
@@ -35,10 +38,10 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
-float ShadowCalculation(vec3 fragPos, vec3 normal)
+float ShadowCalculation(vec3 fragPos, vec3 normal, vec3 lightPos, int lightNum)
 {
     // get vector between fragment position and light position
-    vec3 fragToLight = fragPos - lights[0].Position;
+    vec3 fragToLight = fragPos - lightPos;
     // use the fragment to light vector to sample from the depth map    
     // float closestDepth = texture(depthMap, fragToLight).r;
     // it is currently in linear range between [0,1], let's re-transform it back to original depth value
@@ -69,14 +72,14 @@ float ShadowCalculation(vec3 fragPos, vec3 normal)
     // shadow /= (samples * samples * samples);
     float shadow = 0.0;
 	// note: tweak the bias as you see fit. Higher bias will cause less shadow acne but more shadow displacement
-	vec3 lightDir = normalize(lights[0].Position - fragPos);
+	vec3 lightDir = normalize(lightPos - fragPos);
     float bias = max(0.15 * (1.0 - dot(normal, lightDir)), 0.1);
     int samples = 20;
     float viewDistance = length(viewPos - fragPos);
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
     for(int i = 0; i < samples; ++i)
     {
-        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        float closestDepth = texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : depthMap3)), fragToLight + gridSamplingDisk[i] * diskRadius).r;
         closestDepth *= far_plane;   // undo mapping [0;1]
         if(currentDepth - bias > closestDepth)
             shadow += 1.0;
@@ -99,7 +102,6 @@ void main()
     
     // then calculate lighting as usual
     vec3 ambient = Diffuse * 0.15; // hard-coded ambient component
-	float shadow = ShadowCalculation(FragPos, Normal);
 	vec3 diffuseSpec = vec3(0,0,0);
     vec3 viewDir  = normalize(viewPos - FragPos);
     for(int i = 0; i < NR_LIGHTS; ++i)
@@ -108,6 +110,7 @@ void main()
         float distance = length(lights[i].Position - FragPos);
         if(distance < lights[i].Radius)
         {
+			float shadow = ShadowCalculation(FragPos, Normal, lights[i].Position, i);
             // diffuse
             vec3 lightDir = normalize(lights[i].Position - FragPos);
             vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
@@ -119,9 +122,9 @@ void main()
             float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
             diffuse *= attenuation;
             specular *= attenuation;
-            diffuseSpec += diffuse + specular;
+            diffuseSpec += (1-shadow)*(diffuse + specular);
         }
     }    
-	vec3 lighting = (ambient + (1.0 - shadow) * (diffuseSpec));// * Diffuse;   
+	vec3 lighting = ambient + diffuseSpec;// * Diffuse;   
     FragColor = vec4(lighting, 1.0);
 }
