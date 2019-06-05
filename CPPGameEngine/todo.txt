@@ -5,6 +5,7 @@
 	-bloom
 	-blending (using forward pass)
 	-spotlights w/ shadows
+	-bake static shadows for stationary lights
 -SSAO
 -implement either deferred lighting or tile-based deferred shading so that light volumes can be utilized properly
 -add silhouette generation to POM

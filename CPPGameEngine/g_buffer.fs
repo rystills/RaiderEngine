@@ -22,7 +22,8 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir) {
 	const float heightScale = .05;
 	// number of depth layers
     const float minLayers = 8;
-    const float maxLayers = 256;
+	// note: increasing maxLayers will improve POM greatly, at substantial performance cost. Recommended range: 32-256
+    const float maxLayers = 32;
     float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
     // calculate the size of each layer
     float layerDepth = 1.0 / numLayers;

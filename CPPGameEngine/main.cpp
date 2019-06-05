@@ -76,8 +76,8 @@ std::vector<std::unique_ptr<GameObject>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;
 
 // settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
 // camera
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
@@ -105,6 +105,7 @@ float lastFrame = 0.0f;
 
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
+#define useVsync true
 
 /*
 update deltaTime based on the amount of time elapsed since the previous frame
@@ -374,7 +375,7 @@ originalColor = cbInfo.wAttributes;
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CPPGameEngine", 0, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CPPGameEngine", glfwGetPrimaryMonitor(),NULL);
 	if (window == NULL) {
 		ERROR(std::cout << "Failed to create GLFW window" << std::endl);
 		glfwTerminate();
@@ -396,6 +397,7 @@ originalColor = cbInfo.wAttributes;
 		exit(EXIT_FAILURE);
 	}
 	
+	glfwSwapInterval(useVsync);
 	return window;
 }
 
