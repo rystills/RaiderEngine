@@ -125,7 +125,7 @@ struct GBuffer {
 } gBuffer;
 
 /*
-extract the base mesh name from an assimp node name, removing $_transform information and trailing numbers
+extract the base mesh name from an assimp node name, removing $_transform information, trailing numbers, and constructor arguments
 @param fullName: the node name provided by assimp that we wish to strip
 @returns: a stripped version of the input node name with trailing transform and numbering info removed
 */
@@ -136,10 +136,38 @@ std::string stripNodeName(std::string fullName) {
 	int sPos = (underscorePos == std::string::npos || (underscorePos != fullName.length()-1 && fullName[underscorePos+1] == '$') ? 0 : underscorePos+1);
 	std::string name = nameExtraStart == std::string::npos ? fullName.substr(sPos) : fullName.substr(sPos, nameExtraStart - sPos);
 	// strip trailing numbers applied to duplicate object names in the newest version of assimp
-	while (isdigit(name[name.length() - 1])) {
+	while (isdigit(name[name.length() - 1]))
 		name = name.substr(0, name.length() - 1);
-	}
+	
+	// strip constructor arguments
+	if (name[name.length() - 1] == ')') 
+		name = name.substr(0,name.find("("));
+
 	return name;
+}
+
+/*
+extract all arguments from the specified node name in string form
+@param name: the node name from which to extract the arguments
+@returns: a vector of extracted string arguments
+*/
+std::vector<std::string> extractNameArgs(std::string name) {
+	std::vector<std::string> args;
+	// find the start and end of the argument list
+	std::size_t sParenPos = name.find("(");
+	std::size_t eParenPos = name.find(")");
+	if (sParenPos == std::string::npos || eParenPos == std::string::npos)
+		return args;
+
+	// sequentually extract arguments using string.find
+	size_t last = 0; 
+	std::string delimiter = ",";
+	std::string s = name.substr(sParenPos+1,eParenPos-sParenPos-1);
+	for (size_t next = 0; next = s.find(delimiter, last) != std::string::npos; last = next+1)
+		args.emplace_back(s.substr(last, next - last));
+	args.emplace_back(s.substr(last));
+
+	return args;
 }
 
 
@@ -169,6 +197,9 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, aiRot.y);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 
+
+	std::cout << tempProp.fullName << " | " << name << std::endl;
+
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
 	bool isTransformNode = false;
 	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
@@ -193,6 +224,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	}
 
 	if (!isTransformNode) {
+		std::vector<std::string> argList = extractNameArgs(tempProp.fullName);
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
@@ -207,7 +239,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
 			// create a light
-			lights.emplace_back(new Light(tempProp.pos, glm::vec3(1, 1, 1)));
+			lights.emplace_back(new Light(tempProp.pos, glm::vec3(1, 1, 1),argList.size() > 0 ? std::stof(argList[0]) : 200));
 		}
 		else {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
@@ -722,7 +754,7 @@ int main() {
 	Model::defaultHeightMap.path = "defaultHeightMap.png";
 	
 	// load map
-	loadMap("bookshelf");
+	loadMap("hallway");
 	// enable anisotropic filtering if supported
 	if (glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoFilterAmount);

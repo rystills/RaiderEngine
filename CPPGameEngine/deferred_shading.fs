@@ -101,7 +101,7 @@ void main()
     float Specular = texture(gAlbedoSpec, TexCoords).a;
     
     // then calculate lighting as usual
-    vec3 ambient = Diffuse * 0.15; // hard-coded ambient component
+    vec3 ambient = Diffuse *0; // hard-coded ambient component
 	vec3 diffuseSpec = vec3(0,0,0);
     vec3 viewDir  = normalize(viewPos - FragPos);
     for(int i = 0; i < NR_LIGHTS; ++i)
