@@ -35,7 +35,7 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
-float ShadowCalculation(vec3 fragPos)
+float ShadowCalculation(vec3 fragPos, vec3 normal)
 {
     // get vector between fragment position and light position
     vec3 fragToLight = fragPos - lights[0].Position;
@@ -68,7 +68,9 @@ float ShadowCalculation(vec3 fragPos)
     // }
     // shadow /= (samples * samples * samples);
     float shadow = 0.0;
-    float bias = 0.15;
+	// note: tweak the bias as you see fit. Higher bias will cause less shadow acne but more shadow displacement
+	vec3 lightDir = normalize(lights[0].Position - fragPos);
+    float bias = max(0.15 * (1.0 - dot(normal, lightDir)), 0.1);
     int samples = 20;
     float viewDistance = length(viewPos - fragPos);
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
@@ -97,7 +99,7 @@ void main()
     
     // then calculate lighting as usual
     vec3 ambient = Diffuse * 0.15; // hard-coded ambient component
-	float shadow = ShadowCalculation(FragPos);
+	float shadow = ShadowCalculation(FragPos, Normal);
 	vec3 diffuseSpec = vec3(0,0,0);
     vec3 viewDir  = normalize(viewPos - FragPos);
     for(int i = 0; i < NR_LIGHTS; ++i)

@@ -4,10 +4,9 @@
 	-HDR
 	-bloom
 	-blending (using forward pass)
-	-shadows
+	-spotlights w/ shadows
 -SSAO
 -implement either deferred lighting or tile-based deferred shading so that light volumes can be utilized properly
--reimplement spotlights / directional lights
 -add silhouette generation to POM
 
 ~Usage~

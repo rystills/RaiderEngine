@@ -665,6 +665,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 24);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glEnable(GL_CULL_FACE);
 
 	// configure depth map FBO
 	// -----------------------
@@ -863,7 +864,6 @@ int main() {
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		// 1. geometry pass: render scene's geometry/color data into gbuffer
 		// -----------------------------------------------------------------
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
