@@ -775,7 +775,9 @@ int main() {
 			gameObjects[i]->update(deltaTime);
 
 		// get updated view / projection matrices
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+#define near_plane 0.1f
+#define far_plane 1000.0f
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
 		glm::mat4 view = camera.GetViewMatrix();
 
 		std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
@@ -837,9 +839,6 @@ int main() {
 		// render
 		// 0. create depth cubemap transformation matrices
 		// -----------------------------------------------
-		// TODO: share these with the deferred shader
-		float near_plane = 0.1f;
-		float far_plane = 1000;
 		glEnable(GL_BLEND);
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		pointShadowsDepth.use();
