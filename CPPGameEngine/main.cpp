@@ -197,7 +197,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	aiVector3D aiPos, aiRot, aiScale;
 	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
 	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, aiRot.y);
+	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, -aiRot.y);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
