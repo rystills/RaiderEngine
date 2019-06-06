@@ -19,3 +19,5 @@
 
 ~Structure~
 -organize source files into sub-folders
+
+-scenes are not	quite importing correctly - see cogs relative position/rotation in hallway.fbx
