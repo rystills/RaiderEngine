@@ -3,8 +3,7 @@
 
 #include "GameObject.hpp"
 
-class MovingPlatform : public GameObject
-{
+class MovingPlatform : public GameObject {
 public:
 	float elapsedTime = 0;
 	// TODO: remove this constraint from the world and delete it on death

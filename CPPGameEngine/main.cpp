@@ -72,7 +72,6 @@ std::unordered_map<std::string, std::shared_ptr<Model>> models;
 #include "GameObject.hpp"
 #include "Light.hpp"
 std::vector<std::unique_ptr<GameObject>> gameObjects;
-#include "GameObjectRegistry.hpp"
 std::vector<std::unique_ptr<Light>> lights;
 
 // settings
@@ -96,6 +95,7 @@ bool mouseReleasedRight = false;  // whether or not the right mouse button was j
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+#include "GameObjectRegistry.hpp"
 #include "inputUtils.hpp"
 #include "renderUtils.hpp"
 
@@ -105,7 +105,7 @@ float lastFrame = 0.0f;
 
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
-#define useVsync true
+#define useVsync false
 
 /*
 update deltaTime based on the amount of time elapsed since the previous frame
@@ -198,9 +198,6 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.z, aiRot.y);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 
-
-	std::cout << tempProp.fullName << " | " << name << std::endl;
-
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
 	bool isTransformNode = false;
 	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
@@ -235,7 +232,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
-			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale);
+			instantiateGameObject(name, tempProp.pos, tempProp.rot, tempProp.scale, argList);
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;

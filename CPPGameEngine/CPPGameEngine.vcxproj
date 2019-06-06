@@ -149,6 +149,7 @@
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
     <ClInclude Include="MovingPlatform.hpp" />
+    <ClInclude Include="PlayerSpawn.hpp" />
     <ClInclude Include="renderUtils.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
