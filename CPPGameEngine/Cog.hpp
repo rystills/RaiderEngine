@@ -17,7 +17,7 @@ public:
 		body->getMotionState()->getWorldTransform(trans);
 		float z, y, x;
 		trans.getRotation().getEulerZYX(z, y, x);
-		setRotation(glm::vec3(x, y, z+elapsedTime/2*rotSpeed*(counterClockWise ? -1 : 1)));
+		rotation = glm::rotate(rotation, elapsedTime / 2 * rotSpeed*(counterClockWise ? -1 : 1), glm::vec3(0, 1, 0));
 	}
 };
 

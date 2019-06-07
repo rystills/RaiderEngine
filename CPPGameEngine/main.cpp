@@ -105,7 +105,7 @@ float lastFrame = 0.0f;
 
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
-#define useVsync false
+#define useVsync true
 #define fullScreen false
 
 /*
