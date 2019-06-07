@@ -845,17 +845,27 @@ int main() {
 			}
 		}
 
+// clear held body velocity upon letting go
+// TODO: set held body to player velocity once a player class is defined, ie. riding an elevator
+// TODO: make this a proper method once data encapsulation structure has been decided
+#define clearHeldBodyVelocity() { \
+	holdBody->setLinearVelocity(btVector3(0, 0, 0)); \
+	holdBody->setAngularVelocity(btVector3(0, 0, 0)); \
+} \
+
 		// throw held object on right mouse button
 		if (mousePressedRight && (holdBody != NULL)) {
 			float force = .1f;
 			btVector3 dir = (btRayTo - btRayFrom).normalize() * force;
+			clearHeldBodyVelocity();
 			holdBody->applyCentralImpulse(dir);
 			goto letGo;
 		}
 
 		// release held object on mouse button release
 		if (mouseReleasedLeft && (holdBody != NULL)) {
-			letGo:
+			clearHeldBodyVelocity();
+		letGo:
 			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
 			delete holdConstraint;
 			holdConstraint = NULL;
