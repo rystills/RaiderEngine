@@ -44,11 +44,12 @@ public:
 	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
 	@param makeStatic: whether or not to force the newly created mesh to be static. Note that this has no effect if the mesh has already been created.
 	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
+	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true, bool useSpecialRotationInit=true) : position(position), scale(scale), grabbable(grabbable) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable) {
 		//TODO: this should be simplified: the intermediate transformation into a quaternion seems to be overkill
 		setModel(modelName, makeStatic);
-		addPhysics(useSpecialRotationInit ? setRotationInitial(rotationEA) : setRotation(rotationEA));
+		addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
 
 	/*
@@ -130,29 +131,13 @@ public:
 	/*
 	update the GameObject's rotation from a vec3 of euler angles
 	@param rotationEA: the desired rotation (in euler angles) to set
+	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
-	glm::quat setRotation(glm::vec3 rotationEA) {
+	glm::quat setRotation(glm::vec3 rotationEA, bool fixInitialRotation = false) {
 		glm::quat q = glm::quat(rotationEA);
-		rotation = glm::toMat4(q);
-		return q;
-	}
-
-	/*
-	set the GameObject's rotation from a vec3 of euler angles provided by assimp while loading a 3ds max fbx file
-	@param rotationEA: the desired rotation (in euler angles) to set
-	@returns: the quaternion calculated prior to conversion to a mat4, for piping into physics initialization
-	*/
-	glm::quat setRotationInitial(glm::vec3 rotationEA) {
-		// for an explanation of how we calculate this quaternion given the rotation application order, see https://gamedev.stackexchange.com/questions/13436/glm-euler-angles-to-quaternion
-		float sx = sin(rotationEA.x / 2), sy = sin(rotationEA.y / 2), sz = sin(rotationEA.z / 2);
-		float cx = cos(rotationEA.x / 2), cy = cos(rotationEA.y / 2), cz = cos(rotationEA.z / 2);
-		glm::quat q = glm::quat(
-			cx*cy*cz + sx*sy*sz,  // w
-			sx*cy*cz - cx*sy*sz,  // x
-			cx*sy*cz + sx*cy*sz,  // y
-			cx*cy*sz - sx*sy*cz   // z
-		);
-		q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;
+		// fix dynamic object initial rotation with a 90 degree offset
+		if (fixInitialRotation) 
+			q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;
 		rotation = glm::toMat4(q);
 		return q;
 	}
