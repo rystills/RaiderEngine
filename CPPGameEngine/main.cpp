@@ -184,14 +184,6 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	// determine the full name and real name of the current node
 	tempProp.fullName = node->mName.C_Str();
 	std::string name = stripNodeName(tempProp.fullName);
-	// reset the accumulated transform properties first thing if we're on a new object
-	if (name != tempProp.prevName) {
-		tempProp.prevName = name;
-		tempProp.pos = glm::vec3(0, 0, 0);
-		tempProp.geoPos = glm::vec3(0, 0, 0);
-		tempProp.rot = glm::vec3(-glm::half_pi<float>(), 0, 0);
-		tempProp.scale = glm::vec3(1, 1, 1);
-	}
 
 	// extract the transform data from the current node
 	aiVector3D aiPos, aiRot, aiScale;
@@ -230,30 +222,40 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			// load a barebones physics enabled model
 			//std::cout << "generating object: " << name << std::endl;
 			gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, name));
+			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
 			instantiateGameObject(name, tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
+			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
 			// create a light
 			lights.emplace_back(new Light(tempProp.pos + tempProp.geoPos, glm::vec3(1, 1, 1),argList.size() > 0 ? std::stof(argList[0]) : 200));
+			goto clearTransform;
+		}
+		else if (node->mNumMeshes > 0) {
+			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
+			// generate a new model from the mesh list
+			//TODO: consider using name here rather than fullName so we can re-use static geometry too
+			//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
+			std::shared_ptr<Model> baseModel = std::make_shared<Model>();
+			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+			baseModel->calculateCollisionShape();
+			models.insert({ tempProp.fullName, baseModel });
+			gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x , tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,false,true,false));
+			goto clearTransform;
 		}
 		else {
-			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
-			if (node->mNumMeshes > 0) {
-				// generate a new model from the mesh list
-				//TODO: consider using name here rather than fullName so we can re-use static geometry too
-				//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
-				std::shared_ptr<Model> baseModel = std::make_shared<Model>();
-				for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
-				baseModel->calculateCollisionShape();
-				models.insert({ tempProp.fullName, baseModel });
-				gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x , tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,false,true,false));
-			}
+		clearTransform:
+			// reset the accumulated transform properties first thing once we finish building an object
+			tempProp.pos = glm::vec3(0, 0, 0);
+			tempProp.geoPos = glm::vec3(0, 0, 0);
+			tempProp.rot = glm::vec3(-glm::half_pi<float>(), 0, 0);
+			tempProp.scale = glm::vec3(1, 1, 1);
 		}
 	}
 
