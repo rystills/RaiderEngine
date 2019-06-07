@@ -189,7 +189,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		tempProp.prevName = name;
 		tempProp.pos = glm::vec3(0, 0, 0);
 		tempProp.geoPos = glm::vec3(0, 0, 0);
-		tempProp.rot = glm::vec3(0, 0, 0);
+		tempProp.rot = glm::vec3(-glm::half_pi<float>(), 0, 0);
 		tempProp.scale = glm::vec3(1, 1, 1);
 	}
 
@@ -197,7 +197,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 	aiVector3D aiPos, aiRot, aiScale;
 	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
 	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-	glm::vec3 rot = glm::vec3(aiRot.x, aiRot.y, aiRot.z);
+	glm::vec3 rot = glm::vec3(aiRot.x - glm::half_pi<float>(), -aiRot.y, aiRot.z);
 	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
 
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
@@ -207,7 +207,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		isTransformNode = true;
 	}
 	else if (tempProp.fullName.find("$_PreRotation") != std::string::npos) {
-		// note: pre-rotation data is ignored and manually applied to static map meshes below
+		// note: pre-rotation data is ignored and manually applied to rotation above
 		isTransformNode = true;
 	}
 	else if (tempProp.fullName.find("$_GeometricTranslation") != std::string::npos) {
@@ -252,8 +252,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 					baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
 				baseModel->calculateCollisionShape();
 				models.insert({ tempProp.fullName, baseModel });
-				// note: pre-rotation manually applied here
-				gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x - glm::half_pi<float>(), tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName));
+				gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x , tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,false,true,false));
 			}
 		}
 	}
