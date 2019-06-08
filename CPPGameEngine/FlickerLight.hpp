@@ -6,7 +6,7 @@
 class FlickerLight : public Light {
 public:
 	float elapsedTime = 0, prevTime = 0, flickerWait = chooseFlickerWait(3);
-	FlickerLight(glm::vec3 position, glm::vec3 color, float strength) :Light(position, color, strength) {
+	FlickerLight(glm::vec3 position, float strength, glm::vec3 color) :Light(position, strength, color) {
 	}
 
 	/*

@@ -29,7 +29,7 @@ public:
 	float radius;
 	float maxBrightness;
 	bool on = true;
-	Light(glm::vec3 position, glm::vec3 color, float strength) : position(position), color(color) {
+	Light(glm::vec3 position, float strength, glm::vec3 color) : position(position), color(color) {
 		offColor = glm::vec3(color.r / 8, color.g / 8, color.b / 8);
 		linear = 7/strength*.7f;
 		quadratic = 7/strength*1.8;

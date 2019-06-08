@@ -91,13 +91,13 @@ public:
 	*/
     Model(std::string const &path, bool isStatic = false, bool gamma = false) : isStaticMesh(isStatic), gammaCorrection(gamma) {
         loadModel(path);
-		calculateCollisionShape();
+		generateCollisionShape();
     }
 
 	/*
 	calculate the collision shape for this mesh, to be used by bullet physics
 	*/
-	void calculateCollisionShape() {
+	void generateCollisionShape() {
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
 		collisionMargin = isStaticMesh ? 0 : 0.025f;
 		if (isStaticMesh) {
@@ -142,16 +142,16 @@ public:
 			collisionShape = std::make_unique<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
 		}
 		collisionShape->setMargin(collisionMargin);
-		volume = calcVolume();
+		volume = calculateVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it
 		bulletData.collisionShapes.push_back(collisionShape.get());
 	}
 
 	/*
 	calculate the volume of the current Model's meshes
-	@returns: the volume of the mesh vector meshes
+	@returns: the volume of the current Model's meshes
 	*/
-	float calcVolume() {
+	float calculateVolume() {
 		float volume = 0;
 		for (int j = 0; j < meshes.size(); ++j) {
 			Mesh mesh = meshes[j];

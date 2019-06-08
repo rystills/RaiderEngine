@@ -54,6 +54,7 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include "shader.hpp"
 #include "camera.hpp"
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 #include <memory>
 
@@ -161,13 +162,9 @@ std::vector<std::string> extractNameArgs(std::string name) {
 	if (sParenPos == std::string::npos || eParenPos == std::string::npos)
 		return args;
 
-	// sequentually extract arguments using string.find
-	size_t last = 0; 
-	std::string delimiter = ",";
-	std::string s = name.substr(sParenPos+1,eParenPos-sParenPos-1);
-	for (size_t next = 0; next = s.find(delimiter, last) != std::string::npos; last = next+1)
-		args.emplace_back(s.substr(last, next - last));
-	args.emplace_back(s.substr(last));
+	// sequentually extract arguments delimited by commas
+	std::istringstream tokenStream(name.substr(sParenPos + 1, eParenPos - sParenPos - 1));
+	for (std::string token; std::getline(tokenStream, token, ','); args.push_back(token));
 
 	return args;
 }
@@ -244,7 +241,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			std::shared_ptr<Model> baseModel = std::make_shared<Model>();
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
-			baseModel->calculateCollisionShape();
+			baseModel->generateCollisionShape();
 			models.insert({ tempProp.fullName, baseModel });
 			gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x , tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName,false,true,false));
 			goto clearTransform;
