@@ -35,9 +35,6 @@
     <ClInclude Include="filesystem.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameObjectRegistry.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -63,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Cog.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FlickerLight.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectRegistry.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

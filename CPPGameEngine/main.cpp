@@ -95,7 +95,7 @@ bool mouseReleasedRight = false;  // whether or not the right mouse button was j
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-#include "GameObjectRegistry.hpp"
+#include "ObjectRegistry.hpp"
 #include "inputUtils.hpp"
 #include "renderUtils.hpp"
 
@@ -233,7 +233,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
 			// create a light
-			lights.emplace_back(new Light(tempProp.pos + tempProp.geoPos, glm::vec3(1, 1, 1),argList.size() > 0 ? std::stof(argList[0]) : 200));
+			instantiateLight(name,tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
 			goto clearTransform;
 		}
 		else if (node->mNumMeshes > 0) {
@@ -808,6 +808,8 @@ int main() {
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
 			gameObjects[i]->update(deltaTime);
+		for (int i = 0; i < lights.size(); ++i)
+			lights[i]->update(deltaTime);
 
 		// get updated view / projection matrices
 #define near_plane 0.1f
@@ -890,26 +892,28 @@ int main() {
 		pointShadowsDepth.setFloat("far_plane", far_plane);
 		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
 		for (int k = 0; k < lights.size(); ++k) {
-			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glm::vec3 lightPos = lights[k]->position;
-			std::vector<glm::mat4> shadowTransforms;
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			if (lights[k]->on) {
+				glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
+				glClear(GL_DEPTH_BUFFER_BIT);
+				glm::vec3 lightPos = lights[k]->position;
+				std::vector<glm::mat4> shadowTransforms;
+				shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
-			// 0.5. render scene to depth cubemap
-			// --------------------------------
-			for (unsigned int i = 0; i < 6; ++i)
-				pointShadowsDepth.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
-			pointShadowsDepth.setVec3("lightPos", lightPos);
-			// render scene
-			for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-				pointShadowsDepth.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
-				gameObjects[i]->model->draw(pointShadowsDepth);
+				// 0.5. render scene to depth cubemap
+				// --------------------------------
+				for (unsigned int i = 0; i < 6; ++i)
+					pointShadowsDepth.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+				pointShadowsDepth.setVec3("lightPos", lightPos);
+				// render scene
+				for (unsigned int i = 0; i < gameObjects.size(); ++i) {
+					pointShadowsDepth.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+					gameObjects[i]->model->draw(pointShadowsDepth);
+				}
 			}
 		}
 		glDisable(GL_BLEND);
@@ -944,11 +948,17 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, gBuffer.albedoSpec);
 		// send light relevant uniforms
 		for (unsigned int i = 0; i < lights.size(); ++i) {
-			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
-			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
-			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+			if (lights[i]->on) {
+				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].On", true);
+				shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
+				shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
+				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
+				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
+				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+			}
+			else {
+				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].On", false);
+			}
 		}
 		shaderLightingPass.setVec3("viewPos", camera.Position);
 		// shadow uniforms
@@ -980,7 +990,7 @@ int main() {
 		shaderLightBox.setMat4("view", view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
 			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
-			shaderLightBox.setVec3("lightColor", lights[i]->color);
+			shaderLightBox.setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
 			renderCube();
 		}
 

@@ -23,17 +23,21 @@
 
 class Light {
 public:
-	glm::vec3 position, color;
+	glm::vec3 position, color, offColor;
 	float linear, quadratic;
 	int constant = 1;
 	float radius;
 	float maxBrightness;
+	bool on = true;
 	Light(glm::vec3 position, glm::vec3 color, float strength) : position(position), color(color) {
+		offColor = glm::vec3(color.r / 8, color.g / 8, color.b / 8);
 		linear = 7/strength*.7f;
 		quadratic = 7/strength*1.8;
 		calculateMaxBrightness();
 		calculateRadius();
 	}
+	
+	virtual void update(float deltaTime) { }
 
 private:
 	/*

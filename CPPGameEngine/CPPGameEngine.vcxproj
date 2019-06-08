@@ -143,8 +143,9 @@
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="Cog.hpp" />
     <ClInclude Include="filesystem.hpp" />
+    <ClInclude Include="FlickerLight.hpp" />
     <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="GameObjectRegistry.hpp" />
+    <ClInclude Include="ObjectRegistry.hpp" />
     <ClInclude Include="inputUtils.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
