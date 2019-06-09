@@ -70,6 +70,8 @@ struct BulletData {
 float anisoFilterAmount = 0.0f;
 #include "model.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
+std::string displayString = "";
+std::unordered_map<std::string, std::string> objectInfoDisplays = { { "cog" , "A rusty old cog. Should still be able to function." } };
 #include "GameObject.hpp"
 #include "Light.hpp"
 std::vector<std::unique_ptr<GameObject>> gameObjects;
@@ -108,8 +110,6 @@ unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
 #define useVsync true
 #define fullScreen false
-
-std::string displayString = "";
 
 /*
 update deltaTime based on the amount of time elapsed since the previous frame
@@ -713,8 +713,8 @@ display an information box detailing the specified object
 @param go: the GameObject about which we wish to show information
 */
 void displayObjectInfo(GameObject* go) {
-	camera.controllable = false;
-	displayString = go->modelName;
+	displayString = go->getDisplayString();
+	camera.controllable = displayString.length() == 0;
 }
 
 int main() {
@@ -1042,35 +1042,37 @@ int main() {
 		}
 
 		// 4. render UI
-		// centered point to indicate mouse position for precise object grabbing / interaction
-		// TODO: stick me in a "render point" method
+		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
-		debugLineShader.use();
-		debugDrawer->SetMatrices(debugLineShader, view, projection);
-		GLfloat points[6];
-		points[0] = btRayTo.getX();
-		points[1] = btRayTo.getY();
-		points[2] = btRayTo.getZ();
-		points[3] = 0;
-		points[4] = 0;
-		points[5] = 255;
+		if (holdBody == NULL && displayString == "") {
+			// TODO: stick me in a "render point" method
+			debugLineShader.use();
+			debugDrawer->SetMatrices(debugLineShader, view, projection);
+			GLfloat points[6];
+			points[0] = btRayTo.getX();
+			points[1] = btRayTo.getY();
+			points[2] = btRayTo.getZ();
+			points[3] = 0;
+			points[4] = 0;
+			points[5] = 255;
 
-		glDeleteBuffers(1, &VBO);
-		glDeleteVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		glBindVertexArray(0);
+			glDeleteBuffers(1, &VBO);
+			glDeleteVertexArrays(1, &VAO);
+			glGenBuffers(1, &VBO);
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+			glBindVertexArray(0);
 
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_POINTS, 0, 1);
-		glBindVertexArray(0);
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_POINTS, 0, 1);
+			glBindVertexArray(0);
+		}
 
 		// debug render bullet data
 		bulletData.dynamicsWorld->debugDrawWorld();

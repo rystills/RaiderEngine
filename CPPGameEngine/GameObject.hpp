@@ -53,6 +53,13 @@ public:
 	}
 
 	/*
+	return a string detailing information about this object, to be shown when the user right clicks the object
+	*/
+	virtual std::string getDisplayString() {
+		return objectInfoDisplays[modelName];
+	}
+
+	/*
 	set this GameObject's model to the specified name, creating a new entry in the model dictionary if the name is not already present
 	@param modelName: the name of the model to use
 	@param makeStatic: whether or not to make the model static, if we create the model
