@@ -109,6 +109,8 @@ unsigned int textVBO, textVAO;
 #define useVsync true
 #define fullScreen false
 
+std::string displayString = "";
+
 /*
 update deltaTime based on the amount of time elapsed since the previous frame
 */
@@ -302,22 +304,41 @@ render the specified text with the specified (font,size) pair (if loaded) at the
 @param y: the y coordinate (in screen pixels) at which to render the text
 @param scale: the scale at which to render the text
 @param color: the color to use when rendering the text
+@param centered: whether or not to center the rendered text
 */
-void renderText(std::string fontName, int fontSize, Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color) {
+void renderText(std::string fontName, int fontSize, Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered=false) {
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
 		return;
 	}
+	if (text.length() == 0) 
+		return;
 	// Activate corresponding render state	
 	s.use();
 	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(textVAO);
 
-	// Iterate through all characters
 	std::string::const_iterator c;
+	Character ch;
+	// adjust text starting position if rendering centered text
+	if (centered) {
+		// TODO: using the size of a capital 'A' to get the effective height for now; a proper, cross-language solution should be implemented instead
+		y -= fonts[fontName][fontSize]['A'].Size.y * scale / 2;
+		// subtract half of the advance of each character, except for the last one (since we don't advance from the last character)
+		for (c = text.begin(); c != text.end() - 1; ++c) {
+			ch = fonts[fontName][fontSize][*c];
+			x -= (ch.Advance >> 6) * scale / 2;
+		}
+		ch = fonts[fontName][fontSize][*(text.end() - 1)];
+		// subtract the bearing and size of the last character instead of its advance, since we want its exact width
+		// note: horizontal text centering may be slightly off; the logic seems correct, but the addition by 1 is a bit suspicious
+		x -= (ch.Bearing.x + ch.Size.x) * scale / 2 + 1;
+	}
+
+	// Iterate through all characters
 	for (c = text.begin(); c != text.end(); ++c) {
-		Character ch = fonts[fontName][fontSize][*c];
+		ch = fonts[fontName][fontSize][*c];
 
 		GLfloat xpos = x + ch.Bearing.x * scale;
 		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -687,6 +708,15 @@ void resetSingleFrameInput() {
 	mouseReleasedRight = false;
 }
 
+/*
+display an information box detailing the specified object
+@param go: the GameObject about which we wish to show information
+*/
+void displayObjectInfo(GameObject* go) {
+	camera.controllable = false;
+	displayString = go->modelName;
+}
+
 int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
@@ -814,71 +844,91 @@ int main() {
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
 		glm::mat4 view = camera.GetViewMatrix();
 
-		std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
-		btRayTo = hit->m_rayToWorld;
-		btRayFrom = hit->m_rayFromWorld;
-		// if we click onn an object, attempt to grab it
-		if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
-			m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
-			if (m_pickDist < maxPickDist) {
-				GameObject* hitObj = (GameObject*) hit->m_collisionObject->getUserPointer();
-				if (!(hitObj->model->isStaticMesh) && hitObj->grabbable) {
-					holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
-					btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
-					btTransform tr;
-					tr.setIdentity();
-					tr.setOrigin(localPivot);
-					holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, true);
-					holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
-					holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
-					holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
-					holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
-					bulletData.dynamicsWorld->addConstraint(holdConstraint, true);
-					for (int i = 0; i < 6; ++i) {
-						// CFM (constraint force mixing): increase this to make the constraint softer
-						// ERP (error reduction parameter): increase this to fix a greater proportion of the accumulated error each step
-						holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
-						holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
+		// disallow interacting with objects while a display string is active
+		if (displayString == "") {
+			std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
+			btRayTo = hit->m_rayToWorld;
+			btRayFrom = hit->m_rayFromWorld;
+			// if we click onn an object, attempt to grab it
+			if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
+				m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
+				if (m_pickDist < maxPickDist) {
+					GameObject* hitObj = (GameObject*)hit->m_collisionObject->getUserPointer();
+					if (!(hitObj->model->isStaticMesh) && hitObj->grabbable) {
+						holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
+						btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
+						btTransform tr;
+						tr.setIdentity();
+						tr.setOrigin(localPivot);
+						holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, true);
+						holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
+						holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
+						holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
+						holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
+						bulletData.dynamicsWorld->addConstraint(holdConstraint, true);
+						for (int i = 0; i < 6; ++i) {
+							// CFM (constraint force mixing): increase this to make the constraint softer
+							// ERP (error reduction parameter): increase this to fix a greater proportion of the accumulated error each step
+							holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
+							holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
+						}
 					}
 				}
 			}
-		}
 
-// clear held body velocity upon letting go
-// TODO: set held body to player velocity once a player class is defined, ie. riding an elevator
-// TODO: make this a proper method once data encapsulation structure has been decided
+			// clear held body velocity upon letting go
+			// TODO: set held body to player velocity once a player class is defined, ie. riding an elevator
+			// TODO: make this a proper method once data encapsulation structure has been decided
 #define clearHeldBodyVelocity() { \
-	holdBody->setLinearVelocity(btVector3(0, 0, 0)); \
-	holdBody->setAngularVelocity(btVector3(0, 0, 0)); \
-} \
+		holdBody->setLinearVelocity(btVector3(0, 0, 0)); \
+		holdBody->setAngularVelocity(btVector3(0, 0, 0)); \
+	} \
 
-		// throw held object on right mouse button
-		if (mousePressedRight && (holdBody != NULL)) {
-			float force = .1f;
-			btVector3 dir = (btRayTo - btRayFrom).normalize() * force;
-			clearHeldBodyVelocity();
-			holdBody->applyCentralImpulse(dir);
-			goto letGo;
+			// throw held object on right mouse button, otherwise analyze hovered object
+			if (mousePressedRight) {
+				if (holdBody != NULL) {
+					// throw held object
+					float force = .1f;
+					btVector3 dir = (btRayTo - btRayFrom).normalize() * force;
+					clearHeldBodyVelocity();
+					holdBody->applyCentralImpulse(dir);
+					goto letGo;
+				}
+				else {
+					// analyze hovered object
+					if (hit->hasHit()) {
+						displayObjectInfo((GameObject*)hit->m_collisionObject->getUserPointer());
+					}
+				}
+			}
+
+			// release held object on mouse button release
+			if (mouseReleasedLeft && (holdBody != NULL)) {
+				clearHeldBodyVelocity();
+			letGo:
+				bulletData.dynamicsWorld->removeConstraint(holdConstraint);
+				delete holdConstraint;
+				holdConstraint = NULL;
+				holdBody = NULL;
+			}
+
+			// update held object
+			if (holdConstraint != NULL) {
+				//keep it at the same picking distance
+				holdBody->activate(true);
+				btVector3 dir = (btRayTo - btRayFrom).normalize();
+				dir *= m_pickDist;
+				holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
+			}
+		}
+		else {
+			// clear display string on right mouse button press
+			if (mousePressedRight) {
+				displayString = "";
+				camera.controllable = true;
+			}
 		}
 
-		// release held object on mouse button release
-		if (mouseReleasedLeft && (holdBody != NULL)) {
-			clearHeldBodyVelocity();
-		letGo:
-			bulletData.dynamicsWorld->removeConstraint(holdConstraint);
-			delete holdConstraint;
-			holdConstraint = NULL;
-			holdBody = NULL;
-		}
-
-		// update held object
-		if (holdConstraint != NULL) {
-			//keep it at the same picking distance
-			holdBody->activate(true);
-			btVector3 dir = (btRayTo - btRayFrom).normalize();
-			dir *= m_pickDist;
-			holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
-		}
 
 		// render
 		// 0. create depth cubemap transformation matrices
@@ -1031,6 +1081,10 @@ int main() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProjection));
 		renderText("Inter-Regular", 24, textShader, "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		// show display string, if active
+		if (displayString != "") {
+			renderText("Inter-Regular", 24, textShader, displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
+		}
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		

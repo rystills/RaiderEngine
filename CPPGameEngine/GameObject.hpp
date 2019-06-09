@@ -29,6 +29,7 @@ public:
 	glm::vec3 scale;
 	std::shared_ptr<Model> model;
 	bool grabbable;
+	std::string modelName;
 
 	// bullet data
 	std::unique_ptr<btCollisionShape> collisionShape;
@@ -46,7 +47,7 @@ public:
 	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
 		setModel(modelName, makeStatic);
 		addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
