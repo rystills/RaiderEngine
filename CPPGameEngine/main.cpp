@@ -108,7 +108,7 @@ float lastFrame = 0.0f;
 
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
-#define useVsync true
+#define useVsync false
 #define fullScreen false
 
 /*
@@ -820,6 +820,7 @@ int main() {
 	float maxPickDist = 2.5f;
 	// render loop
 	// -----------
+	bool f3Pressed = false;
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
 		updateTime();
@@ -1046,6 +1047,15 @@ int main() {
 		// 4. render UI
 		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
+		if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS) {
+			f3Pressed = true;
+		}
+		else {
+			if (f3Pressed) {
+				f3Pressed = false;
+				debugDrawer->setDebugMode(debugDrawer->getDebugMode() == btIDebugDraw::DBG_DrawConstraints ? btIDebugDraw::DBG_DrawWireframe : btIDebugDraw::DBG_DrawConstraints);
+			}
+		}
 		if (holdBody == NULL && displayString == "") {
 			// TODO: stick me in a "render point" method
 			debugLineShader.use();

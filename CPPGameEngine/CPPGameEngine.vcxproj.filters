@@ -21,6 +21,9 @@
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kineCon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -69,6 +72,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Player.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kineCon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kineConInter.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

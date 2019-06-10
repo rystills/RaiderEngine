@@ -1,14 +1,14 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "camera.hpp"
-#include <BulletDynamics/Character/btKinematicCharacterController.h>
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include "kineCon.h"
 
 class Player {
 public:
 	Camera camera;
-	btKinematicCharacterController* controller;
+	kineCon* controller;
 	btPairCachingGhostObject* ghostObject;
 	btCapsuleShape* convexShape;
 	float radius = .5f;
@@ -39,7 +39,7 @@ public:
 		ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 
 		// controller init
-		controller = new btKinematicCharacterController(ghostObject, convexShape, maxStepHeight);
+		controller = new kineCon(ghostObject, convexShape, maxStepHeight);
 		controller->setGravity(bulletData.dynamicsWorld->getGravity());
 		
 		// add ghost to world

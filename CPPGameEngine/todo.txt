@@ -16,6 +16,7 @@
 
 ~Optimization~
 -add automatic object instancing
+-reset object to starting position if it falls below the lowest map position - 100
 
 ~Structure~
 -organize source files into sub-folders

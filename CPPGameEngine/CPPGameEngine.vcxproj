@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
+    <ClCompile Include="kineCon.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +146,8 @@
     <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FlickerLight.hpp" />
     <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="kineCon.h" />
+    <ClInclude Include="kineConInter.h" />
     <ClInclude Include="ObjectRegistry.hpp" />
     <ClInclude Include="inputUtils.hpp" />
     <ClInclude Include="Light.hpp" />
