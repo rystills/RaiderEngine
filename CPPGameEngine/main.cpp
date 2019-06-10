@@ -52,7 +52,7 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include "filesystem.hpp"
 #include "shader.hpp"
-#include "camera.hpp"
+#include "Player.hpp"
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
@@ -81,8 +81,8 @@ std::vector<std::unique_ptr<Light>> lights;
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
-// camera
-Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
+Player player;
+
 // mouse
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
@@ -714,7 +714,7 @@ display an information box detailing the specified object
 */
 void displayObjectInfo(GameObject* go) {
 	displayString = go->getDisplayString();
-	camera.controllable = displayString.length() == 0;
+	player.camera.controllable = displayString.length() == 0;
 }
 
 int main() {
@@ -841,8 +841,8 @@ int main() {
 		// get updated view / projection matrices
 #define near_plane 0.1f
 #define far_plane 1000.0f
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
-		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(player.camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
+		glm::mat4 view = player.camera.GetViewMatrix();
 
 		// disallow interacting with objects while a display string is active
 		if (displayString == "") {
@@ -925,7 +925,7 @@ int main() {
 			// clear display string on right mouse button press
 			if (mousePressedRight) {
 				displayString = "";
-				camera.controllable = true;
+				player.camera.controllable = true;
 			}
 		}
 
@@ -976,7 +976,7 @@ int main() {
 		shaderGeometryPass.use();
 		shaderGeometryPass.setMat4("projection", projection);
 		shaderGeometryPass.setMat4("view", view);
-		shaderGeometryPass.setVec3("viewPos", camera.Position);
+		shaderGeometryPass.setVec3("viewPos", player.camera.Position);
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
 			shaderGeometryPass.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
 			gameObjects[i]->model->draw(shaderGeometryPass);
@@ -1007,7 +1007,7 @@ int main() {
 				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].On", false);
 			}
 		}
-		shaderLightingPass.setVec3("viewPos", camera.Position);
+		shaderLightingPass.setVec3("viewPos", player.camera.Position);
 		// shadow uniforms
 		shaderLightingPass.setFloat("far_plane", far_plane);
 		glActiveTexture(GL_TEXTURE3);			

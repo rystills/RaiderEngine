@@ -68,6 +68,9 @@
     <ClInclude Include="ObjectRegistry.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
