@@ -13,6 +13,10 @@ public:
 	btCapsuleShape* convexShape;
 	float radius = .5f;
 	float height = 1.6f;
+	float walkSpeed = .02f;
+	float runSpeed = .04f;
+	float jumpSpeed = 5;
+	float maxStepHeight = .05f;
 
 	Player() : camera(glm::vec3(0)) { }
 
@@ -27,7 +31,6 @@ public:
 
 		// shape init
 		convexShape = new btCapsuleShape(radius, height);
-		bulletData.collisionShapes.push_back(convexShape);
 
 		// ghost init
 		ghostObject = new btPairCachingGhostObject();
@@ -36,13 +39,14 @@ public:
 		ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 
 		// controller init
-		controller = new btKinematicCharacterController(ghostObject, convexShape, 1);
+		controller = new btKinematicCharacterController(ghostObject, convexShape, maxStepHeight);
 		controller->setGravity(bulletData.dynamicsWorld->getGravity());
 		
 		// add ghost to world
-		bulletData.dynamicsWorld->addCollisionObject(ghostObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+		bulletData.dynamicsWorld->addCollisionObject(ghostObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
 		bulletData.dynamicsWorld->addAction(controller);
 		bulletData.overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+		controller->setJumpSpeed(jumpSpeed);
 	}
 
 	/*
@@ -70,23 +74,37 @@ public:
 
 	void update(GLFWwindow *window, float deltaTime) {
 		// process input
-		controller->setWalkDirection(btVector3(0, 0, 0));
+		// TODO: move this window close block somewhere else
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 
+		// normalize camera front to get a constant speed regardless of pitch
+		glm::vec3 normalFront = glm::normalize(glm::cross(camera.WorldUp, camera.Right));
+		// walk
+		glm::vec3 dir(0, 0, 0);
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-			controller->setWalkDirection(btVector3(camera.Front.x*.01f, camera.Front.y*.01f, camera.Front.z*.01f));
+			dir += normalFront;
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-			controller->setWalkDirection(btVector3(-camera.Front.x*.01f, -camera.Front.y*.01f, -camera.Front.z*.01f));
+			dir -= normalFront;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			controller->setWalkDirection(btVector3(-camera.Right.x*.01f, -camera.Right.y*.01f, -camera.Right.z*.01f));
+			dir -= camera.Right;
 		}
 		
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-			controller->setWalkDirection(btVector3(camera.Right.x*.01f, camera.Right.y*.01f, camera.Right.z*.01f));
+			dir += camera.Right;
+		}
+		if (dir == glm::vec3(0, 0, 0))
+			controller->setWalkDirection(btVector3(0, 0, 0));
+		else
+			controller->setWalkDirection(btVector3(dir.x, dir.y, dir.z).normalized()*(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed));
+
+		// jump
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+			if (controller->canJump())
+				controller->jump();
 		}
 
 		// resync the camera position
