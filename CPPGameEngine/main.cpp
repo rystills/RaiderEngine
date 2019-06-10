@@ -52,7 +52,6 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include "filesystem.hpp"
 #include "shader.hpp"
-#include "Player.hpp"
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
@@ -67,6 +66,7 @@ struct BulletData {
 	btDefaultCollisionConfiguration* collisionConfiguration;
 } bulletData;
 
+#include "Player.hpp"
 float anisoFilterAmount = 0.0f;
 #include "model.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
@@ -723,6 +723,7 @@ int main() {
 	GLFWwindow* window = initWindow();
 	initGBuffer();
 	initBullet();
+	player.init();
 	initFreetype();
 	freetypeLoadFont("Inter-Regular", 24);
 	glEnable(GL_DEPTH_TEST);
@@ -824,7 +825,6 @@ int main() {
 		updateTime();
 		resetSingleFrameInput();
 		glfwPollEvents();
-		processInput(window);
 
 		// update physics
 		// TODO: don't hardcode 60fps physics
@@ -832,6 +832,8 @@ int main() {
 		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
 		//bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 60.);
 
+		// update player
+		player.update(window, deltaTime);
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
 			gameObjects[i]->update(deltaTime);
