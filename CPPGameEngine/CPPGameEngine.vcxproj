@@ -77,12 +77,12 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(ProjectDir)\libs\freetype\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(ProjectDir)\libs\freetype\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(ProjectDir)\libs\freetype\include;$(ProjectDir)\libs\newton\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\newton\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(ProjectDir)\libs\freetype\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(ProjectDir)\libs\freetype\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\bullet\include;$(ProjectDir)\libs\freetype\include;$(ProjectDir)\libs\newton\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\bullet\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\newton\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
