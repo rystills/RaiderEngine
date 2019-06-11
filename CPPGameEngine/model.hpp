@@ -19,7 +19,6 @@
 #include <map>
 #include <vector>
 #include <experimental/filesystem>
-#include <LinearMath/btGeometryUtil.h>
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 
 /*
@@ -72,11 +71,11 @@ public:
 	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	std::unique_ptr<btCollisionShape> collisionShape;
+	//std::unique_ptr<btCollisionShape> collisionShape;
 	bool isStaticMesh;
 	float volume;
 	float collisionMargin;
-	std::unique_ptr<btTriangleMesh> trimesh;
+	//std::unique_ptr<btTriangleMesh> trimesh;
 
 	/*
 	Model default constructor: create a new empty model
@@ -99,7 +98,7 @@ public:
 	*/
 	void generateCollisionShape() {
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
-		collisionMargin = isStaticMesh ? 0 : 0.025f;
+		/*collisionMargin = isStaticMesh ? 0 : 0.025f;
 		if (isStaticMesh) {
 			// create mesh collider from model tris
 			trimesh = std::make_unique<btTriangleMesh>();
@@ -145,6 +144,7 @@ public:
 		volume = calculateVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it
 		bulletData.collisionShapes.push_back(collisionShape.get());
+		*/
 	}
 
 	/*

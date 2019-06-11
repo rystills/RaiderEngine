@@ -7,10 +7,10 @@ class MovingPlatform : public GameObject {
 public:
 	float elapsedTime = 0;
 	// TODO: remove this constraint from the world and delete it on death
-	btGeneric6DofConstraint* moveConstraint;
+	//btGeneric6DofConstraint* moveConstraint;
 	MovingPlatform(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale) : GameObject(position, rotationEA, scale, "movingPlatform", false,false) {
 		// create a constraint at our starting position, and move that up and down
-		btTransform tr;
+		/*btTransform tr;
 		tr.setIdentity();
 		tr.setOrigin(btVector3(position.x, position.y, position.z));
 		moveConstraint = new btGeneric6DofConstraint(*body, tr, true);
@@ -26,15 +26,17 @@ public:
 			moveConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
 		}
 		body->setGravity(btVector3(0, 0, 0));
+		*/
 	}
 	
 	void update(float deltaTime) override {
 		// update transform position based on time
-		elapsedTime += deltaTime;
+		/*elapsedTime += deltaTime;
 		body->activate(true);		
 		GameObject::update(deltaTime);
 		btVector3 origin = moveConstraint->getFrameOffsetA().getOrigin();
 		moveConstraint->getFrameOffsetA().setOrigin(btVector3(origin.getX(),origin.getY()+sin(elapsedTime)*.01f, origin.getZ()));
+		*/
 	}
 };
 

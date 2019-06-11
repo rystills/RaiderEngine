@@ -32,10 +32,10 @@ public:
 	std::string modelName;
 
 	// bullet data
-	std::unique_ptr<btCollisionShape> collisionShape;
+	//std::unique_ptr<btCollisionShape> collisionShape;
 	bool useModelCollisionShape = false;  // in some instances we don't need our own collision shape; the model shape suffices. Always use the model shape if this flag is true
-	std::unique_ptr<btRigidBody> body;
-	std::unique_ptr<btDefaultMotionState> myMotionState;
+	//std::unique_ptr<btRigidBody> body;
+	//std::unique_ptr<btDefaultMotionState> myMotionState;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -80,7 +80,7 @@ public:
 	@param rot: the quaternion representation of our initial rotation
 	*/
 	void addPhysics(glm::quat rot) {
-		float averageScale = (scale.x + scale.y + scale.z) / 3;
+		/*float averageScale = (scale.x + scale.y + scale.z) / 3;
 		// if we don't have any scaling we can just use our mesh's collision shape directly
 		if (scale.x == 1 && scale.y == 1 && scale.z == 1)
 			useModelCollisionShape = true;
@@ -117,6 +117,7 @@ public:
 		bulletData.dynamicsWorld->addRigidBody(body.get());
 		// store our index in the gameObjects vector in userPointer for easy lookup later
 		body->setUserPointer((void*)this);
+		*/
 	}
 	
 	/*
@@ -125,7 +126,7 @@ public:
 	*/
 	virtual void update(float deltaTime) {
 		// update transform position to bullet transform position
-		btTransform trans;
+		/*btTransform trans;
 		body->getMotionState()->getWorldTransform(trans);
 		position.x = float(trans.getOrigin().getX());
 		position.y = float(trans.getOrigin().getY());
@@ -133,6 +134,7 @@ public:
 		float z, y, x;
 		trans.getRotation().getEulerZYX(z, y, x);
 		setRotation(glm::vec3(x, y, z));
+		*/
 	}
 
 	/*

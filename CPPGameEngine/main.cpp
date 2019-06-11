@@ -48,23 +48,13 @@ unsigned int aiMapProcessFlags =
 	0;
 unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
-#include <btBulletDynamicsCommon.h>
-#include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include "Newton.h"
 #include "filesystem.hpp"
 #include "shader.hpp"
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
 #include <memory>
-
-struct BulletData {
-	btDiscreteDynamicsWorld* dynamicsWorld;
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
-	btSequentialImpulseConstraintSolver* solver;
-	btBroadphaseInterface* overlappingPairCache;
-	btCollisionDispatcher* dispatcher;
-	btDefaultCollisionConfiguration* collisionConfiguration;
-} bulletData;
 
 #include "Player.hpp"
 float anisoFilterAmount = 0.0f;
@@ -462,53 +452,21 @@ void initGBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+NewtonWorld* world;
+
 /*
-initialize bullet physics
+initialize newton physics
 */
-void initBullet() {
-	// collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
-	bulletData.collisionConfiguration = new btDefaultCollisionConfiguration();
-
-	// use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-	bulletData.dispatcher = new btCollisionDispatcher(bulletData.collisionConfiguration);
-
-	// btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
-	bulletData.overlappingPairCache = new btDbvtBroadphase();
-
-	// the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-	bulletData.solver = new btSequentialImpulseConstraintSolver;
-
-	bulletData.dynamicsWorld = new btDiscreteDynamicsWorld(bulletData.dispatcher, bulletData.overlappingPairCache, bulletData.solver, bulletData.collisionConfiguration);
-
-	bulletData.dynamicsWorld->setGravity(btVector3(0, -10, 0));
+void initPhysics() {
+	world = NewtonCreate();
 }
 
 /*
-cleanup the data allocated by bullet physics
+cleanup the data allocated by newton physics
 */
-void cleanupBullet() {
-	// remove the rigidbodies from the dynamics world
-	for (int i = bulletData.dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; --i) {
-		btCollisionObject* obj = bulletData.dynamicsWorld->getCollisionObjectArray()[i];
-		bulletData.dynamicsWorld->removeCollisionObject(obj);
-	}
-
-	// remove collision shapes
-	bulletData.collisionShapes.clear();
-
-	// delete dynamics world
-	delete bulletData.dynamicsWorld;
-
-	// delete solver
-	delete bulletData.solver;
-
-	// delete broadphase
-	delete bulletData.overlappingPairCache;
-
-	// delete dispatcher
-	delete bulletData.dispatcher;
-
-	delete bulletData.collisionConfiguration;
+void cleanupPhysics() {
+	NewtonDestroyAllBodies(world);
+	NewtonDestroy(world);
 }
 
 /*
@@ -593,110 +551,6 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	FT_Done_FreeType(ft);
 }
 
-// Helper class; draws the world as seen by Bullet.
-// This is very handy to see it Bullet's world matches yours
-// How to use this class :
-// Declare an instance of the class :
-// 
-// dynamicsWorld->setDebugDrawer(&mydebugdrawer);
-// Each frame, call it :
-// mydebugdrawer.SetMatrices(ViewMatrix, ProjectionMatrix);
-// dynamicsWorld->debugDrawWorld();
-class BulletDebugDrawer_OpenGL : public btIDebugDraw {
-public:
-	void SetMatrices(Shader s, glm::mat4 pViewMatrix, glm::mat4 pProjectionMatrix)
-	{
-		glUniformMatrix4fv(glGetUniformLocation(s.ID, "projection"), 1, GL_FALSE, glm::value_ptr(pProjectionMatrix));
-		glUniformMatrix4fv(glGetUniformLocation(s.ID, "view"), 1, GL_FALSE, glm::value_ptr(pViewMatrix));
-	}
-
-	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
-	{
-		// Vertex data
-		GLfloat points[12];
-
-		points[0] = from.x();
-		points[1] = from.y();
-		points[2] = from.z();
-		points[3] = color.x();
-		points[4] = color.y();
-		points[5] = color.z();
-
-		points[6] = to.x();
-		points[7] = to.y();
-		points[8] = to.z();
-		points[9] = color.x();
-		points[10] = color.y();
-		points[11] = color.z();
-
-		glDeleteBuffers(1, &VBO);
-		glDeleteVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		glBindVertexArray(0);
-
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_LINES, 0, 2);
-		glBindVertexArray(0);
-
-	}
-	virtual void drawContactPoint(const btVector3 &, const btVector3 &, btScalar, int, const btVector3 &) {}
-	virtual void reportErrorWarning(const char *) {}
-	virtual void draw3dText(const btVector3 &, const char *) {}
-	virtual void setDebugMode(int p) {
-		m = p;
-	}
-	int getDebugMode(void) const { return m; }
-	int m;
-};
-
-/*
-cast a ray from the specified NDC coordinates using the given proj/view matrices, returning the first hit object
-@param projection: the projection matrix to cast frrom
-@param view: the view ematrix to cast from
-@param x: the x coordinate of the raycast (in NDC space)
-@param y: the y coordinate of the raycast (in NDC space)
-@returns: a pointer to the hit collision object (from whom you can get more useful info via getUserPointer) or NULL if no object was hit
-*/
-std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> rayCast(glm::mat4 projection, glm::mat4 view, float x=0, float y=0) {
-	// object picking
-	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
-	glm::vec4 lRayStart_NDC(x,y, -1.0, 1.0f);
-	glm::vec4 lRayEnd_NDC(x, y, 0.0, 1.0f);
-
-	// inverse transform matrices to camera space
-	glm::mat4 M = glm::inverse(projection*view);
-	glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world /= lRayStart_world.w;
-	glm::vec4 lRayEnd_world = M * lRayEnd_NDC; lRayEnd_world /= lRayEnd_world.w;
-
-	// get ray direction
-	glm::vec3 lRayDir_world(lRayEnd_world - lRayStart_world);
-	lRayDir_world = glm::normalize(lRayDir_world);
-	glm::vec3 out_origin = glm::vec3(lRayStart_world);
-	glm::vec3 out_direction = glm::normalize(lRayDir_world);
-
-	// ray test
-	glm::vec3 out_end = out_origin + out_direction*1000.0f;
-
-	std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> RayCallback(new btCollisionWorld::ClosestRayResultCallback(
-		btVector3(out_origin.x, out_origin.y, out_origin.z),
-		btVector3(out_end.x, out_end.y, out_end.z)
-	));
-	bulletData.dynamicsWorld->rayTest(
-		btVector3(out_origin.x, out_origin.y, out_origin.z),
-		btVector3(out_end.x, out_end.y, out_end.z),
-		*RayCallback
-	);
-	return RayCallback;
-}
-
 /*
 reset all input events that occur for a single frame only
 */
@@ -722,7 +576,7 @@ int main() {
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
 	GLFWwindow* window = initWindow();
 	initGBuffer();
-	initBullet();
+	initPhysics();
 	player.init();
 	initFreetype();
 	freetypeLoadFont("Inter-Regular", 24);
@@ -808,15 +662,6 @@ int main() {
 	shaderLightingPass.setInt("depthMap2", 5);
 	shaderLightingPass.setInt("depthMap3", 6);
 
-	BulletDebugDrawer_OpenGL * debugDrawer = new BulletDebugDrawer_OpenGL();
-	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawConstraints);
-	bulletData.dynamicsWorld->setDebugDrawer(debugDrawer);
-
-	btGeneric6DofConstraint* holdConstraint = NULL;
-	btRigidBody* holdBody = NULL;
-	btVector3 btRayTo;
-	btVector3 btRayFrom;
-	btScalar m_pickDist;
 	float maxPickDist = 2.5f;
 	// render loop
 	// -----------
@@ -828,10 +673,7 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		// TODO: don't hardcode 60fps physics
-		//bulletData.dynamicsWorld->stepSimulation(1.f / 60.f, 10);
-		bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 240.);
-		//bulletData.dynamicsWorld->stepSimulation(deltaTime, 10, 1. / 60.);
+		NewtonUpdate(world, deltaTime);
 
 		// update player
 		player.update(window, deltaTime);
@@ -847,91 +689,13 @@ int main() {
 		glm::mat4 projection = glm::perspective(glm::radians(player.camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
 		glm::mat4 view = player.camera.GetViewMatrix();
 
-		// disallow interacting with objects while a display string is active
-		if (displayString == "") {
-			std::unique_ptr<btCollisionWorld::ClosestRayResultCallback> hit = rayCast(projection, view);
-			btRayTo = hit->m_rayToWorld;
-			btRayFrom = hit->m_rayFromWorld;
-			// if we click onn an object, attempt to grab it
-			if (mousePressedLeft && (holdBody == NULL) && hit->hasHit()) {
-				m_pickDist = (hit->m_hitPointWorld - hit->m_rayFromWorld).length();
-				if (m_pickDist < maxPickDist) {
-					GameObject* hitObj = (GameObject*)hit->m_collisionObject->getUserPointer();
-					if (!(hitObj->model->isStaticMesh) && hitObj->grabbable) {
-						holdBody = const_cast<btRigidBody*>(btRigidBody::upcast(hit->m_collisionObject));
-						btVector3 localPivot = holdBody->getCenterOfMassTransform().inverse() * hit->m_hitPointWorld;
-						btTransform tr;
-						tr.setIdentity();
-						tr.setOrigin(localPivot);
-						holdConstraint = new btGeneric6DofConstraint(*holdBody, tr, true);
-						holdConstraint->setLinearLowerLimit(btVector3(0, 0, 0));
-						holdConstraint->setLinearUpperLimit(btVector3(0, 0, 0));
-						holdConstraint->setAngularLowerLimit(btVector3(0, 0, 0));
-						holdConstraint->setAngularUpperLimit(btVector3(0, 0, 0));
-						bulletData.dynamicsWorld->addConstraint(holdConstraint, true);
-						for (int i = 0; i < 6; ++i) {
-							// CFM (constraint force mixing): increase this to make the constraint softer
-							// ERP (error reduction parameter): increase this to fix a greater proportion of the accumulated error each step
-							holdConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.8f, i);
-							holdConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f, i);
-						}
-					}
-				}
-			}
-
-			// clear held body velocity upon letting go
-			// TODO: set held body to player velocity once a player class is defined, ie. riding an elevator
-			// TODO: make this a proper method once data encapsulation structure has been decided
-#define clearHeldBodyVelocity() { \
-		holdBody->setLinearVelocity(btVector3(0, 0, 0)); \
-		holdBody->setAngularVelocity(btVector3(0, 0, 0)); \
-	} \
-
-			// throw held object on right mouse button, otherwise analyze hovered object
-			if (mousePressedRight) {
-				if (holdBody != NULL) {
-					// throw held object
-					float force = .1f;
-					btVector3 dir = (btRayTo - btRayFrom).normalize() * force;
-					clearHeldBodyVelocity();
-					holdBody->applyCentralImpulse(dir);
-					goto letGo;
-				}
-				else {
-					// analyze hovered object
-					if (hit->hasHit()) {
-						displayObjectInfo((GameObject*)hit->m_collisionObject->getUserPointer());
-					}
-				}
-			}
-
-			// release held object on mouse button release
-			if (mouseReleasedLeft && (holdBody != NULL)) {
-				clearHeldBodyVelocity();
-			letGo:
-				bulletData.dynamicsWorld->removeConstraint(holdConstraint);
-				delete holdConstraint;
-				holdConstraint = NULL;
-				holdBody = NULL;
-			}
-
-			// update held object
-			if (holdConstraint != NULL) {
-				//keep it at the same picking distance
-				holdBody->activate(true);
-				btVector3 dir = (btRayTo - btRayFrom).normalize();
-				dir *= m_pickDist;
-				holdConstraint->getFrameOffsetA().setOrigin(btRayFrom + dir);
-			}
-		}
-		else {
+		if (displayString != "") {
 			// clear display string on right mouse button press
 			if (mousePressedRight) {
 				displayString = "";
 				player.camera.controllable = true;
 			}
 		}
-
 
 		// render
 		// 0. create depth cubemap transformation matrices
@@ -1047,47 +811,9 @@ int main() {
 		// 4. render UI
 		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
-		if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS) {
-			f3Pressed = true;
+		if (displayString == "") {
+			// TODO: render point
 		}
-		else {
-			if (f3Pressed) {
-				f3Pressed = false;
-				debugDrawer->setDebugMode(debugDrawer->getDebugMode() == btIDebugDraw::DBG_DrawConstraints ? btIDebugDraw::DBG_DrawWireframe : btIDebugDraw::DBG_DrawConstraints);
-			}
-		}
-		if (holdBody == NULL && displayString == "") {
-			// TODO: stick me in a "render point" method
-			debugLineShader.use();
-			debugDrawer->SetMatrices(debugLineShader, view, projection);
-			GLfloat points[6];
-			points[0] = btRayTo.getX();
-			points[1] = btRayTo.getY();
-			points[2] = btRayTo.getZ();
-			points[3] = 0;
-			points[4] = 0;
-			points[5] = 255;
-
-			glDeleteBuffers(1, &VBO);
-			glDeleteVertexArrays(1, &VAO);
-			glGenBuffers(1, &VBO);
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-			glBindVertexArray(0);
-
-			glBindVertexArray(VAO);
-			glDrawArrays(GL_POINTS, 0, 1);
-			glBindVertexArray(0);
-		}
-
-		// debug render bullet data
-		bulletData.dynamicsWorld->debugDrawWorld();
 
 		// 5. render text
 		textShader.use();
@@ -1104,7 +830,7 @@ int main() {
 		
 		glfwSwapBuffers(window);
 	}
-	cleanupBullet();
+	cleanupPhysics();
 	glfwTerminate();
 	// delete object and model data
 	gameObjects.clear();
