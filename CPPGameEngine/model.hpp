@@ -19,12 +19,6 @@
 #include <map>
 #include <vector>
 #include <experimental/filesystem>
-#include "Newton.h"
-#include "dMathDefines.h"
-#include "dVector.h"
-#include "dMatrix.h"
-#include "dQuaternion.h"
-#include "dLinearAlgebra.h"
 
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 
@@ -78,7 +72,7 @@ public:
 	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	NewtonCollision* collisionShape;
+	dNewtonCollision* collisionShape;
 	bool isStaticMesh;
 	float volume;
 
@@ -105,8 +99,9 @@ public:
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
 		if (isStaticMesh) {
 			// create mesh shape from model tris
-			collisionShape = NewtonCreateTreeCollision(world, 0);
-			NewtonTreeCollisionBeginBuild(collisionShape);
+			dNewtonCollisionMesh* col = new dNewtonCollisionMesh(&world, 1);
+			//collisionahape = NewtonCreateTreeCollision(world, 0);
+			col->BeginFace();
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
 				for (int i = 0; i < mesh.indices.size(); i += 3) {
@@ -114,10 +109,11 @@ public:
 						dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z),
 						dVector(mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z),
 						dVector(mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z) };
-					NewtonTreeCollisionAddFace(collisionShape, 3, &verts[0][0], sizeof(dVector), 0);
+					col->AddFace(3, &verts[0][0], 3*sizeof(dFloat), 0);
 				}
 			}
-			NewtonTreeCollisionEndBuild(collisionShape, 0);
+			col->EndFace();
+			collisionShape = static_cast<dNewtonCollision*>(col);
 		}
 		else {
 			// create convex hull shape from mesh verts
@@ -129,7 +125,8 @@ public:
 			}
 			// tolerance of 0.01f = 1% vert removal threshold
 			dVector* dVerts = verts.data();
-			collisionShape = NewtonCreateConvexHull(world, verts.size(), &dVerts[0].m_x, sizeof(dVector), 0.01f, 0, NULL);
+			dNewtonCollisionConvexHull* col = new dNewtonCollisionConvexHull(&world, verts.size(), &dVerts[0].m_x, 3 * sizeof(dFloat), 0.01f, 0);
+			collisionShape = static_cast<dNewtonCollision*>(col);
 		}
 		volume = calculateVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it

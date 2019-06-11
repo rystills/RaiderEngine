@@ -48,8 +48,12 @@ unsigned int aiMapProcessFlags =
 	0;
 unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
-#include "Newton.h"
-NewtonWorld* world;
+#include <dVector.h>
+#include <dMatrix.h>
+#include <dNewton.h>
+#include <dNewtonCollision.h>
+#include <dNewtonDynamicBody.h>
+dNewton world;
 #include "filesystem.hpp"
 #include "shader.hpp"
 #include <iostream>
@@ -457,15 +461,15 @@ void initGBuffer() {
 initialize newton physics
 */
 void initPhysics() {
-	world = NewtonCreate();
+	//world = NewtonCreate();
 }
 
 /*
 cleanup the data allocated by newton physics
 */
 void cleanupPhysics() {
-	NewtonDestroyAllBodies(world);
-	NewtonDestroy(world);
+	//NewtonDestroyAllBodies(world);
+	//NewtonDestroy(world);
 }
 
 /*
@@ -672,7 +676,7 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		NewtonUpdate(world, deltaTime);
+		world.UpdateOffLine(deltaTime);
 
 		// update player
 		player.update(window, deltaTime);

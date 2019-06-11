@@ -28,6 +28,35 @@
 #include <dNewtonDynamicBody.h>
 #include <dNewtonPlayerManager.h>
 
+class MyDynamicBody : public dNewtonDynamicBody
+{
+public:
+	MyDynamicBody(dNewton* const world, dFloat mass, const dNewtonCollision* const collision, void* const userData, const dMatrix& matrix)
+		:dNewtonDynamicBody(world, mass, collision, userData, &matrix[0][0], NULL)
+	{
+	}
+
+	// the end application need to overload this function from dNetwonBody
+	void OnBodyTransform(const dFloat* const matrix, int threadIndex)
+	{
+		Update(matrix);
+	}
+
+	// the end application need to overload this function from dNetwonDynamicBody
+	void OnForceAndTorque(dFloat timestep, int threadIndex)
+	{
+		// apply gravity force to the body
+		dFloat mass;
+		dFloat Ixx;
+		dFloat Iyy;
+		dFloat Izz;
+
+		GetMassAndInertia(mass, Ixx, Iyy, Izz);
+		dVector gravityForce(0.0f, -9.8f * mass, 0.0f);
+		SetForce(&gravityForce[0]);
+	}
+};
+
 class GameObject {
 public:
 	glm::vec3 position;
@@ -84,17 +113,12 @@ public:
 	void addPhysics(glm::quat rot) {
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
-		float initialTrans[16] = { 
-			1.0f, 0.0f, 0.0f, position.x,
-			0.0f, 1.0f, 0.0f, position.y,
-			0.0f, 0.0f, 1.0f, position.z,
-			0.0f, 0.0f, 0.0f, 1.0f };
 
-		body = new MyDynamicBody(world, mass, model->collisionShape, NULL, dGetIdentityMatrix());
+		body = new MyDynamicBody(&world, mass, model->collisionShape, NULL, dGetIdentityMatrix());
 		
 		//NewtonBodySetMassProperties(body, mass, model->collisionShape);
 
-		//TODO: rotation, scale
+		//TODO: pos, rotation, scale
 		/*btQuaternion quat;
 		glm::vec3 rotationEA = glm::eulerAngles(rot);
 		quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
@@ -130,35 +154,6 @@ public:
 			q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;
 		rotation = glm::toMat4(q);
 		return q;
-	}
-};
-
-class MyDynamicBody : public dNewtonDynamicBody
-{
-public:
-	MyDynamicBody(dNewton* const world, dFloat mass, const dNewtonCollision* const collision, void* const userData, const dMatrix& matrix)
-		:dNewtonDynamicBody(world, mass, collision, userData, &matrix[0][0], NULL)
-	{
-	}
-
-	// the end application need to overload this function from dNetwonBody
-	void OnBodyTransform(const dFloat* const matrix, int threadIndex)
-	{
-		Update(matrix);
-	}
-
-	// the end application need to overload this function from dNetwonDynamicBody
-	void OnForceAndTorque(dFloat timestep, int threadIndex)
-	{
-		// apply gravity force to the body
-		dFloat mass;
-		dFloat Ixx;
-		dFloat Iyy;
-		dFloat Izz;
-
-		GetMassAndInertia(mass, Ixx, Iyy, Izz);
-		dVector gravityForce(0.0f, -9.8f * mass, 0.0f);
-		SetForce(&gravityForce[0]);
 	}
 };
 #endif
