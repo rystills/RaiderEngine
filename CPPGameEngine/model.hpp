@@ -19,6 +19,13 @@
 #include <map>
 #include <vector>
 #include <experimental/filesystem>
+#include "Newton.h"
+#include "dMathDefines.h"
+#include "dVector.h"
+#include "dMatrix.h"
+#include "dQuaternion.h"
+#include "dLinearAlgebra.h"
+
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 
 /*
@@ -71,11 +78,9 @@ public:
 	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	//std::unique_ptr<btCollisionShape> collisionShape;
+	NewtonCollision* collisionShape;
 	bool isStaticMesh;
 	float volume;
-	float collisionMargin;
-	//std::unique_ptr<btTriangleMesh> trimesh;
 
 	/*
 	Model default constructor: create a new empty model
@@ -98,53 +103,36 @@ public:
 	*/
 	void generateCollisionShape() {
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
-		/*collisionMargin = isStaticMesh ? 0 : 0.025f;
 		if (isStaticMesh) {
-			// create mesh collider from model tris
-			trimesh = std::make_unique<btTriangleMesh>();
+			// create mesh shape from model tris
+			collisionShape = NewtonCreateTreeCollision(world, 0);
+			NewtonTreeCollisionBeginBuild(collisionShape);
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
 				for (int i = 0; i < mesh.indices.size(); i += 3) {
-					btVector3 vertex_1{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-					btVector3 vertex_2{ mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z };
-					btVector3 vertex_3{ mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z };
-					trimesh->addTriangle(vertex_1, vertex_2, vertex_3);
+					dVector verts[3] = {
+						dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z),
+						dVector(mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z),
+						dVector(mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z) };
+					NewtonTreeCollisionAddFace(collisionShape, 3, &verts[0][0], sizeof(dVector), 0);
 				}
 			}
-			collisionShape = std::make_unique<btBvhTriangleMeshShape>(trimesh.get(), true);
+			NewtonTreeCollisionEndBuild(collisionShape, 0);
 		}
 		else {
-			// create convex hull collider from mesh verts
-			btAlignedObjectArray<btVector3> vertices;
+			// create convex hull shape from mesh verts
+			std::vector<dVector> verts;
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
-				for (int i = 0; i < mesh.indices.size(); ++i) {
-					btVector3 vertex{ mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z };
-					vertices.push_back(vertex);
-				}
+				for (int i = 0; i < mesh.indices.size(); ++i)
+					verts.push_back(dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z));
 			}
-
-			// shrink convex hull by margin to cancel it out (this isn't a perfect solution, but it works well enough - see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=2358)
-			btAlignedObjectArray<btVector3> planeEquations;
-			btGeometryUtil::getPlaneEquationsFromVertices(vertices, planeEquations);
-
-			btAlignedObjectArray<btVector3> shiftedPlaneEquations;
-			for (int p = 0; p<planeEquations.size(); ++p) {
-				btVector3 plane = planeEquations[p];
-				plane[3] += collisionMargin;
-				shiftedPlaneEquations.push_back(plane);
-			}
-			btAlignedObjectArray<btVector3> shiftedVertices;
-			btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, shiftedVertices);
-
-			// TODO: constructing this btConvexHullShape seems to cause a memory access violation when using std::make_shared. Please check this with a memory debugger
-			collisionShape = std::make_unique<btConvexHullShape>(&(shiftedVertices[0].getX()), shiftedVertices.size());
+			// tolerance of 0.01f = 1% vert removal threshold
+			dVector* dVerts = verts.data();
+			collisionShape = NewtonCreateConvexHull(world, verts.size(), &dVerts[0].m_x, sizeof(dVector), 0.01f, 0, NULL);
 		}
-		collisionShape->setMargin(collisionMargin);
 		volume = calculateVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it
-		bulletData.collisionShapes.push_back(collisionShape.get());
-		*/
 	}
 
 	/*

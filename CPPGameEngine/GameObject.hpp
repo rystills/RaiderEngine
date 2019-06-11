@@ -21,6 +21,12 @@
 #include <vector>
 #include <memory>
 #include <glm/gtx/quaternion.hpp>
+#include <dVector.h>
+#include <dMatrix.h>
+#include <dNewton.h>
+#include <dNewtonCollision.h>
+#include <dNewtonDynamicBody.h>
+#include <dNewtonPlayerManager.h>
 
 class GameObject {
 public:
@@ -30,12 +36,8 @@ public:
 	std::shared_ptr<Model> model;
 	bool grabbable;
 	std::string modelName;
-
-	// bullet data
-	//std::unique_ptr<btCollisionShape> collisionShape;
-	bool useModelCollisionShape = false;  // in some instances we don't need our own collision shape; the model shape suffices. Always use the model shape if this flag is true
-	//std::unique_ptr<btRigidBody> body;
-	//std::unique_ptr<btDefaultMotionState> myMotionState;
+	MyDynamicBody* body;
+	dFloat mass;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -80,43 +82,23 @@ public:
 	@param rot: the quaternion representation of our initial rotation
 	*/
 	void addPhysics(glm::quat rot) {
-		/*float averageScale = (scale.x + scale.y + scale.z) / 3;
-		// if we don't have any scaling we can just use our mesh's collision shape directly
-		if (scale.x == 1 && scale.y == 1 && scale.z == 1)
-			useModelCollisionShape = true;
-		else {
-			// create a scaled container for our mesh's collision shape
-			if (model->isStaticMesh)
-				// triangle meshes can be shared with non-uniform scaling
-				collisionShape = std::make_unique<btScaledBvhTriangleMeshShape>((btBvhTriangleMeshShape*)(model->collisionShape.get()), btVector3(scale.x, scale.y, scale.z));
-			else {
-				// note: convex hulls can only be shared with uniform scaling, so the scale average will have to be good enough
-				collisionShape = std::make_unique<btUniformScalingShape>((btConvexHullShape*)(model->collisionShape.get()), btScalar(averageScale));
-				collisionShape->setMargin(model->collisionMargin * averageScale);
-			}
-			// push back our scaled collision shape
-			bulletData.collisionShapes.push_back(collisionShape.get());
-		}
+		float averageScale = (scale.x + scale.y + scale.z) / 3;
+		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
+		float initialTrans[16] = { 
+			1.0f, 0.0f, 0.0f, position.x,
+			0.0f, 1.0f, 0.0f, position.y,
+			0.0f, 0.0f, 1.0f, position.z,
+			0.0f, 0.0f, 0.0f, 1.0f };
 
-		btTransform startTransform;
-		startTransform.setIdentity();
-		btScalar mass(model->isStaticMesh ? 0.0f : model->volume*averageScale);
-		btVector3 localInertia(0, 0, 0);
-		if (!model->isStaticMesh)
-			(useModelCollisionShape ? model->collisionShape : collisionShape)->calculateLocalInertia(mass, localInertia);
-		startTransform.setOrigin(btVector3(position.x, position.y, position.z));
-		btQuaternion quat;
+		body = new MyDynamicBody(world, mass, model->collisionShape, NULL, dGetIdentityMatrix());
+		
+		//NewtonBodySetMassProperties(body, mass, model->collisionShape);
+
+		//TODO: rotation, scale
+		/*btQuaternion quat;
 		glm::vec3 rotationEA = glm::eulerAngles(rot);
 		quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
 		startTransform.setRotation(quat);
-
-		// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		myMotionState = std::make_unique<btDefaultMotionState>(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState.get(), (useModelCollisionShape ? model->collisionShape : collisionShape).get(), localInertia);
-		body = std::make_unique<btRigidBody>(rbInfo);
-		bulletData.dynamicsWorld->addRigidBody(body.get());
-		// store our index in the gameObjects vector in userPointer for easy lookup later
-		body->setUserPointer((void*)this);
 		*/
 	}
 	
@@ -126,15 +108,14 @@ public:
 	*/
 	virtual void update(float deltaTime) {
 		// update transform position to bullet transform position
-		/*btTransform trans;
-		body->getMotionState()->getWorldTransform(trans);
+		/*NewtonBodyGetPosition(body,)
 		position.x = float(trans.getOrigin().getX());
 		position.y = float(trans.getOrigin().getY());
 		position.z = float(trans.getOrigin().getZ());
 		float z, y, x;
 		trans.getRotation().getEulerZYX(z, y, x);
-		setRotation(glm::vec3(x, y, z));
-		*/
+		setRotation(glm::vec3(x, y, z));*/
+		
 	}
 
 	/*
@@ -149,6 +130,35 @@ public:
 			q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;
 		rotation = glm::toMat4(q);
 		return q;
+	}
+};
+
+class MyDynamicBody : public dNewtonDynamicBody
+{
+public:
+	MyDynamicBody(dNewton* const world, dFloat mass, const dNewtonCollision* const collision, void* const userData, const dMatrix& matrix)
+		:dNewtonDynamicBody(world, mass, collision, userData, &matrix[0][0], NULL)
+	{
+	}
+
+	// the end application need to overload this function from dNetwonBody
+	void OnBodyTransform(const dFloat* const matrix, int threadIndex)
+	{
+		Update(matrix);
+	}
+
+	// the end application need to overload this function from dNetwonDynamicBody
+	void OnForceAndTorque(dFloat timestep, int threadIndex)
+	{
+		// apply gravity force to the body
+		dFloat mass;
+		dFloat Ixx;
+		dFloat Iyy;
+		dFloat Izz;
+
+		GetMassAndInertia(mass, Ixx, Iyy, Izz);
+		dVector gravityForce(0.0f, -9.8f * mass, 0.0f);
+		SetForce(&gravityForce[0]);
 	}
 };
 #endif

@@ -55,17 +55,21 @@ public:
 		glm::vec3 dir(0, 0, 0);
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			dir += normalFront;
+			camera.ProcessKeyboard(FORWARD, deltaTime);
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 			dir -= normalFront;
+			camera.ProcessKeyboard(BACKWARD, deltaTime);
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 			dir -= camera.Right;
+			camera.ProcessKeyboard(LEFT, deltaTime);
 		}
 		
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 			dir += camera.Right;
+			camera.ProcessKeyboard(RIGHT, deltaTime);
 		}
 		/*if (dir == glm::vec3(0, 0, 0))
 			controller->setWalkDirection(btVector3(0, 0, 0));

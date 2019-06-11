@@ -49,6 +49,7 @@ unsigned int aiMapProcessFlags =
 unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
 #include "Newton.h"
+NewtonWorld* world;
 #include "filesystem.hpp"
 #include "shader.hpp"
 #include <iostream>
@@ -451,8 +452,6 @@ void initGBuffer() {
 		ERROR(std::cout << "Framebuffer not complete!" << std::endl);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
-NewtonWorld* world;
 
 /*
 initialize newton physics
