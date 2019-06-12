@@ -87,23 +87,31 @@ public:
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
 		// initial transform
-		float tm[16] = {
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f
-		};
+		dMatrix tm = dGetIdentityMatrix();
 		std::cout << "position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
-		tm[12] = 2.0;
-		tm[13] = 2.0;
-		tm[14] = 2.0;
-		body = NewtonCreateDynamicBody(world, model->collisionShape, tm);
+		// set position
+		tm.m_posit.m_x = position.x;
+		tm.m_posit.m_y = position.y;
+		tm.m_posit.m_z = position.z;
+
+		// rotation
+		/*matrix[0].m_w = rotation[0].w; matrix[0].m_x = rotation[0].x; matrix[0].m_y = rotation[0].y; matrix[0].m_z = rotation[0].z;
+		matrix[1].m_w = rotation[1].w; matrix[1].m_x = rotation[1].x; matrix[1].m_y = rotation[1].y; matrix[1].m_z = rotation[1].z;
+		matrix[2].m_w = rotation[2].w; matrix[2].m_x = rotation[2].x; matrix[2].m_y = rotation[2].y; matrix[2].m_z = rotation[2].z;
+		matrix[3].m_w = rotation[3].w; matrix[3].m_x = rotation[3].x; matrix[3].m_y = rotation[3].y; matrix[3].m_z = rotation[3].z;
+
+		// translation
+		matrix.m_posit.m_x += position.x;
+		matrix.m_posit.m_y += position.y;
+		matrix.m_posit.m_z += position.z;
+		*/
+		body = NewtonCreateDynamicBody(world, model->collisionShape, &tm[0][0]);
 		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
 		// Install the callbacks to track the body positions.
 		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
 		// Attach our custom data structure to the bodies.
 		NewtonBodySetUserData(body, (void *)this);
-
+		
 		/*dMatrix matrix = dGetIdentityMatrix();
 
 		// rotation
@@ -176,7 +184,7 @@ void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadInde
 	NewtonBodyGetPosition(body, pos);
 
 	// Apply force.
-	dFloat force[3] = { 0, -9.8, 0 };
+	dFloat force[3] = { 0, -.3f, 0 };
 	NewtonBodySetForce(body, force);
 	GO->position.x = pos[0];
 	GO->position.y = pos[1];
