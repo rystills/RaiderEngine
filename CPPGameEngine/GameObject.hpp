@@ -115,6 +115,22 @@ public:
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
 
 		body = new MyDynamicBody(&world, mass, model->collisionShape, NULL, dGetIdentityMatrix());
+		dMatrix matrix;
+		body->GetTargetMatrix(&matrix[0][0]);
+
+		// rotation
+		matrix[0].m_w = rotation[0].w; matrix[0].m_x = rotation[0].x; matrix[0].m_y = rotation[0].y; matrix[0].m_z = rotation[0].z;
+		matrix[1].m_w = rotation[1].w; matrix[1].m_x = rotation[1].x; matrix[1].m_y = rotation[1].y; matrix[1].m_z = rotation[1].z;
+		matrix[2].m_w = rotation[2].w; matrix[2].m_x = rotation[2].x; matrix[2].m_y = rotation[2].y; matrix[2].m_z = rotation[2].z;
+		matrix[3].m_w = rotation[3].w; matrix[3].m_x = rotation[3].x; matrix[3].m_y = rotation[3].y; matrix[3].m_z = rotation[3].z;
+		
+		// translation
+		matrix.m_posit.m_x += position.x;
+		matrix.m_posit.m_y += position.y;
+		matrix.m_posit.m_z += position.z;
+
+		// apply
+		body->SetTargetMatrix(&matrix[0][0]);
 		
 		//NewtonBodySetMassProperties(body, mass, model->collisionShape);
 
@@ -131,15 +147,18 @@ public:
 	@param deltaTime: the elapsed time (in seconds) since the previous frame
 	*/
 	virtual void update(float deltaTime) {
-		// update transform position to bullet transform position
-		/*NewtonBodyGetPosition(body,)
-		position.x = float(trans.getOrigin().getX());
-		position.y = float(trans.getOrigin().getY());
-		position.z = float(trans.getOrigin().getZ());
-		float z, y, x;
-		trans.getRotation().getEulerZYX(z, y, x);
-		setRotation(glm::vec3(x, y, z));*/
+		dMatrix matrix;
+		body->InterpolateMatrix(1.0f, &matrix[0][0]);
+		position.x = matrix.m_posit.m_x;
+		position.y = matrix.m_posit.m_y;
+		position.z = matrix.m_posit.m_z;
+		std::cout << "position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
+		dVector euler0, euler1;
+		matrix.GetEulerAngles(euler0, euler1);
+		setRotation(glm::vec3(euler0.m_x, euler0.m_y, euler0.m_z));
 		
+		/*trans.getRotation().getEulerZYX(z, y, x);
+		setRotation(glm::vec3(x, y, z));*/
 	}
 
 	/*
