@@ -99,7 +99,7 @@ public:
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
 		if (isStaticMesh) {
 			// create mesh shape from model tris
-			/*collisionShape = NewtonCreateTreeCollision(world, 0);
+			collisionShape = NewtonCreateTreeCollision(world, 0);
 			NewtonTreeCollisionBeginBuild(collisionShape);
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
@@ -108,11 +108,11 @@ public:
 						dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z),
 						dVector(mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z),
 						dVector(mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z) };
-					NewtonTreeCollisionAddFace(collisionShape, 3, &verts[0][0], sizeof(dFloat)*3, 0);
+					NewtonTreeCollisionAddFace(collisionShape, 3, &verts[0][0], sizeof(dVector), 0);
 				}
 			}
-			NewtonTreeCollisionEndBuild(collisionShape, 0);*/
-			collisionShape = NewtonCreateBox(world, 100, 0.1, 100, 0, NULL);
+			NewtonTreeCollisionEndBuild(collisionShape, 0);
+			//collisionShape = NewtonCreateBox(world, 100, 0.1, 100, 0, NULL);
 		}
 		else {
 			// create convex hull shape from mesh verts
