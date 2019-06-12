@@ -50,10 +50,11 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 
 #include <dVector.h>
 #include <dMatrix.h>
+#include <Newton.h>
 #include <dNewton.h>
 #include <dNewtonCollision.h>
 #include <dNewtonDynamicBody.h>
-dNewton world;
+NewtonWorld* world;
 #include "filesystem.hpp"
 #include "shader.hpp"
 #include <iostream>
@@ -103,7 +104,7 @@ float lastFrame = 0.0f;
 
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
-#define useVsync false
+#define useVsync true
 #define fullScreen false
 
 /*
@@ -461,15 +462,15 @@ void initGBuffer() {
 initialize newton physics
 */
 void initPhysics() {
-	//world = NewtonCreate();
+	world = NewtonCreate();
 }
 
 /*
 cleanup the data allocated by newton physics
 */
 void cleanupPhysics() {
-	//NewtonDestroyAllBodies(world);
-	//NewtonDestroy(world);
+	NewtonDestroyAllBodies(world);
+	NewtonDestroy(world);
 }
 
 /*
@@ -676,7 +677,7 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		world.UpdateOffLine(deltaTime);
+		NewtonUpdate(world, deltaTime);
 
 		// update player
 		player.update(window, deltaTime);

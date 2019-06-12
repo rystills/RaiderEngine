@@ -23,40 +23,13 @@
 #include <glm/gtx/quaternion.hpp>
 #include <dVector.h>
 #include <dMatrix.h>
+#include <Newton.h>
 #include <dNewton.h>
 #include <dNewtonCollision.h>
 #include <dNewtonDynamicBody.h>
 #include <dNewtonPlayerManager.h>
 
-class MyDynamicBody : public dNewtonDynamicBody
-{
-public:
-	MyDynamicBody(dNewton* const world, dFloat mass, const dNewtonCollision* const collision, void* const userData, const dMatrix& matrix)
-		:dNewtonDynamicBody(world, mass, collision, userData, &matrix[0][0], NULL)
-	{
-	}
-
-	// the end application need to overload this function from dNetwonBody
-	void OnBodyTransform(const dFloat* const matrix, int threadIndex)
-	{
-		Update(matrix);
-	}
-
-	// the end application need to overload this function from dNetwonDynamicBody
-	void OnForceAndTorque(dFloat timestep, int threadIndex)
-	{
-		// apply gravity force to the body
-		dFloat mass;
-		dFloat Ixx;
-		dFloat Iyy;
-		dFloat Izz;
-
-		GetMassAndInertia(mass, Ixx, Iyy, Izz);
-		dVector gravityForce(0.0f, -9.8f * mass, 0.0f);
-		SetForce(&gravityForce[0]);
-	}
-};
-
+void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex);
 class GameObject {
 public:
 	glm::vec3 position;
@@ -65,7 +38,7 @@ public:
 	std::shared_ptr<Model> model;
 	bool grabbable;
 	std::string modelName;
-	MyDynamicBody* body;
+	NewtonBody* body;
 	dFloat mass;
 
 	/*
@@ -113,10 +86,25 @@ public:
 	void addPhysics(glm::quat rot) {
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
+		// initial transform
+		float tm[16] = {
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
+		};
+		std::cout << "position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
+		tm[12] = 2.0;
+		tm[13] = 2.0;
+		tm[14] = 2.0;
+		body = NewtonCreateDynamicBody(world, model->collisionShape, tm);
+		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
+		// Install the callbacks to track the body positions.
+		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
+		// Attach our custom data structure to the bodies.
+		NewtonBodySetUserData(body, (void *)this);
 
-		body = new MyDynamicBody(&world, mass, model->collisionShape, NULL, dGetIdentityMatrix());
-		dMatrix matrix;
-		body->GetTargetMatrix(&matrix[0][0]);
+		/*dMatrix matrix = dGetIdentityMatrix();
 
 		// rotation
 		matrix[0].m_w = rotation[0].w; matrix[0].m_x = rotation[0].x; matrix[0].m_y = rotation[0].y; matrix[0].m_z = rotation[0].z;
@@ -130,10 +118,8 @@ public:
 		matrix.m_posit.m_z += position.z;
 
 		// apply
-		body->SetTargetMatrix(&matrix[0][0]);
+		body->SetTargetMatrix(&matrix[0][0]);*/
 		
-		//NewtonBodySetMassProperties(body, mass, model->collisionShape);
-
 		//TODO: pos, rotation, scale
 		/*btQuaternion quat;
 		glm::vec3 rotationEA = glm::eulerAngles(rot);
@@ -147,15 +133,21 @@ public:
 	@param deltaTime: the elapsed time (in seconds) since the previous frame
 	*/
 	virtual void update(float deltaTime) {
-		dMatrix matrix;
+		/*dMatrix matrix;
 		body->InterpolateMatrix(1.0f, &matrix[0][0]);
+		
+		// position
 		position.x = matrix.m_posit.m_x;
 		position.y = matrix.m_posit.m_y;
 		position.z = matrix.m_posit.m_z;
 		std::cout << "position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
+		
+		// rotation
 		dVector euler0, euler1;
 		matrix.GetEulerAngles(euler0, euler1);
 		setRotation(glm::vec3(euler0.m_x, euler0.m_y, euler0.m_z));
+		*/
+		//model->collisionShape->DebugRender(matrix,);
 		
 		/*trans.getRotation().getEulerZYX(z, y, x);
 		setRotation(glm::vec3(x, y, z));*/
@@ -175,4 +167,23 @@ public:
 		return q;
 	}
 };
+
+void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex)
+{
+	// Fetch user data and body position.
+	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
+	dFloat pos[4];
+	NewtonBodyGetPosition(body, pos);
+
+	// Apply force.
+	dFloat force[3] = { 0, -9.8, 0 };
+	NewtonBodySetForce(body, force);
+	GO->position.x = pos[0];
+	GO->position.y = pos[1];
+	GO->position.z = pos[2];
+
+	// Print info to terminal.
+	//printf("BodyID=%d, Sleep=%d, %.2f, %.2f, %.2f\n",
+	//	mydata->bodyID, NewtonBodyGetSleepState(body), pos[0], pos[1], pos[2]);
+}
 #endif

@@ -72,7 +72,7 @@ public:
 	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	dNewtonCollision* collisionShape;
+	NewtonCollision* collisionShape;
 	bool isStaticMesh;
 	float volume;
 
@@ -99,7 +99,7 @@ public:
 		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
 		if (isStaticMesh) {
 			// create mesh shape from model tris
-			dNewtonCollisionMesh* col = new dNewtonCollisionMesh(&world, 1);
+			/*dNewtonCollisionMesh* col = new dNewtonCollisionMesh(&world, 1);
 			//collisionahape = NewtonCreateTreeCollision(world, 0);
 			col->BeginFace();
 			for (int j = 0; j < meshes.size(); ++j) {
@@ -113,11 +113,13 @@ public:
 				}
 			}
 			col->EndFace();
-			collisionShape = static_cast<dNewtonCollision*>(col);
+			collisionShape = static_cast<dNewtonCollision*>(col);*/
+			collisionShape = NewtonCreateBox(world, 100, 0.1, 100, 0, NULL);
+			
 		}
 		else {
 			// create convex hull shape from mesh verts
-			std::vector<dVector> verts;
+			/*std::vector<dVector> verts;
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
 				for (int i = 0; i < mesh.indices.size(); ++i)
@@ -126,7 +128,8 @@ public:
 			// tolerance of 0.01f = 1% vert removal threshold
 			dVector* dVerts = verts.data();
 			dNewtonCollisionConvexHull* col = new dNewtonCollisionConvexHull(&world, verts.size(), &dVerts[0].m_x, 3 * sizeof(dFloat), 0.01f, 0);
-			collisionShape = static_cast<dNewtonCollision*>(col);
+			collisionShape = static_cast<dNewtonCollision*>(col);*/
+			collisionShape = NewtonCreateSphere(world, 1, 0, NULL);
 		}
 		volume = calculateVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it
