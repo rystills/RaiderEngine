@@ -116,7 +116,7 @@ public:
 		}
 		else {
 			// create convex hull shape from mesh verts
-			/*std::vector<dVector> verts;
+			std::vector<dVector> verts;
 			for (int j = 0; j < meshes.size(); ++j) {
 				Mesh mesh = meshes[j];
 				for (int i = 0; i < mesh.indices.size(); ++i)
@@ -124,9 +124,8 @@ public:
 			}
 			// tolerance of 0.01f = 1% vert removal threshold
 			dVector* dVerts = verts.data();
-			dNewtonCollisionConvexHull* col = new dNewtonCollisionConvexHull(&world, verts.size(), &dVerts[0].m_x, 3 * sizeof(dFloat), 0.01f, 0);
-			collisionShape = static_cast<dNewtonCollision*>(col);*/
-			collisionShape = NewtonCreateSphere(world, 1, 0, NULL);
+			collisionShape = NewtonCreateConvexHull(world, verts.size(), &dVerts[0].m_x, sizeof(dVector), 0.01f, 0, NULL);
+			//collisionShape = NewtonCreateSphere(world, 1, 0, NULL);
 		}
 		volume = calculateVolume();
 		// push back a single instance of the default collision shape so objects with no scaling can share it

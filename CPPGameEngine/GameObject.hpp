@@ -86,54 +86,20 @@ public:
 	void addPhysics(glm::quat rot) {
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
-		// initial transform
-		dMatrix tm = dGetIdentityMatrix();
-		std::cout << "position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
-		// set position
-		tm.m_posit.m_x = position.x;
-		tm.m_posit.m_y = position.y;
-		tm.m_posit.m_z = position.z;
-
+		
 		// rotation
-		/*matrix[0].m_w = rotation[0].w; matrix[0].m_x = rotation[0].x; matrix[0].m_y = rotation[0].y; matrix[0].m_z = rotation[0].z;
-		matrix[1].m_w = rotation[1].w; matrix[1].m_x = rotation[1].x; matrix[1].m_y = rotation[1].y; matrix[1].m_z = rotation[1].z;
-		matrix[2].m_w = rotation[2].w; matrix[2].m_x = rotation[2].x; matrix[2].m_y = rotation[2].y; matrix[2].m_z = rotation[2].z;
-		matrix[3].m_w = rotation[3].w; matrix[3].m_x = rotation[3].x; matrix[3].m_y = rotation[3].y; matrix[3].m_z = rotation[3].z;
-
+		dMatrix tm = glm::value_ptr(rotation);
 		// translation
-		matrix.m_posit.m_x += position.x;
-		matrix.m_posit.m_y += position.y;
-		matrix.m_posit.m_z += position.z;
-		*/
+		tm.m_posit.m_x += position.x;
+		tm.m_posit.m_y += position.y;
+		tm.m_posit.m_z += position.z;
+
 		body = NewtonCreateDynamicBody(world, model->collisionShape, &tm[0][0]);
 		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
 		// Install the callbacks to track the body positions.
 		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
 		// Attach our custom data structure to the bodies.
 		NewtonBodySetUserData(body, (void *)this);
-		
-		/*dMatrix matrix = dGetIdentityMatrix();
-
-		// rotation
-		matrix[0].m_w = rotation[0].w; matrix[0].m_x = rotation[0].x; matrix[0].m_y = rotation[0].y; matrix[0].m_z = rotation[0].z;
-		matrix[1].m_w = rotation[1].w; matrix[1].m_x = rotation[1].x; matrix[1].m_y = rotation[1].y; matrix[1].m_z = rotation[1].z;
-		matrix[2].m_w = rotation[2].w; matrix[2].m_x = rotation[2].x; matrix[2].m_y = rotation[2].y; matrix[2].m_z = rotation[2].z;
-		matrix[3].m_w = rotation[3].w; matrix[3].m_x = rotation[3].x; matrix[3].m_y = rotation[3].y; matrix[3].m_z = rotation[3].z;
-		
-		// translation
-		matrix.m_posit.m_x += position.x;
-		matrix.m_posit.m_y += position.y;
-		matrix.m_posit.m_z += position.z;
-
-		// apply
-		body->SetTargetMatrix(&matrix[0][0]);*/
-		
-		//TODO: pos, rotation, scale
-		/*btQuaternion quat;
-		glm::vec3 rotationEA = glm::eulerAngles(rot);
-		quat.setEulerZYX(rotationEA.z, rotationEA.y, rotationEA.x); //or quat.setEulerZYX depending on the ordering you want
-		startTransform.setRotation(quat);
-		*/
 	}
 	
 	/*
@@ -186,9 +152,19 @@ void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadInde
 	// Apply force.
 	dFloat force[3] = { 0, -.3f, 0 };
 	NewtonBodySetForce(body, force);
+
+	// update position
 	GO->position.x = pos[0];
 	GO->position.y = pos[1];
 	GO->position.z = pos[2];
+
+	// update rotation
+	dMatrix rot;
+	NewtonBodyGetRotation(body, &rot[0][0]);
+	dVector euler0, euler1;
+	rot.GetEulerAngles(euler0, euler1);
+	GO->setRotation(glm::vec3(euler0.m_x, euler0.m_y, euler0.m_z));
+	
 
 	// Print info to terminal.
 	//printf("BodyID=%d, Sleep=%d, %.2f, %.2f, %.2f\n",

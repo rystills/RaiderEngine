@@ -555,6 +555,65 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	FT_Done_FreeType(ft);
 }
 
+
+void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color)
+{
+	// Vertex data
+	GLfloat points[12];
+
+	points[0] = from.x;
+	points[1] = from.y;
+	points[2] = from.z;
+	points[3] = color.x;
+	points[4] = color.y;
+	points[5] = color.z;
+
+	points[6] = to.x;
+	points[7] = to.y;
+	points[8] = to.z;
+	points[9] = color.x;
+	points[10] = color.y;
+	points[11] = color.z;
+
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glBindVertexArray(0);
+
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_LINES, 0, 2);
+	glBindVertexArray(0);
+
+}
+void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
+	int index = vertexCount - 1;
+	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
+	for (int i = 0; i < vertexCount; i++) {
+		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
+		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), glm::vec3(255, 255, 255));
+		p0 = p1;
+	}
+}
+
+/*
+draw all bullet colliders as wireframes
+*/
+void debugDrawNewton() {
+	for (int i = 0; i < gameObjects.size(); ++i) {
+		dMatrix tm;
+		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
+		NewtonCollisionForEachPolygonDo(gameObjects[i]->model->collisionShape, &tm[0][0], debugDrawNewtonCallback, NULL);
+	}
+}
+
 /*
 reset all input events that occur for a single frame only
 */
@@ -818,6 +877,11 @@ int main() {
 		if (displayString == "") {
 			// TODO: render point
 		}
+
+		debugLineShader.use();
+		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		debugDrawNewton();
 
 		// 5. render text
 		textShader.use();
