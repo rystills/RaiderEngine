@@ -556,8 +556,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 }
 
 
-void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color)
-{
+void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color) {
 	// Vertex data
 	GLfloat points[12];
 
@@ -591,8 +590,8 @@ void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_LINES, 0, 2);
 	glBindVertexArray(0);
-
 }
+
 void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
 	int index = vertexCount - 1;
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
@@ -729,6 +728,7 @@ int main() {
 	// render loop
 	// -----------
 	bool f3Pressed = false;
+	updateTime();
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
 		updateTime();
@@ -897,6 +897,9 @@ int main() {
 		glEnable(GL_DEPTH_TEST);
 		
 		glfwSwapBuffers(window);
+
+		//system("pause");
+		//break;
 	}
 	cleanupPhysics();
 	glfwTerminate();

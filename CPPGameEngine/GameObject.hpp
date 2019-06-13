@@ -85,7 +85,7 @@ public:
 	*/
 	void addPhysics(glm::quat rot) {
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
-		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale;
+		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;
 		
 		// rotation
 		dMatrix tm = glm::value_ptr(rotation);
@@ -129,7 +129,7 @@ public:
 
 	/*
 	update the GameObject's rotation from a vec3 of euler angles
-	@param rotationEA: the desired rotation (in euler angles) to set
+	@param rotationEA: the desired rotation (in radian euler angles) to set
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
 	glm::quat setRotation(glm::vec3 rotationEA, bool fixInitialRotation = false) {
@@ -142,16 +142,16 @@ public:
 	}
 };
 
-void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex)
-{
+void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex) {
+	// Apply force.
+	// TODO: mass seems to affect fall speed; fix that
+	dFloat force[3] = { 0, -9.8, 0 };
+	NewtonBodySetForce(body, force);
+
 	// Fetch user data and body position.
 	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
 	dFloat pos[4];
 	NewtonBodyGetPosition(body, pos);
-
-	// Apply force.
-	dFloat force[3] = { 0, -.3f, 0 };
-	NewtonBodySetForce(body, force);
 
 	// update position
 	GO->position.x = pos[0];
@@ -160,11 +160,8 @@ void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadInde
 
 	// update rotation
 	dMatrix rot;
-	NewtonBodyGetRotation(body, &rot[0][0]);
-	dVector euler0, euler1;
-	rot.GetEulerAngles(euler0, euler1);
-	GO->setRotation(glm::vec3(euler0.m_x, euler0.m_y, euler0.m_z));
-	
+	NewtonBodyGetRotation(body, &rot[0][0]);	
+	GO->rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));
 
 	// Print info to terminal.
 	//printf("BodyID=%d, Sleep=%d, %.2f, %.2f, %.2f\n",
