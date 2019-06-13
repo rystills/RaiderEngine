@@ -96,14 +96,12 @@ public:
 	calculate the collision shape for this mesh, to be used by bullet physics
 	*/
 	void generateCollisionShape() {
-		// note: lowered collision margin for now so small objects don't get warped hulls; increase later if phasing through the floor is observed
 		if (isStaticMesh) {
 			// create mesh shape from model tris
 			collisionShape = NewtonCreateTreeCollision(world, 0);
 			NewtonTreeCollisionBeginBuild(collisionShape);
-			for (int j = 0; j < meshes.size(); ++j) {
-				Mesh mesh = meshes[j];
-				for (int i = 0; i < mesh.indices.size(); i += 3) {
+			for (Mesh mesh : meshes) {
+				for (int i = 0; i < mesh.indices.size()-2; i += 3) {
 					dVector verts[3] = {
 						dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z),
 						dVector(mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z),
@@ -116,10 +114,9 @@ public:
 		else {
 			// create convex hull shape from mesh verts
 			std::vector<dVector> verts;
-			for (int j = 0; j < meshes.size(); ++j) {
-				Mesh mesh = meshes[j];
-				for (int i = 0; i < mesh.indices.size(); ++i)
-					verts.push_back(dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z));
+			for (Mesh mesh : meshes) {
+				for (int meshInd : mesh.indices)
+					verts.push_back(dVector(mesh.vertices[meshInd].Position.x, mesh.vertices[meshInd].Position.y, mesh.vertices[meshInd].Position.z));
 			}
 			// tolerance of 0.01f = 1% vert removal threshold
 			dVector* dVerts = verts.data();

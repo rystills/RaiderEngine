@@ -55,6 +55,7 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include <dNewtonCollision.h>
 #include <dNewtonDynamicBody.h>
 NewtonWorld* world;
+#include "mousePicking.hpp"
 #include "filesystem.hpp"
 #include "shader.hpp"
 #include <iostream>
@@ -654,6 +655,7 @@ void displayObjectInfo(GameObject* go) {
 	player.camera.controllable = displayString.length() == 0;
 }
 
+
 int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
@@ -781,6 +783,9 @@ int main() {
 #define far_plane 1000.0f
 		glm::mat4 projection = glm::perspective(glm::radians(player.camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
 		glm::mat4 view = player.camera.GetViewMatrix();
+
+		// picking
+		UpdatePickBody(deltaTime, view, projection);
 
 		if (displayString != "") {
 			// clear display string on right mouse button press

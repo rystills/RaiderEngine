@@ -101,10 +101,11 @@ public:
 		// scale
 		NewtonBodySetCollisionScale(body, scale.x, scale.y, scale.z);
 
-		// Install the callbacks to track the body positions.
-		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
 		// Attach our custom data structure to the bodies.
 		NewtonBodySetUserData(body, (void *)this);
+
+		// Install the callbacks to track the body positions.
+		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
 	}
 	
 	/*

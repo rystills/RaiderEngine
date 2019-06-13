@@ -71,6 +71,9 @@
     <ClInclude Include="Player.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="mousePicking.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
