@@ -10,7 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 extern float lastX, lastY;
-extern bool mousePressedLeft;
+extern bool mouseHeldLeft;
 
 /*
 convert a pair of x,y NDC coordinates to a world start and end position for raycasting
@@ -60,8 +60,10 @@ void CalculatePickForceAndTorque(const NewtonBody* const body, const dVector& po
 	for (int i = 0; i < 3; i++) {
 		dVector veloc(0.0f);
 		veloc[i] = deltaVeloc[i];
-		// todo: what should the timestep argument be for NewtonBodyAddImpulse?
-		NewtonBodyAddImpulse(body, &veloc[0], &pointOnBodyInGlobalSpace[0], 1);
+		// todo: consider timestep (deltaTime) dependent impulse time
+		// todo: consider enforcing a maximum impulse strength to minimize the risk of clipping
+		// todo: rather than using ray end as target position, perform a second raycast from held object's position to ray end to respect walls and floors
+		NewtonBodyAddImpulse(body, &veloc[0], &pointOnBodyInGlobalSpace[0], .15f);
 	}
 
 	// damp angular velocity
@@ -173,7 +175,7 @@ dVector m_pickedBodyLocalAtachmentNormal;
 dVector m_pickedBodyTargetPosition;
 void UpdatePickBody(dFloat timestep, glm::mat4 view, glm::mat4 projection) {
 	// handle pick body from the screen
-	bool mousePickState = mousePressedLeft;
+	bool mousePickState = mouseHeldLeft;
 	float m_mousePosX = lastX;
 	float m_mousePosY = lastY;
 	if (!m_targetPicked) {
@@ -206,7 +208,6 @@ void UpdatePickBody(dFloat timestep, glm::mat4 view, glm::mat4 projection) {
 	}
 	else {
 		if (mousePickState) {
-			puts("B");
 			dFloat x = dFloat(m_mousePosX);
 			dFloat y = dFloat(m_mousePosY);
 			std::pair<dVector, dVector> worldPoints = screenToWorld(view, projection);
