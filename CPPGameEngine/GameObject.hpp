@@ -112,24 +112,15 @@ public:
 	@param deltaTime: the elapsed time (in seconds) since the previous frame
 	*/
 	virtual void update(float deltaTime) {
-		/*dMatrix matrix;
-		body->InterpolateMatrix(1.0f, &matrix[0][0]);
-		
-		// position
-		position.x = matrix.m_posit.m_x;
-		position.y = matrix.m_posit.m_y;
-		position.z = matrix.m_posit.m_z;
-		std::cout << "position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
-		
-		// rotation
-		dVector euler0, euler1;
-		matrix.GetEulerAngles(euler0, euler1);
-		setRotation(glm::vec3(euler0.m_x, euler0.m_y, euler0.m_z));
-		*/
-		//model->collisionShape->DebugRender(matrix,);
-		
-		/*trans.getRotation().getEulerZYX(z, y, x);
-		setRotation(glm::vec3(x, y, z));*/
+		// update position
+		dFloat pos[4];
+		NewtonBodyGetPosition(body, pos);
+		position.x = pos[0]; position.y = pos[1]; position.z = pos[2];
+
+		// update rotation
+		dMatrix rot;
+		NewtonBodyGetRotation(body, &rot[0][0]);
+		rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));
 	}
 
 	/*
@@ -147,29 +138,18 @@ public:
 	}
 };
 
+/*
+apply force callback; called by newton each time the body is about to be simulated
+@param body: the body that is about to be simulated
+@param timestep: 
+@param threadIndex:
+*/
 void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex) {
-	// Apply force.
-	// TODO: mass seems to affect fall speed; fix that
-	dFloat force[3] = { 0, -9.8, 0 };
-	NewtonBodySetForce(body, force);
-
-	// Fetch user data and body position.
+	// retrieve the corresponding GameObject from the body's user data
 	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
-	dFloat pos[4];
-	NewtonBodyGetPosition(body, pos);
 
-	// update position
-	GO->position.x = pos[0];
-	GO->position.y = pos[1];
-	GO->position.z = pos[2];
-
-	// update rotation
-	dMatrix rot;
-	NewtonBodyGetRotation(body, &rot[0][0]);	
-	GO->rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));
-
-	// Print info to terminal.
-	//printf("BodyID=%d, Sleep=%d, %.2f, %.2f, %.2f\n",
-	//	mydata->bodyID, NewtonBodyGetSleepState(body), pos[0], pos[1], pos[2]);
+	// apply gravitational force
+	dFloat force[3] = { 0, -9.8*GO->mass, 0 };
+	NewtonBodySetForce(body, force);
 }
 #endif
