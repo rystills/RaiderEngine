@@ -474,6 +474,14 @@ void cleanupPhysics() {
 }
 
 /*
+initialize the default vertex buffer and attribute objects (VBO and VAO, respectively)
+*/
+void initBuffers() {
+	glGenBuffers(1, &VBO);
+	glGenVertexArrays(1, &VAO);
+}
+
+/*
 initialize freetype, creating a VBO and VAO specifically for text rendering
 */
 void initFreetype() {
@@ -556,6 +564,12 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 }
 
 
+/*
+draw a single line (useless unless the debug render shader is active)
+@param from: the line's start position
+@param to: the line's end position
+@param color: the line's rgb color
+*/
 void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color) {
 	// Vertex data
 	GLfloat points[12];
@@ -574,10 +588,6 @@ void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& 
 	points[10] = color.y;
 	points[11] = color.z;
 
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
@@ -592,25 +602,32 @@ void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& 
 	glBindVertexArray(0);
 }
 
+/*
+callback for debugDrawNewton - provides us with a single body's transformed collider info
+@param userData: newton's userData field; currently we use this to store the body's sleep state
+@param vertexCount: the total number of vertices
+@param faceVertec: array of face vertices
+@param faceId: 
+*/
 void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
+	int isSleeping = (int)userData;
 	int index = vertexCount - 1;
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
 	for (int i = 0; i < vertexCount; i++) {
 		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-		// TODO: manually scale debug draw points by rigidbody scale
-		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), glm::vec3(255, 255, 255));
+		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), glm::vec3(isSleeping*255,0,!isSleeping*255));
 		p0 = p1;
 	}
 }
 
 /*
-draw all bullet colliders as wireframes
+draw all newton colliders as wireframes
 */
 void debugDrawNewton() {
 	for (int i = 0; i < gameObjects.size(); ++i) {
 		dMatrix tm;
 		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
-		NewtonCollisionForEachPolygonDo(gameObjects[i]->model->collisionShape, &tm[0][0], debugDrawNewtonCallback, NULL);
+		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
 	}
 }
 
@@ -642,6 +659,7 @@ int main() {
 	initPhysics();
 	player.init();
 	initFreetype();
+	initBuffers();
 	freetypeLoadFont("Inter-Regular", 24);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
