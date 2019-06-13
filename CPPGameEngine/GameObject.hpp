@@ -89,6 +89,7 @@ public:
 		
 		// rotation
 		dMatrix tm = glm::value_ptr(rotation);
+		
 		// translation
 		tm.m_posit.m_x += position.x;
 		tm.m_posit.m_y += position.y;
@@ -96,6 +97,10 @@ public:
 
 		body = NewtonCreateDynamicBody(world, model->collisionShape, &tm[0][0]);
 		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
+
+		// scale
+		NewtonBodySetCollisionScale(body, scale.x, scale.y, scale.z);
+
 		// Install the callbacks to track the body positions.
 		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
 		// Attach our custom data structure to the bodies.

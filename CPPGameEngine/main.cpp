@@ -597,6 +597,7 @@ void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
 	for (int i = 0; i < vertexCount; i++) {
 		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
+		// TODO: manually scale debug draw points by rigidbody scale
 		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), glm::vec3(255, 255, 255));
 		p0 = p1;
 	}
@@ -728,8 +729,17 @@ int main() {
 	// render loop
 	// -----------
 	bool f3Pressed = false;
+	bool debugDraw = false;
 	updateTime();
 	while (!glfwWindowShouldClose(window)) {
+		// debug key update
+		if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
+			f3Pressed = true;
+		else if (f3Pressed) {
+			f3Pressed = false;
+			debugDraw = !debugDraw;
+		}
+			
 		// update frame
 		updateTime();
 		resetSingleFrameInput();
@@ -878,10 +888,12 @@ int main() {
 			// TODO: render point
 		}
 
-		debugLineShader.use();
-		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		debugDrawNewton();
+		if (debugDraw) {
+			debugLineShader.use();
+			glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+			glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			debugDrawNewton();
+		}
 
 		// 5. render text
 		textShader.use();
