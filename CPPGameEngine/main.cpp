@@ -113,6 +113,8 @@ update deltaTime based on the amount of time elapsed since the previous frame
 void updateTime() {
 	float currentFrame = glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
+	// if fps goes below 30, slow down the game speed rather than trying to interpolate (this should prevent occasional jitters from breaking the physics)
+	if (deltaTime > .034f) deltaTime = .034f;
 	lastFrame = currentFrame;
 }
 
@@ -602,20 +604,21 @@ void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& 
 	glBindVertexArray(0);
 }
 
+glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
 /*
 callback for debugDrawNewton - provides us with a single body's transformed collider info
-@param userData: newton's userData field; currently we use this to store the body's sleep state
+@param userData: newton's userData field; currently we use this as an enum where 2 = static, 1 = dynamic and asleep, 0 = dynamic and awake
 @param vertexCount: the total number of vertices
 @param faceVertec: array of face vertices
 @param faceId: 
 */
 void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
-	int isSleeping = (int)userData;
+	int state = (int)userData;
 	int index = vertexCount - 1;
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
 	for (int i = 0; i < vertexCount; i++) {
 		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), glm::vec3(isSleeping*255,0,!isSleeping*255));
+		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
 		p0 = p1;
 	}
 }
@@ -627,7 +630,7 @@ void debugDrawNewton() {
 	for (int i = 0; i < gameObjects.size(); ++i) {
 		dMatrix tm;
 		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
-		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
+		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, gameObjects[i]->model->isStaticMesh ? (void*)2 : (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
 	}
 }
 
@@ -748,7 +751,6 @@ int main() {
 	// -----------
 	bool f3Pressed = false;
 	bool debugDraw = false;
-	updateTime();
 	while (!glfwWindowShouldClose(window)) {
 		// debug key update
 		if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
