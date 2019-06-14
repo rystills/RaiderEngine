@@ -1,24 +1,7 @@
 #pragma once
-
-#include <glad/glad.h> 
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
+#include "stdafx.h"
 #include "mesh.hpp"
 #include "shader.hpp"
-
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <map>
-#include <vector>
-#include <memory>
 
 class Light {
 public:

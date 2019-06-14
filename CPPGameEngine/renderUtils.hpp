@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------

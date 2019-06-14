@@ -1,7 +1,7 @@
 #pragma once
+#include "stdafx.h"
 
 // add support for colored terminal output by enclosing print statements in ERROR, WARNING, or SUCCESS
-#include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>

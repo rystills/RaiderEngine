@@ -1,5 +1,5 @@
 #pragma once
-
+#include "stdafx.h"
 #include "Light.hpp"
 
 class FlickerLight : public Light {

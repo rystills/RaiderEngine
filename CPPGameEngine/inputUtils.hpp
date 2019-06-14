@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------

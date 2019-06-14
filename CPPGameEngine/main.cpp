@@ -1,9 +1,4 @@
-// C++ standard includes
-#include <stdio.h>
-#include <iostream>
-#include <sstream>
-#include <unordered_map>
-#include <memory>
+#include "stdafx.h"
 
 // engine includes
 #include "terminalColors.hpp"
@@ -12,20 +7,6 @@
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 unsigned int aiMapProcessFlags =
 	aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
 	aiProcess_JoinIdenticalVertices | // join identical vertices/ optimize indexing
@@ -42,12 +23,6 @@ unsigned int aiMapProcessFlags =
 	0;
 unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
 
-#include <dVector.h>
-#include <dMatrix.h>
-#include <Newton.h>
-#include <dNewton.h>
-#include <dNewtonCollision.h>
-#include <dNewtonDynamicBody.h>
 NewtonWorld* world;
 #include "filesystem.hpp"
 #include "shader.hpp"
@@ -85,8 +60,6 @@ float lastFrame = 0.0f;
 #include "inputUtils.hpp"
 #include "renderUtils.hpp"
 
-#include "ft2build.h"
-#include FT_FREETYPE_H
 #define numFontCharacters 128
 
 unsigned int VBO, VAO;

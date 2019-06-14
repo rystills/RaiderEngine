@@ -1,5 +1,5 @@
 #pragma once
-
+#include "stdafx.h"
 #include "GameObject.hpp"
 
 class Cog : public GameObject {

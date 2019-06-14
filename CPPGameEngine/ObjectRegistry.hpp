@@ -1,5 +1,5 @@
 #pragma once
-
+#include "stdafx.h"
 #include "MovingPlatform.hpp"
 #include "PlayerSpawn.hpp"
 #include "Cog.hpp"

@@ -1,16 +1,5 @@
 #pragma once
-
-#include <dVector.h>
-#include <dMatrix.h>
-#include <Newton.h>
-#include <dNewton.h>
-#include <dNewtonCollision.h>
-#include <dNewtonDynamicBody.h>
-#include <utility>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
+#include "stdafx.h"
 #include "Player.hpp"
 extern bool mouseHeldLeft;
 extern Player player;
