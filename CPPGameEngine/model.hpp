@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "assimpFlags.hpp"
 
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 

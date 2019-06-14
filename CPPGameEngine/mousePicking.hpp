@@ -3,6 +3,7 @@
 #include "Player.hpp"
 extern bool mouseHeldLeft;
 extern Player player;
+// this file is responsible for raycasting, and picking up objects with the mouse
 
 /*
 convert a pair of x,y NDC coordinates to a world start and end position for raycasting

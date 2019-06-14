@@ -5,6 +5,8 @@
 #include "Cog.hpp"
 #include "Light.hpp"
 #include "FlickerLight.hpp"
+extern std::vector<std::unique_ptr<GameObject>> gameObjects;
+extern std::vector<std::unique_ptr<Light>> lights;
 
 void instantiateGameObject(std::string name, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::vector<std::string> extraArgs) {
 	if (name == "MovingPlatform") gameObjects.emplace_back(new MovingPlatform(pos, rot, scale));

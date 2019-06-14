@@ -2,6 +2,9 @@
 #include "stdafx.h"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "model.hpp"
+extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
+extern std::unordered_map<std::string, std::string> objectInfoDisplays;
 
 void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex);
 class GameObject {

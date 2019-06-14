@@ -89,6 +89,21 @@
     <ClInclude Include="stdafx.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="timing.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mapLoader.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="assimpFlags.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

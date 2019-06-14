@@ -150,11 +150,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assimpFlags.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="Cog.hpp" />
     <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FlickerLight.hpp" />
     <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="graphics.hpp" />
+    <ClInclude Include="mapLoader.hpp" />
     <ClInclude Include="ObjectRegistry.hpp" />
     <ClInclude Include="inputUtils.hpp" />
     <ClInclude Include="Light.hpp" />
@@ -162,6 +165,7 @@
     <ClInclude Include="model.hpp" />
     <ClInclude Include="MovingPlatform.hpp" />
     <ClInclude Include="mousePicking.hpp" />
+    <ClInclude Include="physics.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />
     <ClInclude Include="renderUtils.hpp" />
@@ -169,6 +173,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="terminalColors.hpp" />
+    <ClInclude Include="timing.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="installInstructions.txt" />
