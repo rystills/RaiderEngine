@@ -1,5 +1,5 @@
-#ifndef GAME_OBJECT_REGISTRY_H
-#define GAME_OBJECT_REGISTRY_H
+#pragma once
+
 #include "MovingPlatform.hpp"
 #include "PlayerSpawn.hpp"
 #include "Cog.hpp"
@@ -16,5 +16,3 @@ void instantiateLight(std::string name, glm::vec3 pos, glm::vec3 rot, glm::vec3 
 	if (name == "point") lights.emplace_back(new Light(pos, extraArgs.size() > 0 ? std::stof(extraArgs[0]) : 200, extraArgs.size() > 3 ? glm::vec3(std::stof(extraArgs[1]), std::stof(extraArgs[2]), std::stof(extraArgs[3])) : glm::vec3(1, 1, 1)));
 	else if (name == "Flicker") lights.emplace_back(new FlickerLight(pos, extraArgs.size() > 0 ? std::stof(extraArgs[0]) : 200, extraArgs.size() > 3 ? glm::vec3(std::stof(extraArgs[1]), std::stof(extraArgs[2]), std::stof(extraArgs[3])) : glm::vec3(1, 1, 1)));
 }
-
-#endif

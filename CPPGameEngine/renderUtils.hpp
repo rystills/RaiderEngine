@@ -1,5 +1,4 @@
-#ifndef RENDERUTILS_H
-#define RENDERUTILS_H
+#pragma once
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -110,4 +109,3 @@ void renderCube() {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
-#endif

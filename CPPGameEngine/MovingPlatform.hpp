@@ -1,5 +1,4 @@
-#ifndef MOVING_PLATFORM_H
-#define MOVING_PLATFORM_H
+#pragma once
 
 #include "GameObject.hpp"
 
@@ -39,5 +38,3 @@ public:
 		*/
 	}
 };
-
-#endif

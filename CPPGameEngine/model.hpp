@@ -1,5 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include <glad/glad.h> 
 
@@ -301,4 +300,3 @@ private:
 };
 std::unordered_map<std::string, Texture> Model::texturesLoaded;
 Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap;
-#endif

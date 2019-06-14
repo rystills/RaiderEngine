@@ -1,5 +1,5 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
+
 #include "camera.hpp"
 
 class Player {
@@ -87,4 +87,3 @@ public:
 		syncCameraPos();
 	}
 };
-#endif

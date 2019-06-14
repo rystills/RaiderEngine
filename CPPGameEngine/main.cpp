@@ -1,27 +1,17 @@
+// C++ standard includes
+#include <stdio.h>
+#include <iostream>
+#include <sstream>
+#include <unordered_map>
+#include <memory>
+
+// engine includes
+#include "terminalColors.hpp"
+
 // settings
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
-// terminal colors
-#include <stdio.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <direct.h>
-CONSOLE_SCREEN_BUFFER_INFO cbInfo;
-HANDLE hConsole;
-int originalColor;
-#define WARNING(msg) { SetConsoleTextAttribute(hConsole, 14); msg; SetConsoleTextAttribute(hConsole, originalColor); }
-#define ERROR(msg) { SetConsoleTextAttribute(hConsole, 12); msg; SetConsoleTextAttribute(hConsole, originalColor); }
-#define SUCCESS(msg) { SetConsoleTextAttribute(hConsole, 10); msg; SetConsoleTextAttribute(hConsole, originalColor); }
-#else
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
-#define WARNING(msg) { printf(ANSI_COLOR_YELLOW); msg; printf(ANSI_COLOR_RESET); }
-#define ERROR(msg) { printf(ANSI_COLOR_RED); msg; printf(ANSI_COLOR_RESET); }
-#define SUCCESS(msg) { printf(ANSI_COLOR_GREEN); msg; printf(ANSI_COLOR_RESET); }
-#endif
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
@@ -61,10 +51,6 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 NewtonWorld* world;
 #include "filesystem.hpp"
 #include "shader.hpp"
-#include <iostream>
-#include <sstream>
-#include <unordered_map>
-#include <memory>
 
 #include "Player.hpp"
 #include "mousePicking.hpp"

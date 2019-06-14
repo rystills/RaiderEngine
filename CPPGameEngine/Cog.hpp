@@ -1,5 +1,4 @@
-#ifndef COG_H
-#define COG_H
+#pragma once
 
 #include "GameObject.hpp"
 
@@ -22,5 +21,3 @@ public:
 		}
 	}
 };
-
-#endif

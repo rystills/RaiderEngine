@@ -1,5 +1,4 @@
-#ifndef PLAYERSPAWN_H
-#define PLAYERSPAWN_H
+#pragma once
 
 class PlayerSpawn {
 public:
@@ -9,4 +8,3 @@ public:
 		player.camera.updateCameraVectors();
 	}
 };
-#endif

@@ -157,6 +157,7 @@
     <ClInclude Include="renderUtils.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="terminalColors.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="installInstructions.txt" />

@@ -1,5 +1,4 @@
-#ifndef INPUTUTILS_H
-#define INPUTUTILS_H
+#pragma once
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
@@ -48,4 +47,3 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	player.camera.ProcessMouseScroll(yoffset);
 }
-#endif

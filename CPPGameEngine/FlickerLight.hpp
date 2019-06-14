@@ -1,5 +1,4 @@
-#ifndef FLICKERLIGHT_H
-#define FLICKERLIGHT_H
+#pragma once
 
 #include "Light.hpp"
 
@@ -30,5 +29,3 @@ public:
 		}
 	}
 };
-
-#endif

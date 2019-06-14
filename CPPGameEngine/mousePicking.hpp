@@ -1,3 +1,5 @@
+#pragma once
+
 #include <dVector.h>
 #include <dMatrix.h>
 #include <Newton.h>

@@ -1,5 +1,4 @@
-#ifndef GAMEOBJECT_H
-#define GAMEOBJECT_H
+#pragma once
 
 #include <glad/glad.h> 
 
@@ -153,4 +152,3 @@ void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadInde
 	dFloat force[3] = { 0, -9.8*GO->mass, 0 };
 	NewtonBodySetForce(body, force);
 }
-#endif

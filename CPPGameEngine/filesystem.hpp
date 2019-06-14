@@ -1,5 +1,4 @@
-#ifndef FILESYSTEM_H
-#define FILESYSTEM_H
+#pragma once
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
@@ -49,6 +48,3 @@ private:
 
 
 };
-
-// FILESYSTEM_H
-#endif
