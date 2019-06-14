@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{be50f23d-d022-481d-a4c3-93fc2ce01d15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -92,44 +95,44 @@
     <Text Include="installInstructions.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="deferred_light_box.fs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\debugLineShader.fs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="deferred_light_box.vs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\debugLineShader.vs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="deferred_shading.fs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\deferred_light_box.fs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="deferred_shading.vs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\deferred_light_box.vs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="g_buffer.fs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\deferred_shading.fs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="g_buffer.vs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\deferred_shading.vs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="debugLineShader.vs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\g_buffer.fs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="debugLineShader.fs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\g_buffer.vs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="textShader.vs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\point_shadows_depth.fs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="textShader.fs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\point_shadows_depth.gs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="point_shadows_depth.fs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\point_shadows_depth.vs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="point_shadows_depth.vs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\textShader.fs">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="point_shadows_depth.gs">
-      <Filter>Source Files</Filter>
+    <None Include="shaders\textShader.vs">
+      <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

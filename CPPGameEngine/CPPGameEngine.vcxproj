@@ -175,19 +175,19 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="debugLineShader.fs" />
-    <None Include="debugLineShader.vs" />
-    <None Include="deferred_light_box.fs" />
-    <None Include="deferred_light_box.vs" />
-    <None Include="deferred_shading.fs" />
-    <None Include="deferred_shading.vs" />
-    <None Include="g_buffer.fs" />
-    <None Include="g_buffer.vs" />
-    <None Include="point_shadows_depth.fs" />
-    <None Include="point_shadows_depth.gs" />
-    <None Include="point_shadows_depth.vs" />
-    <None Include="textShader.fs" />
-    <None Include="textShader.vs" />
+    <None Include="shaders\debugLineShader.fs" />
+    <None Include="shaders\debugLineShader.vs" />
+    <None Include="shaders\deferred_light_box.fs" />
+    <None Include="shaders\deferred_light_box.vs" />
+    <None Include="shaders\deferred_shading.fs" />
+    <None Include="shaders\deferred_shading.vs" />
+    <None Include="shaders\g_buffer.fs" />
+    <None Include="shaders\g_buffer.vs" />
+    <None Include="shaders\point_shadows_depth.fs" />
+    <None Include="shaders\point_shadows_depth.gs" />
+    <None Include="shaders\point_shadows_depth.vs" />
+    <None Include="shaders\textShader.fs" />
+    <None Include="shaders\textShader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

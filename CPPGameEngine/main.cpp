@@ -685,13 +685,13 @@ int main() {
 
 	// build and compile shaders
 	// -------------------------
-	Shader shaderGeometryPass("g_buffer.vs", "g_buffer.fs");
-	Shader shaderLightingPass("deferred_shading.vs", "deferred_shading.fs");
-	Shader shaderLightBox("deferred_light_box.vs", "deferred_light_box.fs");
-	Shader debugLineShader("debugLineShader.vs", "debugLineShader.fs");
-	Shader textShader("textShader.vs", "textShader.fs");
+	Shader shaderGeometryPass("shaders/g_buffer.vs", "shaders/g_buffer.fs");
+	Shader shaderLightingPass("shaders/deferred_shading.vs", "shaders/deferred_shading.fs");
+	Shader shaderLightBox("shaders/deferred_light_box.vs", "shaders/deferred_light_box.fs");
+	Shader debugLineShader("shaders/debugLineShader.vs", "shaders/debugLineShader.fs");
+	Shader textShader("shaders/textShader.vs", "shaders/textShader.fs");
 	glm::mat4 orthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
-	Shader pointShadowsDepth("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
+	Shader pointShadowsDepth("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.fs", "shaders/point_shadows_depth.gs");
 
 	// load models
 	// -----------
