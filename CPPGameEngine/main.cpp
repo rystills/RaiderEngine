@@ -566,6 +566,33 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	FT_Done_FreeType(ft);
 }
 
+/*
+draw a single point (useless unless the debug render shader is active)
+@param pos: the point's position
+@param color: the point's rgb color
+*/
+void debugDrawPoint(glm::vec3 pos, glm::vec3 color) {
+	GLfloat points[6];
+	points[0] = pos.x;
+	points[1] = pos.y;
+	points[2] = pos.z;
+	points[3] = color.r;
+	points[4] = color.g;
+	points[5] = color.b;
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glBindVertexArray(0);
+
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_POINTS, 0, 2);
+	glBindVertexArray(0);
+}
 
 /*
 draw a single line (useless unless the debug render shader is active)
@@ -669,6 +696,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	// configure depth map FBO
 	// -----------------------
@@ -909,15 +937,19 @@ int main() {
 		// 4. render UI
 		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
-		if (displayString == "") {
-			// TODO: render point
-		}
+		debugLineShader.use();
+		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
 		if (debugDraw) {
-			debugLineShader.use();
-			glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-			glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 			debugDrawNewton();
+		}
+
+		if (displayString == "") {
+			// convert center position into camera coordinates
+			glm::mat4 M = glm::inverse(projection*view);
+			glm::vec4 lRayStart_world = M * glm::vec4(0,0, 0,1); lRayStart_world /= lRayStart_world.w;
+			debugDrawPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
 		}
 
 		// 5. render text

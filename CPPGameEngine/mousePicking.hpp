@@ -22,7 +22,8 @@ convert a pair of x,y NDC coordinates to a world start and end position for rayc
 */
 std::pair<dVector, dVector> screenToWorld(glm::mat4 view, glm::mat4 projection, float x=0, float y=0) {
 	glm::vec4 lRayStart_NDC(x, y, 0, 1.0f);
-	glm::vec4 lRayEnd_NDC(x, y, 1, 1.0f);
+	// .94 for max object pick distance
+	glm::vec4 lRayEnd_NDC(x, y, .94, 1.0f);
 
 	// inverse transform matrices to camera space
 	glm::mat4 M = glm::inverse(projection*view);

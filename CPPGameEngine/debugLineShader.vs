@@ -8,6 +8,7 @@ uniform mat4 projection;
 uniform mat4 view;
 
 void main() {
+	gl_PointSize = 3;
 	gl_Position = projection * view * vec4(position, 1.0f);
 	color_from_vshader = color;
 }
