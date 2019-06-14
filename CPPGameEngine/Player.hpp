@@ -71,6 +71,7 @@ public:
 			dir += camera.Right;
 			camera.ProcessKeyboard(RIGHT, deltaTime);
 		}
+		camera.updateViewProj();
 		/*if (dir == glm::vec3(0, 0, 0))
 			controller->setWalkDirection(btVector3(0, 0, 0));
 		else

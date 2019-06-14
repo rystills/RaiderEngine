@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
 
@@ -22,10 +23,8 @@ const float SPEED = 8;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
-
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
-class Camera
-{
+class Camera {
 public:
 	// Camera Attributes
 	glm::vec3 Position;
@@ -41,6 +40,10 @@ public:
 	float MouseSensitivity;
 	float Zoom;
 	bool controllable = true;
+
+	// matrices and clipping planes
+	glm::mat4 projection, view;
+	float near_plane = 0.1f, far_plane = 1000.0f;
 
 	// Constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
@@ -59,9 +62,12 @@ public:
 		updateCameraVectors();
 	}
 
-	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
-	glm::mat4 GetViewMatrix() {
-		return glm::lookAt(Position, Position + Front, Up);
+	/*
+	update view and projection matrices, to be used for raycasting, rendering, etc..
+	*/
+	void updateViewProj() {
+		projection = glm::perspective(glm::radians(Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
+		view = glm::lookAt(Position, Position + Front, Up);;
 	}
 
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

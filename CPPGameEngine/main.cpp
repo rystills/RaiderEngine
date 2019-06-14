@@ -1,3 +1,7 @@
+// settings
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 720;
+
 // terminal colors
 #include <stdio.h>
 #ifdef _WIN32
@@ -55,7 +59,6 @@ unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVer
 #include <dNewtonCollision.h>
 #include <dNewtonDynamicBody.h>
 NewtonWorld* world;
-#include "mousePicking.hpp"
 #include "filesystem.hpp"
 #include "shader.hpp"
 #include <iostream>
@@ -64,6 +67,7 @@ NewtonWorld* world;
 #include <memory>
 
 #include "Player.hpp"
+#include "mousePicking.hpp"
 float anisoFilterAmount = 0.0f;
 #include "model.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
@@ -73,10 +77,6 @@ std::unordered_map<std::string, std::string> objectInfoDisplays = { { "cog" , "A
 #include "Light.hpp"
 std::vector<std::unique_ptr<GameObject>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;
-
-// settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
 
 Player player;
 
@@ -806,14 +806,8 @@ int main() {
 		for (int i = 0; i < lights.size(); ++i)
 			lights[i]->update(deltaTime);
 
-		// get updated view / projection matrices
-#define near_plane 0.1f
-#define far_plane 1000.0f
-		glm::mat4 projection = glm::perspective(glm::radians(player.camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
-		glm::mat4 view = player.camera.GetViewMatrix();
-
 		// picking
-		UpdatePickBody(deltaTime, view, projection);
+		UpdatePickBody(deltaTime);
 
 		if (displayString != "") {
 			// clear display string on right mouse button press
@@ -829,8 +823,8 @@ int main() {
 		glEnable(GL_BLEND);
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		pointShadowsDepth.use();
-		pointShadowsDepth.setFloat("far_plane", far_plane);
-		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+		pointShadowsDepth.setFloat("far_plane", player.camera.far_plane);
+		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, player.camera.near_plane, player.camera.far_plane);
 		for (int k = 0; k < lights.size(); ++k) {
 			if (lights[k]->on) {
 				glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
@@ -867,8 +861,8 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shaderGeometryPass.use();
-		shaderGeometryPass.setMat4("projection", projection);
-		shaderGeometryPass.setMat4("view", view);
+		shaderGeometryPass.setMat4("projection", player.camera.projection);
+		shaderGeometryPass.setMat4("view", player.camera.view);
 		shaderGeometryPass.setVec3("viewPos", player.camera.Position);
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
 			shaderGeometryPass.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
@@ -902,7 +896,7 @@ int main() {
 		}
 		shaderLightingPass.setVec3("viewPos", player.camera.Position);
 		// shadow uniforms
-		shaderLightingPass.setFloat("far_plane", far_plane);
+		shaderLightingPass.setFloat("far_plane", player.camera.far_plane);
 		glActiveTexture(GL_TEXTURE3);			
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
 		glActiveTexture(GL_TEXTURE4);
@@ -926,8 +920,8 @@ int main() {
 		// 3. render lights on top of scene
 		// --------------------------------
 		shaderLightBox.use();
-		shaderLightBox.setMat4("projection", projection);
-		shaderLightBox.setMat4("view", view);
+		shaderLightBox.setMat4("projection", player.camera.projection);
+		shaderLightBox.setMat4("view", player.camera.view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
 			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
 			shaderLightBox.setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
@@ -938,8 +932,8 @@ int main() {
 		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
 		debugLineShader.use();
-		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
+		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
 
 		if (debugDraw) {
 			debugDrawNewton();
@@ -947,7 +941,7 @@ int main() {
 
 		if (displayString == "") {
 			// convert center position into camera coordinates
-			glm::mat4 M = glm::inverse(projection*view);
+			glm::mat4 M = glm::inverse(player.camera.projection*player.camera.view);
 			glm::vec4 lRayStart_world = M * glm::vec4(0,0, 0,1); lRayStart_world /= lRayStart_world.w;
 			debugDrawPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
 		}

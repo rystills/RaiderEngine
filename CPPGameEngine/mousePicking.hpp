@@ -9,24 +9,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-extern float lastX, lastY;
+#include "Player.hpp"
 extern bool mouseHeldLeft;
+extern Player player;
 
 /*
 convert a pair of x,y NDC coordinates to a world start and end position for raycasting
-@param projection: the projection matrix to cast frrom
-@param view: the view ematrix to cast from
 @param x: the x coordinate of the raycast (in normalized device coordinate space)
 @param y: the y coordinate of the raycast (in normalized device coordinate space)
 @returns: a pair of dVectors representing the world start and end position, respectively
 */
-std::pair<dVector, dVector> screenToWorld(glm::mat4 view, glm::mat4 projection, float x=0, float y=0) {
+std::pair<dVector, dVector> screenToWorld(float x=0, float y=0) {
 	glm::vec4 lRayStart_NDC(x, y, 0, 1.0f);
 	// .94 for max object pick distance
 	glm::vec4 lRayEnd_NDC(x, y, .94, 1.0f);
 
 	// inverse transform matrices to camera space
-	glm::mat4 M = glm::inverse(projection*view);
+	glm::mat4 M = glm::inverse(player.camera.projection*player.camera.view);
 	glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world /= lRayStart_world.w;
 	glm::vec4 lRayEnd_world = M * lRayEnd_NDC; lRayEnd_world /= lRayEnd_world.w;
 	return std::pair<dVector, dVector> {dVector(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), dVector(lRayEnd_world.x, lRayEnd_world.y, lRayEnd_world.z)};
@@ -174,18 +173,17 @@ float m_pickedBodyParam;
 dVector m_pickedBodyLocalAtachmentPoint;
 dVector m_pickedBodyLocalAtachmentNormal;
 dVector m_pickedBodyTargetPosition;
-void UpdatePickBody(dFloat timestep, glm::mat4 view, glm::mat4 projection) {
+
+void UpdatePickBody(dFloat timestep) {
 	// handle pick body from the screen
 	bool mousePickState = mouseHeldLeft;
-	float m_mousePosX = lastX;
-	float m_mousePosY = lastY;
 	if (!m_targetPicked) {
 		if (!m_prevMouseState && mousePickState) {
 			dFloat param;
 			dVector posit;
 			dVector normal;
 
-			std::pair<dVector, dVector> worldPoints = screenToWorld(view, projection);
+			std::pair<dVector, dVector> worldPoints = screenToWorld();
 
 			NewtonBody* const body = MousePickByForce(world, worldPoints.first, worldPoints.second, param, posit, normal);
 			if (body) {
@@ -209,9 +207,7 @@ void UpdatePickBody(dFloat timestep, glm::mat4 view, glm::mat4 projection) {
 	}
 	else {
 		if (mousePickState) {
-			dFloat x = dFloat(m_mousePosX);
-			dFloat y = dFloat(m_mousePosY);
-			std::pair<dVector, dVector> worldPoints = screenToWorld(view, projection);
+			std::pair<dVector, dVector> worldPoints = screenToWorld();
 			m_pickedBodyTargetPosition = worldPoints.first + (worldPoints.second - worldPoints.first).Scale(m_pickedBodyParam);
 
 			dMatrix matrix;
