@@ -170,22 +170,24 @@ void UpdatePickBody(dFloat timestep) {
 			if (body) {
 				// set gravity multiplier of held object to 0
 				GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
-				GO->held = true;
+				if (GO->grabbable) {
+					GO->held = true;
 
-				m_targetPicked = body;
-				dMatrix matrix;
-				NewtonBodyGetMatrix(m_targetPicked, &matrix[0][0]);
+					m_targetPicked = body;
+					dMatrix matrix;
+					NewtonBodyGetMatrix(m_targetPicked, &matrix[0][0]);
 
-				// save point local to the body matrix
-				m_pickedBodyParam = param;
-				m_pickedBodyLocalAtachmentPoint = matrix.UntransformVector(posit);
+					// save point local to the body matrix
+					m_pickedBodyParam = param;
+					m_pickedBodyLocalAtachmentPoint = matrix.UntransformVector(posit);
 
-				// convert normal to local space
-				m_pickedBodyLocalAtachmentNormal = matrix.UnrotateVector(normal);
+					// convert normal to local space
+					m_pickedBodyLocalAtachmentNormal = matrix.UnrotateVector(normal);
 
-				// link the a destructor callback
-				//m_bodyDestructor = NewtonBodyGetDestructorCallback(m_targetPicked);
-				//NewtonBodySetDestructorCallback(m_targetPicked, OnPickedBodyDestroyedNotify);
+					// link the a destructor callback
+					//m_bodyDestructor = NewtonBodyGetDestructorCallback(m_targetPicked);
+					//NewtonBodySetDestructorCallback(m_targetPicked, OnPickedBodyDestroyedNotify);
+				}
 			}
 		}
 
