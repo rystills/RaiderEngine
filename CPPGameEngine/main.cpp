@@ -32,10 +32,9 @@ int main() {
 	GLFWwindow* window = initWindow();
 	initGBuffer();
 	initPhysics();
-	player.init();
 	initFreetype();
 	initBuffers();
-	freetypeLoadFont("Inter-Regular", 24);
+	player.init();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glEnable(GL_CULL_FACE);
@@ -67,15 +66,7 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	// build and compile shaders
-	// -------------------------
-	Shader shaderGeometryPass("shaders/g_buffer.vs", "shaders/g_buffer.fs");
-	Shader shaderLightingPass("shaders/deferred_shading.vs", "shaders/deferred_shading.fs");
-	Shader shaderLightBox("shaders/deferred_light_box.vs", "shaders/deferred_light_box.fs");
-	Shader debugLineShader("shaders/debugLineShader.vs", "shaders/debugLineShader.fs");
-	Shader textShader("shaders/textShader.vs", "shaders/textShader.fs");
-	glm::mat4 orthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
-	Shader pointShadowsDepth("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.fs", "shaders/point_shadows_depth.gs");
+	loadShaders();
 
 	// load models
 	// -----------
@@ -99,17 +90,6 @@ int main() {
 	loadMap("bookshelf");
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
-
-	// shader configuration
-	// --------------------
-	shaderLightingPass.use();
-	shaderLightingPass.setInt("gPosition", 0);
-	shaderLightingPass.setInt("gNormal", 1);
-	shaderLightingPass.setInt("gAlbedoSpec", 2);
-	shaderLightingPass.setInt("depthMap0", 3);
-	shaderLightingPass.setInt("depthMap1", 4);
-	shaderLightingPass.setInt("depthMap2", 5);
-	shaderLightingPass.setInt("depthMap3", 6);
 
 	float maxPickDist = 2.5f;
 	// render loop
@@ -157,8 +137,8 @@ int main() {
 		// -----------------------------------------------
 		glEnable(GL_BLEND);
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		pointShadowsDepth.use();
-		pointShadowsDepth.setFloat("far_plane", player.camera.far_plane);
+		shaders["pointShadowsDepth"]->use();
+		shaders["pointShadowsDepth"]->setFloat("far_plane", player.camera.far_plane);
 		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, player.camera.near_plane, player.camera.far_plane);
 		for (int k = 0; k < lights.size(); ++k) {
 			if (lights[k]->on) {
@@ -176,12 +156,12 @@ int main() {
 				// 0.5. render scene to depth cubemap
 				// --------------------------------
 				for (unsigned int i = 0; i < 6; ++i)
-					pointShadowsDepth.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
-				pointShadowsDepth.setVec3("lightPos", lightPos);
+					shaders["pointShadowsDepth"]->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+				shaders["pointShadowsDepth"]->setVec3("lightPos", lightPos);
 				// render scene
 				for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-					pointShadowsDepth.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
-					gameObjects[i]->model->draw(pointShadowsDepth);
+					shaders["pointShadowsDepth"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+					gameObjects[i]->model->draw(*shaders["pointShadowsDepth"]);
 				}
 			}
 		}
@@ -195,20 +175,20 @@ int main() {
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		shaderGeometryPass.use();
-		shaderGeometryPass.setMat4("projection", player.camera.projection);
-		shaderGeometryPass.setMat4("view", player.camera.view);
-		shaderGeometryPass.setVec3("viewPos", player.camera.Position);
+		shaders["shaderGeometryPass"]->use();
+		shaders["shaderGeometryPass"]->setMat4("projection", player.camera.projection);
+		shaders["shaderGeometryPass"]->setMat4("view", player.camera.view);
+		shaders["shaderGeometryPass"]->setVec3("viewPos", player.camera.Position);
 		for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-			shaderGeometryPass.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
-			gameObjects[i]->model->draw(shaderGeometryPass);
+			shaders["shaderGeometryPass"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+			gameObjects[i]->model->draw(*shaders["shaderGeometryPass"]);
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// 2. lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
 		// -----------------------------------------------------------------------------------------------------------------------
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		shaderLightingPass.use();
+		shaders["shaderLightingPass"]->use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, gBuffer.position);
 		glActiveTexture(GL_TEXTURE1);
@@ -218,20 +198,20 @@ int main() {
 		// send light relevant uniforms
 		for (unsigned int i = 0; i < lights.size(); ++i) {
 			if (lights[i]->on) {
-				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].On", true);
-				shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
-				shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
-				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
-				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
-				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", true);
+				shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
+				shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
 			}
 			else {
-				shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].On", false);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", false);
 			}
 		}
-		shaderLightingPass.setVec3("viewPos", player.camera.Position);
+		shaders["shaderLightingPass"]->setVec3("viewPos", player.camera.Position);
 		// shadow uniforms
-		shaderLightingPass.setFloat("far_plane", player.camera.far_plane);
+		shaders["shaderLightingPass"]->setFloat("far_plane", player.camera.far_plane);
 		glActiveTexture(GL_TEXTURE3);			
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
 		glActiveTexture(GL_TEXTURE4);
@@ -254,21 +234,21 @@ int main() {
 
 		// 3. render lights on top of scene
 		// --------------------------------
-		shaderLightBox.use();
-		shaderLightBox.setMat4("projection", player.camera.projection);
-		shaderLightBox.setMat4("view", player.camera.view);
+		shaders["shaderLightBox"]->use();
+		shaders["shaderLightBox"]->setMat4("projection", player.camera.projection);
+		shaders["shaderLightBox"]->setMat4("view", player.camera.view);
 		for (unsigned int i = 0; i < lights.size(); i++) {
-			shaderLightBox.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
-			shaderLightBox.setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
+			shaders["shaderLightBox"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
+			shaders["shaderLightBox"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
 			renderCube();
 		}
 
 		// 4. render UI
 		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
-		debugLineShader.use();
-		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
-		glUniformMatrix4fv(glGetUniformLocation(debugLineShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
+		shaders["debugLineShader"]->use();
+		glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
+		glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
 
 		if (debugDraw) {
 			debugDrawNewton();
@@ -282,14 +262,14 @@ int main() {
 		}
 
 		// 5. render text
-		textShader.use();
+		shaders["textShader"]->use();
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProjection));
-		renderText("Inter-Regular", 24, textShader, "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
+		renderText("Inter-Regular", 24, *shaders["textShader"], "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 		// show display string, if active
 		if (displayString != "") {
-			renderText("Inter-Regular", 24, textShader, displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
+			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
 		}
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);

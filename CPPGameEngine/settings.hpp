@@ -14,3 +14,4 @@ Player player;
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
 std::vector<std::unique_ptr<GameObject>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;
+std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;

@@ -235,22 +235,6 @@ void renderText(std::string fontName, int fontSize, Shader &s, std::string text,
 }
 
 /*
-initialize freetype, creating a VBO and VAO specifically for text rendering
-*/
-void initFreetype() {
-	// Configure VAO/VBO for texture quads
-	glGenVertexArrays(1, &textVAO);
-	glGenBuffers(1, &textVBO);
-	glBindVertexArray(textVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, textVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-/*
 load the specified font at the desired size using freetype, adding the (fontName,size) pair to the fonts map
 @param fontName: the name of the font to load
 @param fontSize: the size at which to load the font
@@ -314,6 +298,24 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	// Destroy FreeType once we're finished
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
+}
+
+/*
+initialize freetype, creating a VBO and VAO specifically for text rendering
+*/
+void initFreetype() {
+	// Configure VAO/VBO for texture quads
+	glGenVertexArrays(1, &textVAO);
+	glGenBuffers(1, &textVBO);
+	glBindVertexArray(textVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	// load the default engine font
+	freetypeLoadFont("Inter-Regular", 24);
 }
 
 /*
@@ -502,4 +504,28 @@ GLFWwindow* initWindow() {
 
 	glfwSwapInterval(useVsync);
 	return window;
+}
+
+/*
+load all engine default shaders and populate them as necessary
+*/
+void loadShaders() {
+	// load shaders
+	shaders["shaderGeometryPass"] = std::make_unique<Shader>("shaders/g_buffer.vs", "shaders/g_buffer.fs");
+	shaders["shaderLightingPass"] = std::make_unique<Shader>("shaders/deferred_shading.vs", "shaders/deferred_shading.fs");
+	shaders["shaderLightBox"] = std::make_unique<Shader>("shaders/deferred_light_box.vs", "shaders/deferred_light_box.fs");
+	shaders["debugLineShader"] = std::make_unique<Shader>("shaders/debugLineShader.vs", "shaders/debugLineShader.fs");
+	shaders["textShader"] = std::make_unique<Shader>("shaders/textShader.vs", "shaders/textShader.fs");
+	shaders["pointShadowsDepth"] = std::make_unique<Shader>("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.fs", "shaders/point_shadows_depth.gs");
+
+	// configure shaders
+	shaders["shaderLightingPass"]->use();
+	shaders["shaderLightingPass"]->setInt("gPosition", 0);
+	shaders["shaderLightingPass"]->setInt("gNormal", 1);
+	shaders["shaderLightingPass"]->setInt("gAlbedoSpec", 2);
+	shaders["shaderLightingPass"]->setInt("depthMap0", 3);
+	shaders["shaderLightingPass"]->setInt("depthMap1", 4);
+	shaders["shaderLightingPass"]->setInt("depthMap2", 5);
+	shaders["shaderLightingPass"]->setInt("depthMap3", 6);
+
 }
