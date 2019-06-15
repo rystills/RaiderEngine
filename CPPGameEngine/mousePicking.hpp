@@ -54,7 +54,7 @@ void CalculatePickForceAndTorque(const NewtonBody* const body, const dVector& po
 		// todo: consider timestep (deltaTime) dependent impulse time
 		// todo: consider enforcing a maximum impulse strength to minimize the risk of clipping
 		// todo: rather than using ray end as target position, perform a second raycast from held object's position to ray end to respect walls and floors
-		NewtonBodyAddImpulse(body, &veloc[0], &pointOnBodyInGlobalSpace[0], .15f);
+		NewtonBodyAddImpulse(body, &veloc[0], &pointOnBodyInGlobalSpace[0], .05f);
 	}
 
 	// damp angular velocity
@@ -150,7 +150,6 @@ NewtonBody* MousePickByForce(NewtonWorld* const nWorld, const dVector& origin, c
 }
 
 NewtonBody* m_targetPicked = NULL;
-float prevGravityMultiplier;
 bool m_prevMouseState = false;
 float m_pickedBodyParam;
 dVector m_pickedBodyLocalAtachmentPoint;
@@ -171,8 +170,7 @@ void UpdatePickBody(dFloat timestep) {
 			if (body) {
 				// set gravity multiplier of held object to 0
 				GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
-				prevGravityMultiplier = GO->gravityMultiplier;
-				GO->gravityMultiplier = 0;
+				GO->held = true;
 
 				m_targetPicked = body;
 				dMatrix matrix;
@@ -208,7 +206,7 @@ void UpdatePickBody(dFloat timestep) {
 
 			// revert gravity multiplier when letting go
 			GameObject* GO = (GameObject*)NewtonBodyGetUserData(m_targetPicked);
-			GO->gravityMultiplier = prevGravityMultiplier;
+			GO->held = false;
 
 			// unchain the callbacks
 			//NewtonBodySetDestructorCallback(m_targetPicked, m_bodyDestructor);
