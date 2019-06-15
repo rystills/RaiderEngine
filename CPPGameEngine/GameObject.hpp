@@ -6,7 +6,7 @@
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
 extern std::unordered_map<std::string, std::string> objectInfoDisplays;
 
-void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex);
+void applyForceCallback(const NewtonBody* const body, dFloat timestep, int threadIndex);
 class GameObject {
 public:
 	glm::vec3 position;
@@ -17,6 +17,7 @@ public:
 	std::string modelName;
 	NewtonBody* body;
 	dFloat mass;
+	float gravityMultiplier = 1;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -82,7 +83,7 @@ public:
 		NewtonBodySetUserData(body, (void *)this);
 
 		// Install the callbacks to track the body positions.
-		NewtonBodySetForceAndTorqueCallback(body, cb_applyForce);
+		NewtonBodySetForceAndTorqueCallback(body, applyForceCallback);
 	}
 	
 	/*
@@ -114,6 +115,17 @@ public:
 		rotation = glm::toMat4(q);
 		return q;
 	}
+
+	/*
+	apply force prior to the current object prior to the next simulation step
+	@param timestep:
+	@param threadIjdex
+	*/
+	virtual void applyForce(dFloat timestep, int threadIndex) {
+		// apply gravitational force
+		dFloat force[3] = { 0, -9.8 * mass * gravityMultiplier, 0 };
+		NewtonBodySetForce(body, force);
+	}
 };
 
 /*
@@ -122,11 +134,9 @@ apply force callback; called by newton each time the body is about to be simulat
 @param timestep: 
 @param threadIndex:
 */
-void cb_applyForce(const NewtonBody* const body, dFloat timestep, int threadIndex) {
+void applyForceCallback(const NewtonBody* const body, dFloat timestep, int threadIndex) {
 	// retrieve the corresponding GameObject from the body's user data
 	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
-
-	// apply gravitational force
-	dFloat force[3] = { 0, -9.8*GO->mass, 0 };
-	NewtonBodySetForce(body, force);
+	// allow the gameObject to handle applying force
+	GO->applyForce(timestep, threadIndex);
 }

@@ -23,8 +23,7 @@ std::pair<dVector, dVector> screenToWorld(float x=0, float y=0) {
 	return std::pair<dVector, dVector> {dVector(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), dVector(lRayEnd_world.x, lRayEnd_world.y, lRayEnd_world.z)};
 }
 
-void CalculatePickForceAndTorque(const NewtonBody* const body, const dVector& pointOnBodyInGlobalSpace, const dVector& targetPositionInGlobalSpace, dFloat timestep)
-{
+void CalculatePickForceAndTorque(const NewtonBody* const body, const dVector& pointOnBodyInGlobalSpace, const dVector& targetPositionInGlobalSpace, dFloat timestep) {
 	dMatrix matrix;
 	dVector com(0.0f);
 	dVector omega0(0.0f);
@@ -89,32 +88,24 @@ void CalculatePickForceAndTorque(const NewtonBody* const body, const dVector& po
 	NewtonWorldCriticalSectionUnlock(world);
 }
 
-class dMousePickClass
-{
+class dMousePickClass {
 public:
-	dMousePickClass()
-		:m_param(1.0f)
-		, m_body(NULL)
-	{
-	}
+	dMousePickClass() :m_param(1.0f), m_body(NULL) { }
 
 	// implement a ray cast pre-filter
-	static unsigned RayCastPrefilter(const NewtonBody* body, const NewtonCollision* const collision, void* const userData)
-	{
+	static unsigned RayCastPrefilter(const NewtonBody* body, const NewtonCollision* const collision, void* const userData) {
 		// ray cannot pick trigger volumes
 		//return NewtonCollisionIsTriggerVolume(collision) ? 0 : 1;
 
 		const NewtonCollision* const parent = NewtonCollisionGetParentInstance(collision);
-		if (parent) {
+		if (parent)
 			// you can use this to filter sub collision shapes.  
 			dAssert(NewtonCollisionGetSubCollisionHandle(collision));
-		}
 
 		return (NewtonBodyGetType(body) == NEWTON_DYNAMIC_BODY) ? 1 : 0;
 	}
 
-	static dFloat RayCastFilter(const NewtonBody* const body, const NewtonCollision* const collisionHit, const dFloat* const contact, const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam)
-	{
+	static dFloat RayCastFilter(const NewtonBody* const body, const NewtonCollision* const collisionHit, const dFloat* const contact, const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam) {
 		dFloat mass;
 		dFloat Ixx;
 		dFloat Iyy;
@@ -147,8 +138,7 @@ public:
 };
 
 
-NewtonBody* MousePickByForce(NewtonWorld* const nWorld, const dVector& origin, const dVector& end, dFloat& paramterOut, dVector& positionOut, dVector& normalOut)
-{
+NewtonBody* MousePickByForce(NewtonWorld* const nWorld, const dVector& origin, const dVector& end, dFloat& paramterOut, dVector& positionOut, dVector& normalOut) {
 	dMousePickClass rayCast;
 	NewtonWorldRayCast(nWorld, &origin[0], &end[0], dMousePickClass::RayCastFilter, &rayCast, dMousePickClass::RayCastPrefilter, 0);
 	if (rayCast.m_body) {
@@ -160,6 +150,7 @@ NewtonBody* MousePickByForce(NewtonWorld* const nWorld, const dVector& origin, c
 }
 
 NewtonBody* m_targetPicked = NULL;
+float prevGravityMultiplier;
 bool m_prevMouseState = false;
 float m_pickedBodyParam;
 dVector m_pickedBodyLocalAtachmentPoint;
@@ -168,17 +159,21 @@ dVector m_pickedBodyTargetPosition;
 
 void UpdatePickBody(dFloat timestep) {
 	// handle pick body from the screen
-	bool mousePickState = mouseHeldLeft;
 	if (!m_targetPicked) {
-		if (!m_prevMouseState && mousePickState) {
+		if (!m_prevMouseState && mouseHeldLeft) {
 			dFloat param;
 			dVector posit;
 			dVector normal;
 
 			std::pair<dVector, dVector> worldPoints = screenToWorld();
-
 			NewtonBody* const body = MousePickByForce(world, worldPoints.first, worldPoints.second, param, posit, normal);
+
 			if (body) {
+				// set gravity multiplier of held object to 0
+				GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
+				prevGravityMultiplier = GO->gravityMultiplier;
+				GO->gravityMultiplier = 0;
+
 				m_targetPicked = body;
 				dMatrix matrix;
 				NewtonBodyGetMatrix(m_targetPicked, &matrix[0][0]);
@@ -198,7 +193,7 @@ void UpdatePickBody(dFloat timestep) {
 
 	}
 	else {
-		if (mousePickState) {
+		if (mouseHeldLeft) {
 			std::pair<dVector, dVector> worldPoints = screenToWorld();
 			m_pickedBodyTargetPosition = worldPoints.first + (worldPoints.second - worldPoints.first).Scale(m_pickedBodyParam);
 
@@ -208,9 +203,12 @@ void UpdatePickBody(dFloat timestep) {
 			CalculatePickForceAndTorque(m_targetPicked, point, m_pickedBodyTargetPosition, timestep);
 		}
 		else {
-			if (m_targetPicked) {
-				NewtonBodySetSleepState(m_targetPicked, 0);
-			}
+			// force the held object to the awake state one final time
+			NewtonBodySetSleepState(m_targetPicked, 0);
+
+			// revert gravity multiplier when letting go
+			GameObject* GO = (GameObject*)NewtonBodyGetUserData(m_targetPicked);
+			GO->gravityMultiplier = prevGravityMultiplier;
 
 			// unchain the callbacks
 			//NewtonBodySetDestructorCallback(m_targetPicked, m_bodyDestructor);
@@ -219,5 +217,5 @@ void UpdatePickBody(dFloat timestep) {
 		}
 	}
 
-	m_prevMouseState = mousePickState;
+	m_prevMouseState = mouseHeldLeft;
 }

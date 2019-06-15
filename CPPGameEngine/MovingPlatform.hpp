@@ -8,6 +8,8 @@ public:
 	// TODO: remove this constraint from the world and delete it on death
 	//btGeneric6DofConstraint* moveConstraint;
 	MovingPlatform(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale) : GameObject(position, rotationEA, scale, "movingPlatform", false,false) {
+		gravityMultiplier = 0;
+		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
 		// create a constraint at our starting position, and move that up and down
 		/*btTransform tr;
 		tr.setIdentity();
@@ -30,11 +32,10 @@ public:
 	
 	void update(float deltaTime) override {
 		// update transform position based on time
-		/*elapsedTime += deltaTime;
-		body->activate(true);		
+		elapsedTime += deltaTime;
+		//body->activate(true);		
 		GameObject::update(deltaTime);
-		btVector3 origin = moveConstraint->getFrameOffsetA().getOrigin();
-		moveConstraint->getFrameOffsetA().setOrigin(btVector3(origin.getX(),origin.getY()+sin(elapsedTime)*.01f, origin.getZ()));
-		*/
+		//btVector3 origin = moveConstraint->getFrameOffsetA().getOrigin();
+		//moveConstraint->getFrameOffsetA().setOrigin(btVector3(origin.getX(),origin.getY()+sin(elapsedTime)*.01f, origin.getZ()));
 	}
 };

@@ -5,10 +5,8 @@
 #include "input.hpp"
 #include "settings.hpp"
 // this file is responsible for graphics, including debug and text rendering
-// settings
+// TODO: merge aniso (and numFontCharacters?) into settings.hpp
 float anisoFilterAmount = 0.0f;
-bool useVsync = true;
-bool fullScreen = false;
 #define numFontCharacters 128  // we only care about the first 128 characters stored in a given font file, at least for now
 
 unsigned int VBO, VAO;

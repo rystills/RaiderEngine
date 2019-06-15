@@ -3,6 +3,8 @@
 // this file holds global settings and shared engine data
 unsigned int SCR_WIDTH = 1280;
 unsigned int SCR_HEIGHT = 720;
+bool useVsync = true;
+bool fullScreen = false;
 
 #include "Player.hpp"
 // TODO: we should not force usage of the Player base class
