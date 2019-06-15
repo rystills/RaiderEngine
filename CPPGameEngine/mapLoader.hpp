@@ -4,8 +4,8 @@
 #include "Light.hpp"
 #include "assimpFlags.hpp"
 #include "ObjectRegistry.hpp"
-extern std::vector<std::unique_ptr<GameObject>> gameObjects;
-extern std::vector<std::unique_ptr<Light>> lights;
+#include "settings.hpp"
+
 // this file is responsible for loading maps from special FBX files
 
 struct ProcessObjectProperties {

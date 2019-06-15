@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "Player.hpp"
-extern Player player;
 
 class PlayerSpawn {
 public:

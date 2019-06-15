@@ -1,99 +1,20 @@
 #include "stdafx.h"
-
 // engine includes (import order matters here, at least for the time being)
 #include "terminalColors.hpp"
 #include "filesystem.hpp"
 #include "physics.hpp"
+#include "settings.hpp"
 #include "mapLoader.hpp"
 #include "graphics.hpp"
 #include "shader.hpp"
-#include "Player.hpp"
+
 #include "mousePicking.hpp"
 #include "model.hpp"
-std::unordered_map<std::string, std::shared_ptr<Model>> models;
 std::string displayString = "";
 std::unordered_map<std::string, std::string> objectInfoDisplays = { { "cog" , "A rusty old cog. Should still be able to function." } };
 #include "GameObject.hpp"
 #include "Light.hpp"
-std::vector<std::unique_ptr<GameObject>> gameObjects;
-std::vector<std::unique_ptr<Light>> lights;
-Player player;
-
-// mouse
-float lastX = (float)SCR_WIDTH / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
-bool firstMouse = true;
-bool mousePressedLeft = false;  // whether or not the left mouse button was just pressed
-bool mouseHeldLeft = false;  // whether or not the left mouse button is currently being held down
-bool mouseReleasedLeft = false;  // whether or not the left mouse button was just released 
-bool mousePressedRight = false;  // whether or not the right mouse button was just pressed
-bool mouseHeldRight = false;  // whether or not the right mouse button is currently being held down
-bool mouseReleasedRight = false;  // whether or not the right mouse button was just released 
-
 #include "timing.hpp"
-#include "inputUtils.hpp"
-#include "renderUtils.hpp"
-
-/*
-initialize our game window, creating the window itself and setting input callbacks
-*/
-GLFWwindow* initWindow() {
-	// glfw: initialize and configure
-	// ------------------------------
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	// setup windows console colors here since the original console color doesn't appear to be accessible prior to main
-#ifdef _WIN32
-hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-GetConsoleScreenBufferInfo(hConsole, &cbInfo);
-originalColor = cbInfo.wAttributes;
-#endif
-
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-	// glfw window creation
-	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CPPGameEngine", fullScreen ? glfwGetPrimaryMonitor() : NULL,NULL);
-	if (window == NULL) {
-		ERROR(std::cout << "Failed to create GLFW window" << std::endl);
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-
-	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	// glad: load all OpenGL function pointers
-	// ---------------------------------------
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		ERROR(std::cout << "Failed to initialize GLAD" << std::endl);
-		exit(EXIT_FAILURE);
-	}
-	
-	glfwSwapInterval(useVsync);
-	return window;
-}
-
-/*
-reset all input events that occur for a single frame only
-*/
-void resetSingleFrameInput() {
-	// reset mouse events
-	mousePressedLeft = false;
-	mouseReleasedLeft = false;
-	mousePressedRight = false;
-	mouseReleasedRight = false;
-}
 
 /*
 display an information box detailing the specified object

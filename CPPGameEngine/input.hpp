@@ -1,5 +1,28 @@
 #pragma once
 #include "stdafx.h"
+#include "graphics.hpp"
+
+// mouse
+float lastX = (float)SCR_WIDTH / 2.0;
+float lastY = (float)SCR_HEIGHT / 2.0;
+bool firstMouse = true;
+bool mousePressedLeft = false;  // whether or not the left mouse button was just pressed
+bool mouseHeldLeft = false;  // whether or not the left mouse button is currently being held down
+bool mouseReleasedLeft = false;  // whether or not the left mouse button was just released 
+bool mousePressedRight = false;  // whether or not the right mouse button was just pressed
+bool mouseHeldRight = false;  // whether or not the right mouse button is currently being held down
+bool mouseReleasedRight = false;  // whether or not the right mouse button was just released 
+
+/*
+reset all input events that occur for a single frame only
+*/
+void resetSingleFrameInput() {
+	// reset mouse events
+	mousePressedLeft = false;
+	mouseReleasedLeft = false;
+	mousePressedRight = false;
+	mouseReleasedRight = false;
+}
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------

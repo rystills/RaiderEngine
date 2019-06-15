@@ -1,8 +1,8 @@
-#pragma once
 #include "stdafx.h"
+#pragma once
 #include "Player.hpp"
 extern bool mouseHeldLeft;
-extern Player player;
+
 // this file is responsible for raycasting, and picking up objects with the mouse
 
 /*

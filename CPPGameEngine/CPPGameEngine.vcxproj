@@ -159,7 +159,7 @@
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mapLoader.hpp" />
     <ClInclude Include="ObjectRegistry.hpp" />
-    <ClInclude Include="inputUtils.hpp" />
+    <ClInclude Include="input.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
@@ -168,7 +168,7 @@
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />
-    <ClInclude Include="renderUtils.hpp" />
+    <ClInclude Include="settings.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />
