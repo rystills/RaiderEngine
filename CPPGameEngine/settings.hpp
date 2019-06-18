@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #pragma once
 // this file holds global settings and shared engine data
-unsigned int SCR_WIDTH = 1280;
-unsigned int SCR_HEIGHT = 720;
+unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720;
 bool useVsync = true;
 bool fullScreen = false;
+const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+bool debugDraw = false;
 
 #include "Player.hpp"
 // TODO: we should not force usage of the Player base class

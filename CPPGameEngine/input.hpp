@@ -12,6 +12,7 @@ bool mouseReleasedLeft = false;  // whether or not the left mouse button was jus
 bool mousePressedRight = false;  // whether or not the right mouse button was just pressed
 bool mouseHeldRight = false;  // whether or not the right mouse button is currently being held down
 bool mouseReleasedRight = false;  // whether or not the right mouse button was just released 
+bool f3Pressed = false;
 
 /*
 reset all input events that occur for a single frame only
@@ -22,6 +23,19 @@ void resetSingleFrameInput() {
 	mouseReleasedLeft = false;
 	mousePressedRight = false;
 	mouseReleasedRight = false;
+}
+
+/*
+toggle debugDraw on f3 press
+*/
+void updateDebugToggle(GLFWwindow* window) {
+	// debug key update
+	if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
+		f3Pressed = true;
+	else if (f3Pressed) {
+		f3Pressed = false;
+		debugDraw = !debugDraw;
+	}
 }
 
 // glfw: whenever the mouse moves, this callback is called

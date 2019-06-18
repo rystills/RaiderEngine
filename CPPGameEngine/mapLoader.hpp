@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #pragma once
-#include "GameObject.hpp"
-#include "Light.hpp"
 #include "assimpFlags.hpp"
 #include "ObjectRegistry.hpp"
 #include "settings.hpp"

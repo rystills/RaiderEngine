@@ -12,6 +12,10 @@ float anisoFilterAmount = 0.0f;
 unsigned int VBO, VAO;
 unsigned int textVBO, textVAO;
 
+#define NR_LIGHTS 4
+unsigned int depthMapFBO[NR_LIGHTS];
+unsigned int depthCubemap[NR_LIGHTS];
+
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } gBuffer;
@@ -455,6 +459,31 @@ void initGBuffer() {
 }
 
 /*
+initialize depth maps for the defined number of lights (used for rendering shadows)
+*/
+void initDepthMaps() {
+	for (int i = 0; i < NR_LIGHTS; ++i) {
+		glGenFramebuffers(1, &depthMapFBO[i]);
+		// create depth cubemap texture
+		glGenTextures(1, &depthCubemap[i]);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[i]);
+		for (unsigned int i = 0; i < 6; ++i)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		// attach depth texture as FBO's depth buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[i]);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap[i], 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+}
+
+/*
 initialize our game window, creating the window itself and setting input callbacks
 */
 GLFWwindow* initWindow() {
@@ -525,5 +554,155 @@ void loadShaders() {
 	shaders["shaderLightingPass"]->setInt("depthMap1", 4);
 	shaders["shaderLightingPass"]->setInt("depthMap2", 5);
 	shaders["shaderLightingPass"]->setInt("depthMap3", 6);
+}
 
+/*
+render the depth information from each of NR_LIGHTS to the scene
+*/
+void renderDepthMap() {
+	// create depth cubemap transformation matrices
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	shaders["pointShadowsDepth"]->use();
+	shaders["pointShadowsDepth"]->setFloat("far_plane", player.camera.far_plane);
+	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, player.camera.near_plane, player.camera.far_plane);
+	for (int k = 0; k < lights.size(); ++k) {
+		if (lights[k]->on) {
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glm::vec3 lightPos = lights[k]->position;
+			std::vector<glm::mat4> shadowTransforms;
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+			// render scene to depth cubemap
+			for (unsigned int i = 0; i < 6; ++i)
+				shaders["pointShadowsDepth"]->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+			shaders["pointShadowsDepth"]->setVec3("lightPos", lightPos);
+			for (unsigned int i = 0; i < gameObjects.size(); ++i) {
+				shaders["pointShadowsDepth"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+				gameObjects[i]->model->draw(*shaders["pointShadowsDepth"]);
+			}
+		}
+	}
+}
+
+/*
+render the scene geometry to the gbuffer
+*/
+void renderGeometryPass() {
+	glDisable(GL_BLEND);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// 1. geometry pass: render scene's geometry/color data into gbuffer
+	// -----------------------------------------------------------------
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shaders["shaderGeometryPass"]->use();
+	shaders["shaderGeometryPass"]->setMat4("projection", player.camera.projection);
+	shaders["shaderGeometryPass"]->setMat4("view", player.camera.view);
+	shaders["shaderGeometryPass"]->setVec3("viewPos", player.camera.Position);
+	for (unsigned int i = 0; i < gameObjects.size(); ++i) {
+		shaders["shaderGeometryPass"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
+		gameObjects[i]->model->draw(*shaders["shaderGeometryPass"]);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/*
+render the geometry in the gbuffer, along with lighting information, to the screen framebuffer
+*/
+void renderLightingPass() {
+	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shaders["shaderLightingPass"]->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gBuffer.position);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gBuffer.normal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, gBuffer.albedoSpec);
+	// send light relevant uniforms
+	for (unsigned int i = 0; i < lights.size(); ++i) {
+		if (lights[i]->on) {
+			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", true);
+			shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
+			shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
+			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
+			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
+			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+		}
+		else
+			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", false);
+	}
+	shaders["shaderLightingPass"]->setVec3("viewPos", player.camera.Position);
+	// shadow uniforms
+	shaders["shaderLightingPass"]->setFloat("far_plane", player.camera.far_plane);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[1]);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[2]);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[3]);
+
+
+	// finally render quad
+	renderQuad();
+
+	// copy content of geometry's depth buffer to default framebuffer's depth buffer
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.buffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // TODO: internal format of FBO and default framebuffer must match (implementation defined?)
+	glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/*
+render colored, unlit cubes indicating the position of lights in the scene
+*/
+void debugDrawLightCubes() {
+	// render lights on top of scene
+	shaders["shaderLightBox"]->use();
+	shaders["shaderLightBox"]->setMat4("projection", player.camera.projection);
+	shaders["shaderLightBox"]->setMat4("view", player.camera.view);
+	for (unsigned int i = 0; i < lights.size(); i++) {
+		shaders["shaderLightBox"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
+		shaders["shaderLightBox"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
+		renderCube();
+	}
+}
+
+/*
+configure the debug line shader, and draw physics wireframes (if specified)
+*/
+void renderLines() {
+	// render UI
+	glDisable(GL_DEPTH_TEST);
+	shaders["debugLineShader"]->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
+	if (debugDraw)
+		debugDrawNewton();
+}
+
+/*
+configure the text shader, and draw fps indicator text
+*/
+void renderText() {
+	// render text
+	shaders["textShader"]->use();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
+
+	renderText("Inter-Regular", 24, *shaders["textShader"], "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 }

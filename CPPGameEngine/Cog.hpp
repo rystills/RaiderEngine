@@ -22,6 +22,6 @@ public:
 	}
 
 	std::string getDisplayString() override {
-		return wallMounted ? "Seems like these cogs are still functioning...somehow." : "A rusty old cog. Should still be able to function.";
+		return wallMounted ? "Seems like these cogs are still running...somehow." : "A rusty old cog. Should still be able to function.";
 	}
 };
