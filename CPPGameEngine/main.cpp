@@ -7,24 +7,22 @@
 #include "mapLoader.hpp"
 #include "graphics.hpp"
 #include "shader.hpp"
-
 #include "mousePicking.hpp"
 #include "model.hpp"
-std::string displayString = "";
-std::unordered_map<std::string, std::string> objectInfoDisplays = { { "cog" , "A rusty old cog. Should still be able to function." } };
 #include "GameObject.hpp"
 #include "Light.hpp"
 #include "timing.hpp"
+#include "rightClickObserve.hpp"
 
 /*
-display an information box detailing the specified object
-@param go: the GameObject about which we wish to show information
+draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
 */
-void displayObjectInfo(GameObject* go) {
-	displayString = go->getDisplayString();
-	player.camera.controllable = displayString.length() == 0;
+void drawCenterIndicator() {
+	// convert center position into camera coordinates
+	glm::mat4 M = glm::inverse(player.camera.projection*player.camera.view);
+	glm::vec4 lRayStart_world = M * glm::vec4(0, 0, 0, 1); lRayStart_world /= lRayStart_world.w;
+	debugDrawPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
 }
-
 
 int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
@@ -68,26 +66,10 @@ int main() {
 
 	loadShaders();
 
-	// load models
-	// -----------
-	Model::defaultDiffuseMap.id = textureFromFile("defaultDiffuseMap.png", ".");
-	Model::defaultDiffuseMap.type = "texture_diffuse";
-	Model::defaultDiffuseMap.path = "defaultDiffuseMap.png";
-
-	Model::defaultNormalMap.id = textureFromFile("defaultNormalMap.png", ".");
-	Model::defaultNormalMap.type = "texture_normal";
-	Model::defaultNormalMap.path = "defaultNormalMap.png";
-
-	Model::defaultSpecularMap.id = textureFromFile("defaultSpecularMap.png", ".");
-	Model::defaultSpecularMap.type = "texture_specular";
-	Model::defaultSpecularMap.path = "defaultSpecularMap.png";
-
-	Model::defaultHeightMap.id = textureFromFile("defaultHeightMap.png", ".");
-	Model::defaultHeightMap.type = "texture_height";
-	Model::defaultHeightMap.path = "defaultHeightMap.png";
+	Model::loadDefaultMaterialMaps();
 	
 	// load map
-	loadMap("bookshelf");
+	loadMap("hallway");
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
 
@@ -121,16 +103,14 @@ int main() {
 		for (int i = 0; i < lights.size(); ++i)
 			lights[i]->update(deltaTime);
 
-		// picking
-		UpdatePickBody(deltaTime);
-
-		if (displayString != "") {
-			// clear display string on right mouse button press
-			if (mousePressedRight) {
-				displayString = "";
-				player.camera.controllable = true;
-			}
+		// picking and object info display
+		if (displayString.size() == 0) {
+			UpdatePickBody(deltaTime);
+			if (!m_targetPicked)
+				checkDisplayObject();
 		}
+		else
+			updateDisplayString();
 
 		// render
 		// 0. create depth cubemap transformation matrices
@@ -244,40 +224,30 @@ int main() {
 		}
 
 		// 4. render UI
-		// centered point to indicate mouse position for precise object grabbing / interaction, when nothing is currently being held or observed
 		glDisable(GL_DEPTH_TEST);
 		shaders["debugLineShader"]->use();
 		glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
 		glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
 
-		if (debugDraw) {
+		if (debugDraw)
 			debugDrawNewton();
-		}
-
-		if (displayString == "") {
-			// convert center position into camera coordinates
-			glm::mat4 M = glm::inverse(player.camera.projection*player.camera.view);
-			glm::vec4 lRayStart_world = M * glm::vec4(0,0, 0,1); lRayStart_world /= lRayStart_world.w;
-			debugDrawPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
-		}
+		if (displayString.size() == 0)
+			drawCenterIndicator();
 
 		// 5. render text
 		shaders["textShader"]->use();
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
+		
 		renderText("Inter-Regular", 24, *shaders["textShader"], "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-		// show display string, if active
-		if (displayString != "") {
+		if (displayString.size() != 0)
 			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
-		}
+		
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		
 		glfwSwapBuffers(window);
-
-		//system("pause");
-		//break;
 	}
 	cleanupPhysics();
 	glfwTerminate();

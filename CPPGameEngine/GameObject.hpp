@@ -4,7 +4,6 @@
 #include "shader.hpp"
 #include "model.hpp"
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
-extern std::unordered_map<std::string, std::string> objectInfoDisplays;
 
 void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex);
 class GameObject {
@@ -39,7 +38,7 @@ public:
 	return a string detailing information about this object, to be shown when the user right clicks the object
 	*/
 	virtual std::string getDisplayString() {
-		return objectInfoDisplays[modelName];
+		return "";
 	}
 
 	/*

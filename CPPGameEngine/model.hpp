@@ -193,6 +193,27 @@ public:
 		// return a mesh object created from the extracted mesh data
 		return Mesh(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory));
 	}
+
+	/*
+	load the default map files for each supported map type
+	*/
+	static void loadDefaultMaterialMaps() {
+		Model::defaultDiffuseMap.id = textureFromFile("defaultDiffuseMap.png", ".");
+		Model::defaultDiffuseMap.type = "texture_diffuse";
+		Model::defaultDiffuseMap.path = "defaultDiffuseMap.png";
+
+		Model::defaultNormalMap.id = textureFromFile("defaultNormalMap.png", ".");
+		Model::defaultNormalMap.type = "texture_normal";
+		Model::defaultNormalMap.path = "defaultNormalMap.png";
+
+		Model::defaultSpecularMap.id = textureFromFile("defaultSpecularMap.png", ".");
+		Model::defaultSpecularMap.type = "texture_specular";
+		Model::defaultSpecularMap.path = "defaultSpecularMap.png";
+
+		Model::defaultHeightMap.id = textureFromFile("defaultHeightMap.png", ".");
+		Model::defaultHeightMap.type = "texture_height";
+		Model::defaultHeightMap.path = "defaultHeightMap.png";
+	}
     
 private:
     /*

@@ -106,11 +106,6 @@ public:
 	}
 
 	static dFloat RayCastFilter(const NewtonBody* const body, const NewtonCollision* const collisionHit, const dFloat* const contact, const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam) {
-		dFloat mass;
-		dFloat Ixx;
-		dFloat Iyy;
-		dFloat Izz;
-
 		// check if we are hitting a sub shape
 		const NewtonCollision* const parent = NewtonCollisionGetParentInstance(collisionHit);
 		if (parent) {
@@ -119,11 +114,7 @@ public:
 		}
 
 		dMousePickClass* const data = (dMousePickClass*)userData;
-		NewtonBodyGetMass(body, &mass, &Ixx, &Iyy, &Izz);
-		if ((mass > 0.0f) || (NewtonBodyGetType(body) == NEWTON_KINEMATIC_BODY)) {
-			data->m_body = body;
-		}
-
+		data->m_body = body;
 
 		if (intersetParam < data->m_param) {
 			data->m_param = intersetParam;
@@ -156,37 +147,43 @@ dVector m_pickedBodyLocalAtachmentPoint;
 dVector m_pickedBodyLocalAtachmentNormal;
 dVector m_pickedBodyTargetPosition;
 
+/*
+attempt to grab, hold, or release an object depending on the current mouse state
+@param timestep: the current frame's deltaTime
+*/
 void UpdatePickBody(dFloat timestep) {
 	// handle pick body from the screen
 	if (!m_targetPicked) {
 		if (!m_prevMouseState && mouseHeldLeft) {
 			dFloat param;
-			dVector posit;
-			dVector normal;
-
+			dVector posit, normal;
 			std::pair<dVector, dVector> worldPoints = screenToWorld();
 			NewtonBody* const body = MousePickByForce(world, worldPoints.first, worldPoints.second, param, posit, normal);
 
 			if (body) {
-				// set gravity multiplier of held object to 0
-				GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
-				if (GO->grabbable) {
-					GO->held = true;
+				dFloat mass, Ixx, Iyy, Izz;
+				NewtonBodyGetMass(body, &mass, &Ixx, &Iyy, &Izz);
+				if ((mass > 0.0f) || (NewtonBodyGetType(body) == NEWTON_KINEMATIC_BODY)) {
+					// set gravity multiplier of held object to 0
+					GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
+					if (GO->grabbable) {
+						GO->held = true;
 
-					m_targetPicked = body;
-					dMatrix matrix;
-					NewtonBodyGetMatrix(m_targetPicked, &matrix[0][0]);
+						m_targetPicked = body;
+						dMatrix matrix;
+						NewtonBodyGetMatrix(m_targetPicked, &matrix[0][0]);
 
-					// save point local to the body matrix
-					m_pickedBodyParam = param;
-					m_pickedBodyLocalAtachmentPoint = matrix.UntransformVector(posit);
+						// save point local to the body matrix
+						m_pickedBodyParam = param;
+						m_pickedBodyLocalAtachmentPoint = matrix.UntransformVector(posit);
 
-					// convert normal to local space
-					m_pickedBodyLocalAtachmentNormal = matrix.UnrotateVector(normal);
+						// convert normal to local space
+						m_pickedBodyLocalAtachmentNormal = matrix.UnrotateVector(normal);
 
-					// link the a destructor callback
-					//m_bodyDestructor = NewtonBodyGetDestructorCallback(m_targetPicked);
-					//NewtonBodySetDestructorCallback(m_targetPicked, OnPickedBodyDestroyedNotify);
+						// link the a destructor callback
+						//m_bodyDestructor = NewtonBodyGetDestructorCallback(m_targetPicked);
+						//NewtonBodySetDestructorCallback(m_targetPicked, OnPickedBodyDestroyedNotify);
+					}
 				}
 			}
 		}

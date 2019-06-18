@@ -168,6 +168,7 @@
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />
+    <ClInclude Include="rightClickObserve.hpp" />
     <ClInclude Include="settings.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
