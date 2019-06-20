@@ -16,6 +16,9 @@ unsigned int textVBO, textVAO;
 unsigned int depthMapFBO[NR_LIGHTS];
 unsigned int depthCubemap[NR_LIGHTS];
 
+std::vector<GLfloat> debugPoints;
+std::vector<GLfloat> debugLinePoints;
+
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } gBuffer;
@@ -321,11 +324,11 @@ void initFreetype() {
 }
 
 /*
-draw a single point (useless unless the debug render shader is active)
+add a single point to the debug point vector
 @param pos: the point's position
 @param color: the point's rgb color
 */
-void debugDrawPoint(glm::vec3 pos, glm::vec3 color) {
+void debugAddPoint(glm::vec3 pos, glm::vec3 color) {
 	GLfloat points[6];
 	points[0] = pos.x;
 	points[1] = pos.y;
@@ -334,9 +337,16 @@ void debugDrawPoint(glm::vec3 pos, glm::vec3 color) {
 	points[4] = color.g;
 	points[5] = color.b;
 
+	debugPoints.insert(std::end(debugPoints), std::begin(points), std::end(points));
+}
+
+/*
+draw all of the buffered debug points, then clear the debug point vector
+*/
+void debugDrawPoints() {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * debugPoints.size(), &debugPoints[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 	glEnableVertexAttribArray(1);
@@ -344,19 +354,19 @@ void debugDrawPoint(glm::vec3 pos, glm::vec3 color) {
 	glBindVertexArray(0);
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_POINTS, 0, 2);
+	glDrawArrays(GL_POINTS, 0, debugPoints.size() / 6);
 	glBindVertexArray(0);
+	debugPoints.clear();
 }
 
 /*
-draw a single line (useless unless the debug render shader is active)
+add a single line to the debug line vector
 @param from: the line's start position
 @param to: the line's end position
 @param color: the line's rgb color
 */
-void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color) {
-	// Vertex data
-	GLfloat points[12];
+void debugAddLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color) {
+	GLfloat points[18];
 
 	points[0] = from.x;
 	points[1] = from.y;
@@ -372,9 +382,25 @@ void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& 
 	points[10] = color.y;
 	points[11] = color.z;
 
+	// terminate each line with NANs so that we can draw the entire array of disjointed lines as a single linestrip
+	// TODO: consider replacing this with a primitive restart to save a bit of memory and render performance
+	points[12] = NAN;
+	points[13] = NAN;
+	points[14] = NAN;
+	points[15] = NAN;
+	points[16] = NAN;
+	points[17] = NAN;
+	
+	debugLinePoints.insert(std::end(debugLinePoints), std::begin(points), std::end(points));
+}
+
+/*
+draw all of the buffered debug lines, then clear the debug line vector
+*/
+void debugDrawLines() {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * debugLinePoints.size(), &debugLinePoints[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 	glEnableVertexAttribArray(1);
@@ -382,8 +408,9 @@ void debugDrawLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& 
 	glBindVertexArray(0);
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_LINES, 0, 2);
+	glDrawArrays(GL_LINE_STRIP, 0, debugLinePoints.size()/6);
 	glBindVertexArray(0);
+	debugLinePoints.clear();
 }
 
 glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
@@ -400,7 +427,7 @@ void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
 	for (int i = 0; i < vertexCount; i++) {
 		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-		debugDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
+		debugAddLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
 		p0 = p1;
 	}
 }
@@ -414,6 +441,7 @@ void debugDrawNewton() {
 		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
 		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, gameObjects[i]->model->isStaticMesh ? (void*)2 : (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
 	}
+	debugDrawLines();
 }
 
 /*
