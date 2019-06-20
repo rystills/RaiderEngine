@@ -704,5 +704,5 @@ void renderText() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
 
-	renderText("Inter-Regular", 24, *shaders["textShader"], "fps: " + std::to_string((int)round(1 / (deltaTime == 0 ? 1 : deltaTime))), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+	renderText("Inter-Regular", 24, *shaders["textShader"], "fps: " + std::to_string(fps), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 }

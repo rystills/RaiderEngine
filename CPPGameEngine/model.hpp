@@ -284,7 +284,7 @@ private:
 					textures.push_back(search->second);
 				else {
 					// texture does not exist yet; try to load it 
-					if (std::experimental::filesystem::exists(directory + "/" + mapName)) {
+					if (std::filesystem::exists(directory + "/" + mapName)) {
 						Texture extraTex;
 						extraTex.id = textureFromFile(mapName.c_str(), directory);
 						extraTex.type = mapTypes[k];
