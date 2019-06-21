@@ -7,6 +7,7 @@ bool fullScreen = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 bool debugDraw = false;
 
+GLFWwindow* window;
 #include "Player.hpp"
 // TODO: we should not force usage of the Player base class
 Player player;

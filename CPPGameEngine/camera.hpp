@@ -11,7 +11,7 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const float YAW = -90.0f;
+const float YAW = 270;
 const float PITCH = 0.0f;
 const float SPEED = 8;
 const float SENSITIVITY = 0.1f;
@@ -43,7 +43,7 @@ public:
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
 		Position = position;
 		WorldUp = up;
-		Yaw = yaw;
+		setYaw(yaw);
 		Pitch = pitch;
 		updateCameraVectors();
 	}
@@ -51,7 +51,7 @@ public:
 	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
 		Position = glm::vec3(posX, posY, posZ);
 		WorldUp = glm::vec3(upX, upY, upZ);
-		Yaw = yaw;
+		setYaw(yaw);
 		Pitch = pitch;
 		updateCameraVectors();
 	}
@@ -80,13 +80,22 @@ public:
 			Position += Right * velocity;
 	}
 
+	/*
+	set the camera's yaw value, clamping it to the range of 0-359
+	@param inYaw: the new yaw value to use
+	*/
+	void setYaw(float inYaw) {
+		Yaw = fmod(inYaw, 360);
+		while (Yaw < 0)
+			Yaw += 360;
+	}
+
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
 		if (!controllable) return;
 		xoffset *= MouseSensitivity;
 		yoffset *= MouseSensitivity;
-
-		Yaw += xoffset;
+		setYaw(Yaw + xoffset);
 		Pitch += yoffset;
 
 		// Make sure that when pitch is out of bounds, screen doesn't get flipped

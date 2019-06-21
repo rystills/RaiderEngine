@@ -30,7 +30,7 @@ void drawCenterIndicator() {
 int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
-	GLFWwindow* window = initWindow();
+	window = initWindow();
 	initGBuffer();
 	initDepthMaps();
 	initPhysics();
@@ -90,9 +90,9 @@ int main() {
 			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);
 	}
-	cleanupPhysics();
+	//cleanupPhysics();
 	glfwTerminate();
 	// delete object and model data
-	gameObjects.clear();
-	models.clear();
+	//gameObjects.clear();
+	//models.clear();
 }

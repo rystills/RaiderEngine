@@ -8,7 +8,7 @@ public:
 		// set camera position explicitly first in case we're using a flycam
 		player.camera.Position = position;
 		player.setPos(position);
-		player.camera.Yaw = glm::degrees(rotationEA.z);
+		player.camera.setYaw(glm::degrees(rotationEA.z));
 		player.camera.updateCameraVectors();
 	}
 };

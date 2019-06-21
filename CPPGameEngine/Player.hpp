@@ -4,7 +4,7 @@
 
 void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix, int threadIndex);
 
-#define PLAYER_RADIUS 5f
+#define PLAYER_RADIUS .5f
 #define PLAYER_HEIGHT  1.9f
 #define PLAYER_MASS  80.0f
 #define PLAYER_WALK_SPEED  8.0f
@@ -94,15 +94,17 @@ public:
 		}
 	}
 
+	void ApplyInputs(dCustomPlayerController* const controller);
+
 	// apply gravity 
 	virtual void ApplyMove(dCustomPlayerController* const controller, dFloat timestep) {
 		// calculate the gravity contribution to the velocity
-		dVector gravity(0,-9.8*PLAYER_MASS,0);
-		dVector totalImpulse(controller->GetImpulse() + gravity.Scale(controller->GetMass() * timestep));
+		dVector gravityImpulse(0.0f, -9.8 * controller->GetMass() * timestep, 0.0f, 0.0f);
+		dVector totalImpulse(controller->GetImpulse() + gravityImpulse);
 		controller->SetImpulse(totalImpulse);
 
 		// apply play movement
-		//ApplyInputs(controller);
+		ApplyInputs(controller);
 	}
 
 	dCustomPlayerController* m_player;
@@ -135,8 +137,9 @@ public:
 	void init() {
 		// configure the starting location
 		dMatrix location(dGetIdentityMatrix());
+		location.m_posit.m_y = 0;
 		BasicPlayerControllerManager* const playerManager = new BasicPlayerControllerManager(world);
-		controller = playerManager->CreatePlayer(location, 1.9f, 0.5, 100.0f);
+		controller = playerManager->CreatePlayer(location, PLAYER_HEIGHT, PLAYER_RADIUS, PLAYER_MASS);
 		playerManager->SetAsPlayer(controller);
 		// set the user data
 		NewtonBodySetUserData(controller->GetBody(), this);
@@ -153,13 +156,13 @@ public:
 	/*
 	sync the position of the camera with the player's current position
 	*/
-	void syncCameraPos() {
-		/*btVector3 pos = ghostObject->getWorldTransform().getOrigin();
-		camera.Position.x = pos.getX();
+	void syncCameraPos(dFloat* pos) {
+		camera.Position.x = pos[0];
 		// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-		camera.Position.y = pos.getY() + (height / 2 - .12f);
-		camera.Position.z = pos.getZ();
-		*/
+		//camera.Position.y = pos[1] + (PLAYER_HEIGHT / 2 - .12f);
+		camera.Position.y = pos[1] + (PLAYER_HEIGHT - .12f);
+		camera.Position.z = pos[2];
+		
 	}
 
 	void update(GLFWwindow *window, float deltaTime) {
@@ -194,7 +197,7 @@ public:
 			dir += camera.Right;
 			camera.ProcessKeyboard(RIGHT, deltaTime);
 		}
-		camera.updateViewProj();
+
 		/*if (dir == glm::vec3(0, 0, 0))
 			controller->setWalkDirection(btVector3(0, 0, 0));
 		else
@@ -207,7 +210,9 @@ public:
 		}*/
 
 		// resync the camera position
-		syncCameraPos();
+		syncCameraPos(pos);
+
+		camera.updateViewProj();
 	}
 };
 
@@ -216,4 +221,20 @@ void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix
 	Player* p = (Player*)NewtonBodyGetUserData(body);
 	// allow the gameObject to handle applying force
 	//p->TransformCallback(body, matrix, threadIndex);
+}
+
+void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const controller) {
+	if (controller == m_player) {
+		dFloat forwarSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * PLAYER_WALK_SPEED;
+		dFloat strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * PLAYER_WALK_SPEED;
+		if (forwarSpeed && strafeSpeed) {
+			dFloat invMag = PLAYER_WALK_SPEED / dSqrt(forwarSpeed * forwarSpeed + strafeSpeed * strafeSpeed);
+			forwarSpeed *= invMag;
+			strafeSpeed *= invMag;
+		}
+		controller->SetForwardSpeed(forwarSpeed);
+		controller->SetLateralSpeed(strafeSpeed);
+		Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
+		controller->SetHeadingAngle(dAtan2(-p->camera.Front.z, p->camera.Front.x));
+	}
 }
