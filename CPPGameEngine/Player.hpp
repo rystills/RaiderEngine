@@ -7,9 +7,11 @@ void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix
 #define PLAYER_RADIUS .5f
 #define PLAYER_HEIGHT  1.9f
 #define PLAYER_MASS  80.0f
-#define PLAYER_WALK_SPEED  8.0f
+#define PLAYER_WALK_SPEED  5.0f
+#define PLAYER_RUN_SPEED  8.0f
 #define PLAYER_JUMP_SPEED  6.0f
 #define PLAYER_THIRD_PERSON_VIEW_DIST  8.0f
+bool canJump = true;
 class BasicPlayerControllerManager : public dCustomPlayerControllerManager
 {
 public:
@@ -71,6 +73,7 @@ public:
 			return 0.0f;
 		}
 		else {
+			canJump = true;
 			// TODO: apply different friction values to different contactIDs; generally ground friction should stay quite high, but it may be lowered on ice / oil / etc.. 
 			return 10;
 			//NewtonCollision* const collision = NewtonBodyGetCollision(otherbody);
@@ -101,9 +104,12 @@ public:
 	// apply gravity 
 	virtual void ApplyMove(dCustomPlayerController* const controller, dFloat timestep) {
 		// calculate the gravity contribution to the velocity
-		dVector gravityImpulse(0.0f, -9.8 * controller->GetMass() * timestep, 0.0f, 0.0f);
-		dVector totalImpulse(controller->GetImpulse() + gravityImpulse);
+		dVector gravityImpulse(0.0f, -9.8f * controller->GetMass() * timestep, 0.0f, 0.0f);
+		dVector existingImpulse = controller->GetImpulse();
+		// when we jump, we ignore gravity and force the y component of our impulse to 200
+		dVector totalImpulse((canJump && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0],200,existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
 		controller->SetImpulse(totalImpulse);
+		canJump = false;
 
 		// apply play movement
 		ApplyInputs(controller);
@@ -233,10 +239,12 @@ void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix
 
 void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const controller) {
 	if (controller == m_player) {
-		dFloat forwarSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * PLAYER_WALK_SPEED;
-		dFloat strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * PLAYER_WALK_SPEED;
+		// walk/run
+		float baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED);
+		dFloat forwarSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
+		dFloat strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
 		if (forwarSpeed && strafeSpeed) {
-			dFloat invMag = PLAYER_WALK_SPEED / dSqrt(forwarSpeed * forwarSpeed + strafeSpeed * strafeSpeed);
+			dFloat invMag = baseMoveSpeed / dSqrt(forwarSpeed * forwarSpeed + strafeSpeed * strafeSpeed);
 			forwarSpeed *= invMag;
 			strafeSpeed *= invMag;
 		}
