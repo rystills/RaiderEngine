@@ -61,7 +61,7 @@ int main() {
 		NewtonUpdate(world, deltaTime);
 
 		// update player
-		player.update(window, deltaTime);
+		player.update(deltaTime);
 		// update objects
 		for (int i = 0; i < gameObjects.size(); ++i)
 			gameObjects[i]->update(deltaTime);
@@ -89,6 +89,9 @@ int main() {
 		if (displayString.size() != 0)
 			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);
+		// set the close flag if the player presses the escape key
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
 	}
 	//cleanupPhysics();
 	glfwTerminate();

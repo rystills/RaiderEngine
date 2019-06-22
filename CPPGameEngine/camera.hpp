@@ -90,6 +90,20 @@ public:
 			Yaw += 360;
 	}
 
+	/*
+	process keyboard events for WASD, enabling control of a simple flycam
+	*/
+	void moveFlycam() {
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			ProcessKeyboard(FORWARD, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			ProcessKeyboard(BACKWARD, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			ProcessKeyboard(LEFT, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			ProcessKeyboard(RIGHT, deltaTime);
+	}
+
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
 		if (!controllable) return;

@@ -10,10 +10,8 @@ void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix
 #define PLAYER_WALK_SPEED  5.0f
 #define PLAYER_RUN_SPEED  8.0f
 #define PLAYER_JUMP_SPEED  6.0f
-#define PLAYER_THIRD_PERSON_VIEW_DIST  8.0f
 bool canJump = true;
-class BasicPlayerControllerManager : public dCustomPlayerControllerManager
-{
+class BasicPlayerControllerManager : public dCustomPlayerControllerManager {
 public:
 	BasicPlayerControllerManager(NewtonWorld* const world) : dCustomPlayerControllerManager(world), m_player(NULL) {}
 
@@ -180,52 +178,13 @@ public:
 		
 	}
 
-	void update(GLFWwindow *window, float deltaTime) {
+	void update(float deltaTime) {
 		NewtonBody* const body = controller->GetBody();
 		dFloat pos[4];
 		NewtonBodyGetPosition(body, pos);
-		// process input
-		// TODO: move this window close block somewhere else
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-			glfwSetWindowShouldClose(window, true);
-
-		// normalize camera front to get a constant speed regardless of pitch
-		glm::vec3 normalFront = glm::normalize(glm::cross(camera.WorldUp, camera.Right));
-		// walk
-		glm::vec3 dir(0, 0, 0);
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-			dir += normalFront;
-			camera.ProcessKeyboard(FORWARD, deltaTime);
-		}
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-			dir -= normalFront;
-			camera.ProcessKeyboard(BACKWARD, deltaTime);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			dir -= camera.Right;
-			camera.ProcessKeyboard(LEFT, deltaTime);
-		}
-		
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-			dir += camera.Right;
-			camera.ProcessKeyboard(RIGHT, deltaTime);
-		}
-
-		/*if (dir == glm::vec3(0, 0, 0))
-			controller->setWalkDirection(btVector3(0, 0, 0));
-		else
-			controller->setWalkDirection(btVector3(dir.x, dir.y, dir.z).normalized()*(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed));
-
-		// jump
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-			if (controller->canJump())
-				controller->jump();
-		}*/
 
 		// resync the camera position
 		syncCameraPos(pos);
-
 		camera.updateViewProj();
 	}
 };
@@ -244,6 +203,7 @@ void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const co
 		dFloat forwarSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
 		dFloat strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
 		if (forwarSpeed && strafeSpeed) {
+			// average forward and strafe speeds to prevent diagonal movement from being faster
 			dFloat invMag = baseMoveSpeed / dSqrt(forwarSpeed * forwarSpeed + strafeSpeed * strafeSpeed);
 			forwarSpeed *= invMag;
 			strafeSpeed *= invMag;
@@ -253,4 +213,5 @@ void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const co
 		Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
 		controller->SetHeadingAngle(dAtan2(-p->camera.Front.z, p->camera.Front.x));
 	}
+	// TODO: add crouching support
 }
