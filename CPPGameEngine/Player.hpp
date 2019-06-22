@@ -71,6 +71,8 @@ public:
 			return 0.0f;
 		}
 		else {
+			// TODO: apply different friction values to different contactIDs; generally ground friction should stay quite high, but it may be lowered on ice / oil / etc.. 
+			return 10;
 			//NewtonCollision* const collision = NewtonBodyGetCollision(otherbody);
 			//int type = NewtonCollisionGetType (collision);
 			//if ((type == SERIALIZE_ID_TREE) || (type == SERIALIZE_ID_TREE)) {
@@ -150,7 +152,14 @@ public:
 	@param pos: the position at which to place the player
 	*/
 	void setPos(glm::vec3 pos) {
-		
+		// TODO: you may need to freeze the world before modifying the player's position; it's probably safe regardless at least when used initially by PlayerSpawn
+		NewtonBody* bod = controller->GetBody();
+		dMatrix mat;
+		NewtonBodyGetMatrix(bod, &mat[0][0]);
+		mat.m_posit.m_x = pos.x;
+		mat.m_posit.m_y = pos.y;
+		mat.m_posit.m_z = pos.z;
+		NewtonBodySetMatrix(bod, &mat[0][0]);
 	}
 
 	/*
@@ -169,7 +178,6 @@ public:
 		NewtonBody* const body = controller->GetBody();
 		dFloat pos[4];
 		NewtonBodyGetPosition(body, pos);
-		std::cout << "player pos: " << pos[0] << ", " << pos[1] << ", " << pos[2] << ", " << pos[3] << std::endl;
 		// process input
 		// TODO: move this window close block somewhere else
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

@@ -436,11 +436,18 @@ void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat
 draw all newton colliders as wireframes
 */
 void debugDrawNewton() {
+	dMatrix tm;
+	// draw GameObject bodies
 	for (int i = 0; i < gameObjects.size(); ++i) {
-		dMatrix tm;
 		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
 		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, gameObjects[i]->model->isStaticMesh ? (void*)2 : (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
 	}
+
+	// draw Player body
+	NewtonBody* body = player.controller->GetBody();
+	NewtonBodyGetMatrix(body, &tm[0][0]);
+	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
+
 	debugDrawLines();
 }
 
