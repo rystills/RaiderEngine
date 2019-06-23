@@ -100,18 +100,7 @@ public:
 	void ApplyInputs(dCustomPlayerController* const controller);
 
 	// apply gravity 
-	virtual void ApplyMove(dCustomPlayerController* const controller, dFloat timestep) {
-		// calculate the gravity contribution to the velocity
-		dVector gravityImpulse(0.0f, -9.8f * controller->GetMass() * timestep, 0.0f, 0.0f);
-		dVector existingImpulse = controller->GetImpulse();
-		// when we jump, we ignore gravity and force the y component of our impulse to 200
-		dVector totalImpulse((canJump && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0],200,existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
-		controller->SetImpulse(totalImpulse);
-		canJump = false;
-
-		// apply play movement
-		ApplyInputs(controller);
-	}
+	virtual void ApplyMove(dCustomPlayerController* const controller, dFloat timestep);
 
 	dCustomPlayerController* m_player;
 };
@@ -214,4 +203,19 @@ void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const co
 		controller->SetHeadingAngle(dAtan2(-p->camera.Front.z, p->camera.Front.x));
 	}
 	// TODO: add crouching support
+}
+
+void BasicPlayerControllerManager::ApplyMove(dCustomPlayerController* const controller, dFloat timestep) {
+	// calculate the gravity contribution to the velocity
+	dVector gravityImpulse(0.0f, -9.8f * controller->GetMass() * timestep, 0.0f, 0.0f);
+	dVector existingImpulse = controller->GetImpulse();
+	// when we jump, we ignore gravity and force the y component of our impulse to 200
+	dVector totalImpulse((canJump && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0], 200, existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
+	controller->SetImpulse(totalImpulse);
+	canJump = false;
+
+	// apply play movement when not observing something
+	Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
+	if (p->camera.controllable)
+		ApplyInputs(controller);
 }
