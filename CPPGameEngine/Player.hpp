@@ -5,18 +5,15 @@
 void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix, int threadIndex);
 
 #define PLAYER_RADIUS .5f
-#define PLAYER_STAND_HEIGHT 1.9f
-#define PLAYER_CROUCH_HEIGHT .8f
-#define PLAYER_MASS 80.0f
-#define PLAYER_WALK_SPEED 5.0f
-#define PLAYER_RUN_SPEED 8.0f
-#define PLAYER_JUMP_SPEED 6.0f
+#define PLAYER_HEIGHT  1.9f
+#define PLAYER_MASS  80.0f
+#define PLAYER_WALK_SPEED  5.0f
+#define PLAYER_RUN_SPEED  8.0f
+#define PLAYER_JUMP_SPEED  6.0f
+#define crouchScale .3f
 bool canJump = true;
 bool crouching = false;
 bool ctrlDown = false;
-dCustomPlayerController* standController;
-dCustomPlayerController* crouchController;
-dCustomPlayerController* controller;
 class BasicPlayerControllerManager : public dCustomPlayerControllerManager {
 public:
 	BasicPlayerControllerManager(NewtonWorld* const world) : dCustomPlayerControllerManager(world), m_player(NULL) {}
@@ -26,7 +23,7 @@ public:
 	void SetAsPlayer(dCustomPlayerController* const controller) {
 		m_player = controller;
 	}
-	
+
 	dCustomPlayerController* CreatePlayer(const dMatrix& location, dFloat height, dFloat radius, dFloat mass) {
 		// set the play coordinate system
 		dMatrix localAxis(dGetIdentityMatrix());
@@ -140,30 +137,32 @@ public:
 		dMatrix location(dGetIdentityMatrix());
 		location.m_posit.m_y = 0;
 		BasicPlayerControllerManager* const playerManager = new BasicPlayerControllerManager(world);
-		standController = playerManager->CreatePlayer(location, PLAYER_STAND_HEIGHT, PLAYER_RADIUS, PLAYER_MASS);
-		crouchController = playerManager->CreatePlayer(location, PLAYER_CROUCH_HEIGHT, PLAYER_RADIUS, PLAYER_MASS);
-		setPos(glm::vec3(-999, -999, -999), 2);
-		controller = standController;
+		controller = playerManager->CreatePlayer(location, PLAYER_HEIGHT, PLAYER_RADIUS, PLAYER_MASS);
 		playerManager->SetAsPlayer(controller);
 		// set the user data
-		NewtonBodySetUserData(standController->GetBody(), this);
-		NewtonBodySetUserData(crouchController->GetBody(), this);
+		NewtonBodySetUserData(controller->GetBody(), this);
 	}
 
 	/*
 	set the player's position in world space
 	@param pos: the position at which to place the player
-	@param forceController: if 0, set the position of the current controller. Otherwise, set the position of the standing controller if 1, or the crouching controller if 2
+	@param relative: whether to add the input position to the current position, or to replace the current position with the input position
 	*/
-	void setPos(glm::vec3 pos, int forceController = 0) {
-		std::cout << forceController << std::endl;
+	void setPos(glm::vec3 pos, bool relative = false) {
 		// TODO: you may need to freeze the world before modifying the player's position; it's probably safe regardless at least when used initially by PlayerSpawn
-		NewtonBody* bod = forceController == 0 ? controller->GetBody() : (forceController == 1 ? standController->GetBody() : crouchController->GetBody());
+		NewtonBody* bod = controller->GetBody();
 		dMatrix mat;
 		NewtonBodyGetMatrix(bod, &mat[0][0]);
-		mat.m_posit.m_x = pos.x;
-		mat.m_posit.m_y = pos.y;
-		mat.m_posit.m_z = pos.z;
+		if (relative) {
+			mat.m_posit.m_x += pos.x;
+			mat.m_posit.m_y += pos.y;
+			mat.m_posit.m_z += pos.z;
+		}
+		else {
+			mat.m_posit.m_x = pos.x;
+			mat.m_posit.m_y = pos.y;
+			mat.m_posit.m_z = pos.z;
+		}
 		NewtonBodySetMatrix(bod, &mat[0][0]);
 	}
 
@@ -173,10 +172,9 @@ public:
 	void syncCameraPos(dFloat* pos) {
 		camera.Position.x = pos[0];
 		// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-		//camera.Position.y = pos[1] + (PLAYER_HEIGHT / 2 - .12f);
-		camera.Position.y = pos[1] + ((crouching ? PLAYER_CROUCH_HEIGHT : PLAYER_STAND_HEIGHT) - .12f);
+		camera.Position.y = pos[1] + (PLAYER_HEIGHT * (crouching ? 1 - crouchScale : 1) - .12f);
 		camera.Position.z = pos[2];
-		
+
 	}
 
 	void update(float deltaTime) {
@@ -187,7 +185,6 @@ public:
 		// resync the camera position
 		syncCameraPos(pos);
 		camera.updateViewProj();
-		//std::cout << "position: " << pos[0] << ", " << pos[1] << ", " << pos[2] << ", " << pos[3] << std::endl;
 	}
 };
 
@@ -200,49 +197,37 @@ void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix
 
 void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const controller) {
 	if (controller == m_player) {
-		// walk/run
-		float baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED);
-		dFloat forwarSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
-		dFloat strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
-		if (forwarSpeed && strafeSpeed) {
-			// average forward and strafe speeds to prevent diagonal movement from being faster
-			dFloat invMag = baseMoveSpeed / dSqrt(forwarSpeed * forwarSpeed + strafeSpeed * strafeSpeed);
-			forwarSpeed *= invMag;
-			strafeSpeed *= invMag;
-		}
-		controller->SetForwardSpeed(forwarSpeed);
-		controller->SetLateralSpeed(strafeSpeed);
 		Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
-		controller->SetHeadingAngle(dAtan2(-p->camera.Front.z, p->camera.Front.x));
-		// crouch toggle
-		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-			ctrlDown = true;
-		else if (ctrlDown) {
-			ctrlDown = false;
-			// toggle crouch 
-			// swap controller properties
-			dCustomPlayerController* nCon = crouching ? standController : crouchController;
-			
-			// copy position
-			NewtonBody* oBod = controller->GetBody();
-			NewtonBody* nBod = nCon->GetBody();
-			dMatrix oMat;
-			NewtonBodyGetMatrix(oBod, &oMat[0][0]);
-			p->setPos(glm::vec3(oMat.m_posit.m_x, oMat.m_posit.m_y, oMat.m_posit.m_z),crouching ? 1 : 2);
-			p->setPos(glm::vec3(-999, -999, -999), crouching ? 2 : 1);
-			
-			// copy speed
-			nCon->SetForwardSpeed(controller->GetForwardSpeed());
-			nCon->SetLateralSpeed(controller->GetLateralSpeed());
-			nCon->SetVelocity(controller->GetVelocity());
-			nCon->SetFrame(controller->GetFrame());
-			nCon->SetHeadingAngle(controller->GetHeadingAngle());
-			nCon->SetImpulse(controller->GetImpulse());
+		// disallow movement when the player isn't in control
+		if (p->camera.controllable) {
+			// walk/run
+			float baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED);
+			dFloat forwarSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
+			dFloat strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
+			if (forwarSpeed && strafeSpeed) {
+				// average forward and strafe speeds to prevent diagonal movement from being faster
+				dFloat invMag = baseMoveSpeed / dSqrt(forwarSpeed * forwarSpeed + strafeSpeed * strafeSpeed);
+				forwarSpeed *= invMag;
+				strafeSpeed *= invMag;
+			}
+			controller->SetForwardSpeed(forwarSpeed);
+			controller->SetLateralSpeed(strafeSpeed);
+			controller->SetHeadingAngle(dAtan2(-p->camera.Front.z, p->camera.Front.x));
 
-			// apply new controller
-			*controller = *nCon;
-			SetAsPlayer(controller);
-			crouching = !crouching;
+			// crouch toggle
+			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+				ctrlDown = true;
+			else if (ctrlDown) {
+				ctrlDown = false;
+				crouching = !crouching;
+				NewtonBodySetCollisionScale(controller->GetBody(), (crouching ? crouchScale : 1), 1, 1);
+				p->setPos(glm::vec3(0, PLAYER_HEIGHT * (1 - crouchScale) * (crouching ? -.5f : .5f), 0), true);
+				// TODO: disallow standing back up if it will cause a collision (either test collisions without resolving them, or use a spherecast)
+			}
+		}
+		else {
+			controller->SetForwardSpeed(0);
+			controller->SetLateralSpeed(0);
 		}
 	}
 }
@@ -252,12 +237,9 @@ void BasicPlayerControllerManager::ApplyMove(dCustomPlayerController* const cont
 	dVector gravityImpulse(0.0f, -9.8f * controller->GetMass() * timestep, 0.0f, 0.0f);
 	dVector existingImpulse = controller->GetImpulse();
 	// when we jump, we ignore gravity and force the y component of our impulse to 200
-	dVector totalImpulse((canJump && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0], 200, existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
+	Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
+	dVector totalImpulse((canJump && p->camera.controllable && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0], 200, existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
 	controller->SetImpulse(totalImpulse);
 	canJump = false;
-
-	// apply play movement when not observing something
-	Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
-	if (p->camera.controllable)
-		ApplyInputs(controller);
+	ApplyInputs(controller);
 }

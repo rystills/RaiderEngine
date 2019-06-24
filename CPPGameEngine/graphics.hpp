@@ -175,7 +175,7 @@ render the specified text with the specified (font,size) pair (if loaded) at the
 @param color: the color to use when rendering the text
 @param centered: whether or not to center the rendered text
 */
-void renderText(std::string fontName, int fontSize, Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered = false) {
+void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered = false) {
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
 		return;
@@ -365,7 +365,7 @@ add a single line to the debug line vector
 @param to: the line's end position
 @param color: the line's rgb color
 */
-void debugAddLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& color) {
+void debugAddLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) {
 	GLfloat points[18];
 
 	points[0] = from.x;
@@ -390,7 +390,7 @@ void debugAddLine(const glm::vec3& from, const glm::vec3 &to, const glm::vec3& c
 	points[15] = NAN;
 	points[16] = NAN;
 	points[17] = NAN;
-	
+
 	debugLinePoints.insert(std::end(debugLinePoints), std::begin(points), std::end(points));
 }
 
@@ -408,7 +408,7 @@ void debugDrawLines() {
 	glBindVertexArray(0);
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_LINE_STRIP, 0, debugLinePoints.size()/6);
+	glDrawArrays(GL_LINE_STRIP, 0, debugLinePoints.size() / 6);
 	glBindVertexArray(0);
 	debugLinePoints.clear();
 }
@@ -444,11 +444,9 @@ void debugDrawNewton() {
 	}
 
 	// draw Player body
-	for (int i = 0; i < 2; ++i) {
-		NewtonBody* body = (i ? standController->GetBody() : crouchController->GetBody());
-		NewtonBodyGetMatrix(body, &tm[0][0]);
-		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
-	}
+	NewtonBody* body = player.controller->GetBody();
+	NewtonBodyGetMatrix(body, &tm[0][0]);
+	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
 
 	debugDrawLines();
 }
