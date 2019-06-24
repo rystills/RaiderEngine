@@ -444,9 +444,11 @@ void debugDrawNewton() {
 	}
 
 	// draw Player body
-	NewtonBody* body = player.controller->GetBody();
-	NewtonBodyGetMatrix(body, &tm[0][0]);
-	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
+	for (int i = 0; i < 2; ++i) {
+		NewtonBody* body = (i ? standController->GetBody() : crouchController->GetBody());
+		NewtonBodyGetMatrix(body, &tm[0][0]);
+		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
+	}
 
 	debugDrawLines();
 }
