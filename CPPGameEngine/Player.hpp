@@ -9,7 +9,7 @@ void applyTransformCallbackRedirect(const NewtonBody* body, const dFloat* matrix
 #define PLAYER_MASS  80.0f
 #define PLAYER_WALK_SPEED  5.0f
 #define PLAYER_RUN_SPEED  8.0f
-#define PLAYER_JUMP_SPEED  6.0f
+#define PLAYER_JUMP_SPEED  230.0f
 #define crouchScale .3f
 bool canJump = true;
 bool crouching = false;
@@ -230,15 +230,16 @@ void BasicPlayerControllerManager::ApplyInputs(dCustomPlayerController* const co
 			controller->SetLateralSpeed(0);
 		}
 	}
+	// TODO: fix buggy interaction with steps
 }
 
 void BasicPlayerControllerManager::ApplyMove(dCustomPlayerController* const controller, dFloat timestep) {
 	// calculate the gravity contribution to the velocity
-	dVector gravityImpulse(0.0f, -9.8f * controller->GetMass() * timestep, 0.0f, 0.0f);
+	dVector gravityImpulse(0.0f, -GRAVITY_STRENGTH * controller->GetMass() * timestep, 0.0f, 0.0f);
 	dVector existingImpulse = controller->GetImpulse();
 	// when we jump, we ignore gravity and force the y component of our impulse to 200
 	Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
-	dVector totalImpulse((canJump && p->camera.controllable && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0], 200, existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
+	dVector totalImpulse((canJump && p->camera.controllable && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0], PLAYER_JUMP_SPEED, existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
 	controller->SetImpulse(totalImpulse);
 	canJump = false;
 	ApplyInputs(controller);

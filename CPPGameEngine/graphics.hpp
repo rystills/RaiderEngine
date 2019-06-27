@@ -550,6 +550,8 @@ GLFWwindow* initWindow() {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+
+	// callback events
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -567,6 +569,12 @@ GLFWwindow* initWindow() {
 	}
 
 	glfwSwapInterval(useVsync);
+
+	// required capabilities
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+
 	return window;
 }
 
@@ -750,10 +758,29 @@ void renderText() {
 update all objects in all object lists
 */
 void updateObjects() {
+	updateDebugToggle(window);
 	for (int i = 0; i < gameObjects.size(); ++i)
 		gameObjects[i]->update(deltaTime);
 	for (int i = 0; i < lights.size(); ++i)
 		lights[i]->update(deltaTime);
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->update(deltaTime);
+}
+
+/*
+call all of the graphics initialization steps in order
+@returns the newly created GLFWwindow pointer
+*/
+GLFWwindow* initGraphics() {
+	GLFWwindow* window = initWindow();
+	initGBuffer();
+	initDepthMaps();
+	initPhysics();
+	initFreetype();
+	initBuffers();
+
+	loadShaders();
+	Model::loadDefaultMaterialMaps();
+
+	return window;
 }

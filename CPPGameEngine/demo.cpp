@@ -31,19 +31,8 @@ void drawCenterIndicator() {
 int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
-	window = initWindow();
-	initGBuffer();
-	initDepthMaps();
-	initPhysics();
-	initFreetype();
-	initBuffers();
+	window = initGraphics();
 	player.init();
-	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_PROGRAM_POINT_SIZE);
-
-	loadShaders();
-	Model::loadDefaultMaterialMaps();
 
 	// load map
 	loadMap("hallway");
@@ -53,8 +42,6 @@ int main() {
 	textObjects.emplace_back(new FpsDisplay());
 
 	while (!glfwWindowShouldClose(window)) {
-		updateDebugToggle(window);
-
 		// update frame
 		updateTime();
 		resetSingleFrameInput();
@@ -93,9 +80,9 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 	}
-	//cleanupPhysics();
 	glfwTerminate();
-	// delete object and model data
-	//gameObjects.clear();
-	//models.clear();
+	// delete physics, object, and model data (unnecessary here, but good practice nonetheless)
+	cleanupPhysics();
+	gameObjects.clear();
+	models.clear();
 }

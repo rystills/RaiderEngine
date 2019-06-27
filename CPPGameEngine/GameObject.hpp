@@ -123,7 +123,7 @@ public:
 	*/
 	virtual void applyForceCallback(dFloat timestep, int threadIndex) {
 		// apply gravitational force
-		dFloat force[3] = { 0, -9.8 * mass * gravityMultiplier * !held, 0 };
+		dFloat force[3] = { 0, -GRAVITY_STRENGTH * mass * gravityMultiplier * !held, 0 };
 		NewtonBodySetForce(body, force);
 
 		// disable omega and torque when held
