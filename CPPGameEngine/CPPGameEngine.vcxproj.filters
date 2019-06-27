@@ -30,6 +30,9 @@
     <ClCompile Include="demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -105,6 +108,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="rightClickObserve.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FpsDisplay.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextObject.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

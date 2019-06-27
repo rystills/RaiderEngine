@@ -1,3 +1,4 @@
+#pragma once
 #include "stdafx.h"
 // this file is responsible for maintaining timing information within the main game loop
 float deltaTime = 0.0f;

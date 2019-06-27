@@ -15,6 +15,7 @@
 
 #include "rightClickObserve.hpp"
 #include "mousePicking.hpp"
+#include "FpsDisplay.hpp"
 
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
@@ -48,6 +49,8 @@ int main() {
 	loadMap("hallway");
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
+	// add fps indicator
+	textObjects.emplace_back(new FpsDisplay());
 
 	while (!glfwWindowShouldClose(window)) {
 		updateDebugToggle(window);
@@ -63,10 +66,7 @@ int main() {
 		// update player
 		player.update(deltaTime);
 		// update objects
-		for (int i = 0; i < gameObjects.size(); ++i)
-			gameObjects[i]->update(deltaTime);
-		for (int i = 0; i < lights.size(); ++i)
-			lights[i]->update(deltaTime);
+		updateObjects();
 
 		// picking and object info display
 		if (displayString.size() == 0) {

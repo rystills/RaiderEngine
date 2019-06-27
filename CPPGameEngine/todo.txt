@@ -18,3 +18,4 @@
 -add automatic object instancing
 -reset object to starting position if it falls below the lowest map position - 100
 -send lights to shader in order of distance from player and importance, and render shadows for first N lights
+-split classes into separate .h and .cpp files

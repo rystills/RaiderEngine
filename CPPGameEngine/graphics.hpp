@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #pragma once
+#include "settings.hpp"
 #include "model.hpp"
 #include "GameObject.hpp"
+#include "Light.hpp"
+#include "textObject.h"
 #include "input.hpp"
-#include "settings.hpp"
 // this file is responsible for graphics, including debug and text rendering
 // TODO: merge aniso (and numFontCharacters?) into settings.hpp
 float anisoFilterAmount = 0.0f;
@@ -730,7 +732,7 @@ void renderLines() {
 }
 
 /*
-configure the text shader, and draw fps indicator text
+configure the text shader, and draw all TextObjects
 */
 void renderText() {
 	// render text
@@ -739,5 +741,19 @@ void renderText() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
 
-	renderText("Inter-Regular", 24, *shaders["textShader"], "fps: " + std::to_string(fps), 6, 6, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+	for (int i = 0; i < textObjects.size(); ++i)
+		textObjects[i]->draw(*shaders["textShader"]);
+}
+
+// TODO: updateObjects doesn't really belong in graphics.hpp
+/*
+update all objects in all object lists
+*/
+void updateObjects() {
+	for (int i = 0; i < gameObjects.size(); ++i)
+		gameObjects[i]->update(deltaTime);
+	for (int i = 0; i < lights.size(); ++i)
+		lights[i]->update(deltaTime);
+	for (int i = 0; i < textObjects.size(); ++i)
+		textObjects[i]->update(deltaTime);
 }
