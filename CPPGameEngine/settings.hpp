@@ -15,7 +15,7 @@ Player player;
 #include "model.hpp"
 #include "GameObject.hpp"
 #include "Light.hpp"
-#include "textObject.h"
+#include "TextObject.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
 std::vector<std::unique_ptr<GameObject>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;

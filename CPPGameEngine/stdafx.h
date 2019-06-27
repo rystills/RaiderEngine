@@ -43,3 +43,7 @@
 #include FT_FREETYPE_H
 // stb
 #include "stb_image.h"
+// openalsoft
+#include "AL/al.h"
+#include "AL/alc.h"
+#include "AL/alext.h"

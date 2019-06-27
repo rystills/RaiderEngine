@@ -1,5 +1,5 @@
 #pragma once
-#include "textObject.h"
+#include "TextObject.hpp"
 #include "timing.hpp"
 
 class FpsDisplay : public TextObject {

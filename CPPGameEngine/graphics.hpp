@@ -4,7 +4,7 @@
 #include "model.hpp"
 #include "GameObject.hpp"
 #include "Light.hpp"
-#include "textObject.h"
+#include "TextObject.hpp"
 #include "input.hpp"
 // this file is responsible for graphics, including debug and text rendering
 // TODO: merge aniso (and numFontCharacters?) into settings.hpp
