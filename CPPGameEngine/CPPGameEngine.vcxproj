@@ -140,12 +140,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="alHelpers.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="demo.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="stb_vorbis.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -153,7 +159,9 @@
     <ClCompile Include="TextObject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alHelpers.h" />
     <ClInclude Include="assimpFlags.hpp" />
+    <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="Cog.hpp" />
     <ClInclude Include="filesystem.hpp" />

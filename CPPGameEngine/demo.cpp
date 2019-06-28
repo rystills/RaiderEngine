@@ -16,6 +16,7 @@
 #include "rightClickObserve.hpp"
 #include "mousePicking.hpp"
 #include "FpsDisplay.hpp"
+#include "audio.hpp"
 
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
@@ -32,6 +33,7 @@ int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
 	window = initGraphics();
+	initAudio();
 	player.init();
 
 	// load map
@@ -40,6 +42,7 @@ int main() {
 	applyAnisotropicFiltering();
 	// add fps indicator
 	textObjects.emplace_back(new FpsDisplay());
+	playSound("Alien_Spaceship_Atmosphere.ogg");
 
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
@@ -81,8 +84,11 @@ int main() {
 			glfwSetWindowShouldClose(window, true);
 	}
 	glfwTerminate();
-	// delete physics, object, and model data (unnecessary here, but good practice nonetheless)
+	// cleanup all of our data manually (unnecessary here, but good practice nonetheless)
 	cleanupPhysics();
 	gameObjects.clear();
 	models.clear();
+	for (std::pair<std::string, std::shared_ptr<ALuint>> sound : sounds)
+		alDeleteBuffers(1, &*sound.second);
+	sounds.clear();
 }

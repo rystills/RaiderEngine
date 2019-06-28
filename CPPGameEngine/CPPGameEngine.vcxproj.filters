@@ -33,6 +33,12 @@
     <ClCompile Include="TextObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="alHelpers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stb_vorbis.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -114,6 +120,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="TextObject.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="alHelpers.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="audio.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 #pragma once
 // this file holds global settings and shared engine data
 unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720;
-bool useVsync = false;
+bool useVsync = true;
 bool fullScreen = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 bool debugDraw = false;
@@ -17,6 +17,7 @@ Player player;
 #include "Light.hpp"
 #include "TextObject.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
+std::unordered_map<std::string, std::shared_ptr<ALuint>> sounds;
 std::vector<std::unique_ptr<GameObject>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;
 std::vector<std::unique_ptr<TextObject>> textObjects;

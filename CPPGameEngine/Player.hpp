@@ -239,6 +239,7 @@ void BasicPlayerControllerManager::ApplyMove(dCustomPlayerController* const cont
 	dVector existingImpulse = controller->GetImpulse();
 	// when we jump, we ignore gravity and force the y component of our impulse to 200
 	Player* p = (Player*)NewtonBodyGetUserData(controller->GetBody());
+	// TODO: jump occasionally only goes a fraction of its normal height
 	dVector totalImpulse((canJump && p->camera.controllable && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) ? dVector(existingImpulse[0], PLAYER_JUMP_SPEED, existingImpulse[2]) : (controller->GetImpulse() + gravityImpulse));
 	controller->SetImpulse(totalImpulse);
 	canJump = false;
