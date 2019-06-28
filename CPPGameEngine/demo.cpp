@@ -88,7 +88,5 @@ int main() {
 	cleanupPhysics();
 	gameObjects.clear();
 	models.clear();
-	for (std::pair<std::string, std::shared_ptr<ALuint>> sound : sounds)
-		alDeleteBuffers(1, &*sound.second);
 	sounds.clear();
 }
