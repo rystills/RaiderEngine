@@ -41,7 +41,12 @@ int main() {
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
 	// add fps indicator
-	textObjects.emplace_back(new FpsDisplay());
+	freetypeLoadFont("Inter-Regular", 18);
+	freetypeLoadFont("Inter-Regular", 24);
+	textObjects.emplace_back(new FpsDisplay(6,6,glm::vec3(1,1,1),18));
+	textObjects.emplace_back(new TextObject("Press f3 to toggle physics wireframes",6,30, glm::vec3(.8f, .2f, .5f), 24));
+	textObjects.emplace_back(new TextObject("Use WASD to move, space to jump, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), 24));
+	textObjects.emplace_back(new TextObject("Press left mouse to grab objects, and right mouse to observe", 6, 90, glm::vec3(.2f, .5f, .8f), 24));
 	playSound("Alien_Spaceship_Atmosphere.ogg");
 
 	while (!glfwWindowShouldClose(window)) {
