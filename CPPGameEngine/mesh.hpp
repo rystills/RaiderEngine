@@ -21,12 +21,21 @@ struct Texture {
 	std::string path;
 };
 
+/*
+custom deleter for smart pointers containing opengl graphics buffers; deletes the buffer's contents before deleting the buffer itself
+@param b: the graphics buffer to delete
+*/
+void deleteGraphicsBuffer(ALuint* b) {
+	glDeleteBuffers(1, b);
+	delete b;
+}
+
 class Mesh {
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
-    unsigned int VAO;
+	std::shared_ptr<unsigned int> VAO;
 
 	/*
 	Mesh constructor: creates a new mesh with the provided vertex, index, and texture data
@@ -68,7 +77,7 @@ public:
         }
         
         // draw mesh
-        glBindVertexArray(VAO);
+        glBindVertexArray(*VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
@@ -77,26 +86,29 @@ public:
     }
 
 private:
-    unsigned int VBO, EBO;
+	std::shared_ptr<unsigned int> VBO, EBO;
 
     /*
 	initialize all the buffer objects/arrays
 	*/
     void setupMesh() {
         // create buffers/arrays
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
+		VAO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
+		VBO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
+		EBO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
+        glGenVertexArrays(1, &*VAO);
+        glGenBuffers(1, &*VBO);
+        glGenBuffers(1, &*EBO);
 
-        glBindVertexArray(VAO);
+        glBindVertexArray(*VAO);
         // load data into vertex buffers
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, *VBO);
         // A great thing about structs is that their memory layout is sequential for all its items.
         // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
         // again translates to 3/2 floats which translates to a byte array.
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);  
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
         // set the vertex attribute pointers

@@ -25,8 +25,8 @@ void drawCenterIndicator() {
 	// convert center position into camera coordinates
 	glm::mat4 M = glm::inverse(player.camera.projection*player.camera.view);
 	glm::vec4 lRayStart_world = M * glm::vec4(0, 0, 0, 1); lRayStart_world /= lRayStart_world.w;
-	debugAddPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
-	debugDrawPoints();
+	queueDrawPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
+	drawPoints();
 }
 
 int main() {

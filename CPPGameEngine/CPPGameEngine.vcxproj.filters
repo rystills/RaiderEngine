@@ -134,12 +134,6 @@
     <Text Include="installInstructions.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\debugLineShader.fs">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\debugLineShader.vs">
-      <Filter>Source Files\shaders</Filter>
-    </None>
     <None Include="shaders\deferred_light_box.fs">
       <Filter>Source Files\shaders</Filter>
     </None>
@@ -171,6 +165,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\textShader.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lineShader.fs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lineShader.vs">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

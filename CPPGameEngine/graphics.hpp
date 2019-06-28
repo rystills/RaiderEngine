@@ -11,15 +11,15 @@
 float anisoFilterAmount = 0.0f;
 #define numFontCharacters 128  // we only care about the first 128 characters stored in a given font file, at least for now
 
-unsigned int VBO, VAO;
+unsigned int primitiveVBO, primitiveVAO;
 unsigned int textVBO, textVAO;
 
 #define NR_LIGHTS 4
 unsigned int depthMapFBO[NR_LIGHTS];
 unsigned int depthCubemap[NR_LIGHTS];
 
-std::vector<GLfloat> debugPoints;
-std::vector<GLfloat> debugLinePoints;
+std::vector<GLfloat> pointsQueue;
+std::vector<GLfloat> linesQueue;
 
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
@@ -160,8 +160,8 @@ void applyAnisotropicFiltering() {
 initialize the default vertex buffer and attribute objects (VBO and VAO, respectively)
 */
 void initBuffers() {
-	glGenBuffers(1, &VBO);
-	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &primitiveVBO);
+	glGenVertexArrays(1, &primitiveVAO);
 }
 
 
@@ -326,11 +326,11 @@ void initFreetype() {
 }
 
 /*
-add a single point to the debug point vector
+add a single point to the point vector
 @param pos: the point's position
 @param color: the point's rgb color
 */
-void debugAddPoint(glm::vec3 pos, glm::vec3 color) {
+void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 	GLfloat points[6];
 	points[0] = pos.x;
 	points[1] = pos.y;
@@ -339,35 +339,35 @@ void debugAddPoint(glm::vec3 pos, glm::vec3 color) {
 	points[4] = color.g;
 	points[5] = color.b;
 
-	debugPoints.insert(std::end(debugPoints), std::begin(points), std::end(points));
+	pointsQueue.insert(std::end(pointsQueue), std::begin(points), std::end(points));
 }
 
 /*
-draw all of the buffered debug points, then clear the debug point vector
+draw all of the buffered points, then clear the point vector
 */
-void debugDrawPoints() {
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * debugPoints.size(), &debugPoints[0], GL_STATIC_DRAW);
+void drawPoints() {
+	glBindVertexArray(primitiveVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * pointsQueue.size(), &pointsQueue[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
 
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_POINTS, 0, debugPoints.size() / 6);
+	glBindVertexArray(primitiveVAO);
+	glDrawArrays(GL_POINTS, 0, pointsQueue.size() / 6);
 	glBindVertexArray(0);
-	debugPoints.clear();
+	pointsQueue.clear();
 }
 
 /*
-add a single line to the debug line vector
+add a single line to the line vector
 @param from: the line's start position
 @param to: the line's end position
 @param color: the line's rgb color
 */
-void debugAddLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) {
+void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) {
 	GLfloat points[18];
 
 	points[0] = from.x;
@@ -393,26 +393,26 @@ void debugAddLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& c
 	points[16] = NAN;
 	points[17] = NAN;
 
-	debugLinePoints.insert(std::end(debugLinePoints), std::begin(points), std::end(points));
+	linesQueue.insert(std::end(linesQueue), std::begin(points), std::end(points));
 }
 
 /*
-draw all of the buffered debug lines, then clear the debug line vector
+draw all of the buffered lines, then clear the line vector
 */
-void debugDrawLines() {
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * debugLinePoints.size(), &debugLinePoints[0], GL_STATIC_DRAW);
+void drawLines() {
+	glBindVertexArray(primitiveVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
 
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_LINE_STRIP, 0, debugLinePoints.size() / 6);
+	glBindVertexArray(primitiveVAO);
+	glDrawArrays(GL_LINE_STRIP, 0, linesQueue.size() / 6);
 	glBindVertexArray(0);
-	debugLinePoints.clear();
+	linesQueue.clear();
 }
 
 glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
@@ -429,7 +429,7 @@ void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
 	for (int i = 0; i < vertexCount; i++) {
 		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-		debugAddLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
+		queueDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
 		p0 = p1;
 	}
 }
@@ -450,7 +450,7 @@ void debugDrawNewton() {
 	NewtonBodyGetMatrix(body, &tm[0][0]);
 	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
 
-	debugDrawLines();
+	drawLines();
 }
 
 /*
@@ -586,7 +586,7 @@ void loadShaders() {
 	shaders["shaderGeometryPass"] = std::make_unique<Shader>("shaders/g_buffer.vs", "shaders/g_buffer.fs");
 	shaders["shaderLightingPass"] = std::make_unique<Shader>("shaders/deferred_shading.vs", "shaders/deferred_shading.fs");
 	shaders["shaderLightBox"] = std::make_unique<Shader>("shaders/deferred_light_box.vs", "shaders/deferred_light_box.fs");
-	shaders["debugLineShader"] = std::make_unique<Shader>("shaders/debugLineShader.vs", "shaders/debugLineShader.fs");
+	shaders["lineShader"] = std::make_unique<Shader>("shaders/lineShader.vs", "shaders/lineShader.fs");
 	shaders["textShader"] = std::make_unique<Shader>("shaders/textShader.vs", "shaders/textShader.fs");
 	shaders["pointShadowsDepth"] = std::make_unique<Shader>("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.fs", "shaders/point_shadows_depth.gs");
 
@@ -727,14 +727,14 @@ void debugDrawLightCubes() {
 }
 
 /*
-configure the debug line shader, and draw physics wireframes (if specified)
+configure the line shader, and draw physics wireframes (if specified)
 */
 void renderLines() {
 	// render UI
 	glDisable(GL_DEPTH_TEST);
-	shaders["debugLineShader"]->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
-	glUniformMatrix4fv(glGetUniformLocation(shaders["debugLineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
+	shaders["lineShader"]->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
 	if (debugDraw)
 		debugDrawNewton();
 }
