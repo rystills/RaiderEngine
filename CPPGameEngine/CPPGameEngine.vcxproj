@@ -143,7 +143,7 @@
     <ClCompile Include="alHelpers.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="demo.cpp" />
+    <ClCompile Include="demo\demo.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -163,9 +163,10 @@
     <ClInclude Include="assimpFlags.hpp" />
     <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />
-    <ClInclude Include="Cog.hpp" />
+    <ClInclude Include="demo\Cog.hpp" />
+    <ClInclude Include="demo\FlickerLight.hpp" />
+    <ClInclude Include="demo\MovingPlatform.hpp" />
     <ClInclude Include="filesystem.hpp" />
-    <ClInclude Include="FlickerLight.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="graphics.hpp" />
@@ -175,7 +176,6 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
-    <ClInclude Include="MovingPlatform.hpp" />
     <ClInclude Include="mousePicking.hpp" />
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="Player.hpp" />

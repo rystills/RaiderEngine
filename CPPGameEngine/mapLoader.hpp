@@ -58,9 +58,8 @@ std::vector<std::string> extractNameArgs(std::string name) {
 process the current node while loading a map, either extracting a single piece of transform data or finalizing the current object / static mesh
 @param node: the node we are currently processing
 @param scene: the overall scene returned by ASSIMP when loading the initial map model
-@param directory: the directory in which the map resides
 */
-void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
+void processMapNode(aiNode *node, const aiScene *scene) {
 	// determine the full name and real name of the current node
 	tempProp.fullName = node->mName.C_Str();
 	std::string name = stripNodeName(tempProp.fullName);
@@ -123,7 +122,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 			//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 			std::shared_ptr<Model> baseModel = std::make_shared<Model>();
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene));
 			baseModel->generateCollisionShape();
 			models.insert({ tempProp.fullName, baseModel });
 			gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, false, true, false));
@@ -141,7 +140,7 @@ void processMapNode(aiNode *node, const aiScene *scene, std::string directory) {
 
 	// recurse over child nodes regardless of current node type
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		processMapNode(node->mChildren[i], scene, directory);
+		processMapNode(node->mChildren[i], scene);
 }
 /*
 load the specified map, instantiating all referenced objects and creating an empty object to house the static geometry
@@ -150,8 +149,7 @@ load the specified map, instantiating all referenced objects and creating an emp
 void loadMap(std::string mapName) {
 	// TODO: don't use hard-coded map folder
 	// load the map as a typical model via ASSIMP
-	std::string directory = FileSystem::getPath("maps/" + mapName + ".fbx");
-	std::string path = directory.substr(0, directory.find_last_of('/'));
+	std::string directory = FileSystem::getPath(mapDir + '/' + mapName + ".fbx");
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors
@@ -162,6 +160,6 @@ void loadMap(std::string mapName) {
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
 	tempProp.prevName = "";
-	processMapNode(scene->mRootNode, scene, path);
+	processMapNode(scene->mRootNode, scene);
 	SUCCESS(std::cout << "Finished loading map '" << mapName << "'" << std::endl);
 }

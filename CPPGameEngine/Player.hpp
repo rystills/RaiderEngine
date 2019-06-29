@@ -77,26 +77,6 @@ public:
 			canJump = true;
 			// TODO: apply different friction values to different contactIDs; generally ground friction should stay quite high, but it may be lowered on ice / oil / etc.. 
 			return 10;
-			//NewtonCollision* const collision = NewtonBodyGetCollision(otherbody);
-			//int type = NewtonCollisionGetType (collision);
-			//if ((type == SERIALIZE_ID_TREE) || (type == SERIALIZE_ID_TREE)) {
-			//} else {
-			switch (contactId)
-			{
-			case 1:
-				// this the brick wall
-				return 0.5f;
-			case 2:
-				// this the wood floor
-				return 1.0f;
-			case 3:
-				// this the cement floor
-				return 2.0f;
-				//return 0.2f;
-			default:
-				// this is everything else
-				return 1.0f;
-			}
 		}
 	}
 
@@ -111,23 +91,8 @@ public:
 class Player {
 public:
 	Camera camera;
-	//kineCon* controller;
-	//btPairCachingGhostObject* ghostObject;
-	//btCapsuleShape* convexShape;
-	/*
-	float walkSpeed = .02f;
-	float runSpeed = .04f;
-	float jumpSpeed = 5;
-	float maxStepHeight = .05f;
-	*/
 	dCustomPlayerController* controller;
-
 	Player() : camera(glm::vec3(0)) { }
-
-	/*void TransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex) {
-		dFloat force[3] = { 0, -9.8 * PLAYER_MASS, 0 };
-		NewtonBodySetForce(body, force);
-	}*/
 
 	/*
 	initialize the player, creating a new newton controller

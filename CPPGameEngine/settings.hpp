@@ -7,6 +7,8 @@ bool fullScreen = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 bool debugDraw = false;
 
+std::string mapDir = "", modelDir = "", textureDir = "", soundDir = "", fontDir = "";
+
 GLFWwindow* window;
 #include "Player.hpp"
 // TODO: we should not force usage of the Player base class
@@ -22,3 +24,22 @@ std::vector<std::unique_ptr<GameObject>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;
 std::vector<std::unique_ptr<TextObject>> textObjects;
 std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
+
+void setMapDir(std::string newDir) {
+	mapDir = newDir + '/';
+}
+void setModelDir(std::string newDir) {
+	modelDir = newDir + '/';
+}
+
+void setTextureDir(std::string newDir) {
+	textureDir = newDir + '/';
+}
+
+void setSoundDir(std::string newDir) {
+	soundDir = newDir + '/';
+}
+
+void setFontDir(std::string newDir) {
+	fontDir = newDir + '/';
+}

@@ -1,22 +1,22 @@
 #include "stdafx.h"
 // engine includes (import order matters here, at least for the time being)
-#include "terminalColors.hpp"
-#include "filesystem.hpp"
-#include "timing.hpp"
-#include "physics.hpp"
-#include "settings.hpp"
-#include "mapLoader.hpp"
-#include "graphics.hpp"
-#include "shader.hpp"
+#include "../terminalColors.hpp"
+#include "../filesystem.hpp"
+#include "../timing.hpp"
+#include "../physics.hpp"
+#include "../settings.hpp"
+#include "../mapLoader.hpp"
+#include "../graphics.hpp"
+#include "../shader.hpp"
 
-#include "model.hpp"
-#include "GameObject.hpp"
-#include "Light.hpp"
+#include "../model.hpp"
+#include "../GameObject.hpp"
+#include "../Light.hpp"
 
-#include "rightClickObserve.hpp"
-#include "mousePicking.hpp"
-#include "FpsDisplay.hpp"
-#include "audio.hpp"
+#include "../rightClickObserve.hpp"
+#include "../mousePicking.hpp"
+#include "../FpsDisplay.hpp"
+#include "../audio.hpp"
 
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
@@ -37,6 +37,11 @@ int main() {
 	player.init();
 
 	// load map
+	setMapDir("demo/maps");
+	setModelDir("demo/models");
+	setTextureDir("demo/textures");
+	setSoundDir("demo/sounds");
+	setFontDir("demo/fonts");
 	loadMap("hallway");
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();

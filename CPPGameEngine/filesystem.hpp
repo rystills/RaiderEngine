@@ -35,7 +35,7 @@ private:
 
 	static std::string getPathRelativeRoot(const std::string& path)
 	{
-		return getRoot() + std::string("/") + path;
+		return getRoot() + '/' + path;
 	}
 
 	static std::string getPathRelativeBinary(const std::string& path)

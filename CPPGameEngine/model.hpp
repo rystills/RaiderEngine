@@ -9,20 +9,16 @@ std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 /*
 load the specified texture from the specified directory
 @param path: the name of the texture file to load
-@param directory: a string containing the directory in which the file resides
 @returns: the texture id returned by glGenTextures
 */
-unsigned int textureFromFile(const char *path, const std::string &directory, bool gamma = false) {
-	// concatenate the file name and directory
-	std::string filename = directory + '/' + std::string(path);
-
+unsigned int textureFromFile(std::string fileName, bool gamma = false) {
 	// generate a new opengl texture to which to write the texture data
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
 	// load the texture data via stbi
 	int width, height, nrComponents;
-	unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+	unsigned char *data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
 	if (data) {
 		if (nrComponents < textureFormats.size() && textureFormats[nrComponents] != NULL) {
 			// establish the texture format based on the number of components returned by stbi
@@ -40,10 +36,10 @@ unsigned int textureFromFile(const char *path, const std::string &directory, boo
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		else
-			ERROR(std::cout << "Error Loading texture '" << path << "': invalid number of components '" << nrComponents << "'" << std::endl);
+			ERROR(std::cout << "Error Loading texture '" << fileName << "': invalid number of components '" << nrComponents << "'" << std::endl);
 	}
 	else
-		ERROR(std::cout << "Texture failed to load at path: " << path << std::endl);
+		ERROR(std::cout << "Texture failed to load at path: " << fileName << std::endl);
 	
 	// cleanup
 	stbi_image_free(data);
@@ -137,10 +133,9 @@ public:
 	process the specified mesh from the scene returned by ASSIMP, producing a mesh instance with the relevant ASSIMP mesh data
 	@param mesh: the ASSIMP mesh to process
 	@param scene: the scene of which the specified mesh is a part
-	@param directory: a string containing the directory in which the file resides
 	@returns: a new Mesh instance containing the relevant ASSIMP mesh data
 	*/
-	Mesh processMesh(aiMesh *mesh, const aiScene *scene, std::string directory) {
+	Mesh processMesh(aiMesh *mesh, const aiScene *scene) {
 		// data to fill
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
@@ -191,7 +186,7 @@ public:
 		// normal: texture_normalN
 
 		// return a mesh object created from the extracted mesh data
-		return Mesh(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory));
+		return Mesh(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"));
 	}
 
 	/*
@@ -232,25 +227,24 @@ private:
         std::string directory = path.substr(0, path.find_last_of('/'));
 
         // process ASSIMP's root node recursively
-        processNode(scene->mRootNode, scene, directory);
+        processNode(scene->mRootNode, scene);
     }
 
     /*
 	processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 	@param node: the current node to process
 	@param scene: the entire scene returned by ASSIMP
-	@param directory: a string containing the directory in which the file resides
 	*/
-    void processNode(aiNode *node, const aiScene *scene, std::string directory) {
+    void processNode(aiNode *node, const aiScene *scene) {
         // process each mesh located at the current node
         for(unsigned int i = 0; i < node->mNumMeshes; ++i)
             // the node object only contains indices to index the actual objects in the scene. 
             // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-            meshes.push_back(processMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+            meshes.push_back(processMesh(scene->mMeshes[node->mMeshes[i]], scene));
 
         // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
         for(unsigned int i = 0; i < node->mNumChildren; ++i)
-            processNode(node->mChildren[i], scene, directory);
+            processNode(node->mChildren[i], scene);
     }
 
 	/*
@@ -258,10 +252,9 @@ private:
 	@param mat: the ASSIMP material
 	@param type: the ASSIMP texture type
 	@param typeName: a string representation of the texture type (see processMesh for options)
-	@param directory: a string containing the directory in which the file resides
 	@returns: a vector containing all of the textures loaded either just now or previously
 	*/
-   	static std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName, std::string directory) {
+   	static std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName) {
 		std::vector<Texture> textures;
         for(unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
             aiString str;
@@ -275,7 +268,8 @@ private:
 			for (int k = 0; k < numMapTypes; ++k) {
 				// get current map name
 				std::string mapName = str.C_Str();
-				mapName = mapName.substr(0, mapName.find_last_of('.')) + mapExtensions[k];
+				std::string mapBaseName = mapName.substr(0, mapName.find_last_of('.'));
+				mapName = mapBaseName + mapExtensions[k];
 				
 				// check if the current texture has already been loaded
 				std::unordered_map<std::string, Texture>::iterator search = texturesLoaded.find(mapName);
@@ -284,9 +278,9 @@ private:
 					textures.push_back(search->second);
 				else {
 					// texture does not exist yet; try to load it 
-					if (std::filesystem::exists(directory + "/" + mapName)) {
+					if (std::filesystem::exists(textureDir + mapBaseName + '/' + mapName)) {
 						Texture extraTex;
-						extraTex.id = textureFromFile(mapName.c_str(), directory);
+						extraTex.id = textureFromFile(textureDir + mapBaseName + '/' + mapName);
 						extraTex.type = mapTypes[k];
 						extraTex.path = mapName.c_str();
 						textures.push_back(extraTex);
@@ -296,7 +290,8 @@ private:
 					else {
 						// can't find texture; fall back to default of matching type
 						textures.push_back(mapDefaults[k]);
-						WARNING(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[k] << " map" << std::endl);
+						if (k) WARNING(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[k] << " map" << std::endl)
+						else ERROR(std::cout << "unable to find diffuse map for texture: '" << str.C_Str() << "'; falling back to default diffuse map" << std::endl);
 					}
 				}
 			}

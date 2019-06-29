@@ -255,7 +255,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 
 	// Load font as face
 	FT_Face face;
-	if (FT_New_Face(ft, ("fonts/" + fontName + ".ttf").c_str(), 0, &face))
+	if (FT_New_Face(ft, (fontDir + fontName + ".ttf").c_str(), 0, &face))
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
 	// Set size to load glyphs as

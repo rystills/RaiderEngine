@@ -16,6 +16,9 @@
     <Filter Include="Source Files\shaders">
       <UniqueIdentifier>{be50f23d-d022-481d-a4c3-93fc2ce01d15}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\demo">
+      <UniqueIdentifier>{494b09d3-35c0-4024-93e2-04d2bcac0aca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -27,9 +30,6 @@
     <ClCompile Include="stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TextObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="stb_vorbis.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="demo\demo.cpp">
+      <Filter>Source Files\demo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,16 +68,7 @@
     <ClInclude Include="mesh.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="MovingPlatform.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="PlayerSpawn.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cog.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FlickerLight.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ObjectRegistry.hpp">
@@ -127,6 +121,15 @@
     </ClInclude>
     <ClInclude Include="audio.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="demo\MovingPlatform.hpp">
+      <Filter>Source Files\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="demo\Cog.hpp">
+      <Filter>Source Files\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="demo\FlickerLight.hpp">
+      <Filter>Source Files\demo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -53,7 +53,7 @@ public:
 			model = search->second;
 		else {
 			// TODO: don't use hard-coded model folder
-			model = std::make_shared<Model>(FileSystem::getPath("models/" + modelName + "/" + modelName + ".fbx"), makeStatic);
+			model = std::make_shared<Model>(FileSystem::getPath(modelDir + modelName + '/' + modelName + ".fbx"), makeStatic);
 			models.insert({ modelName, model });
 		}
 	}
