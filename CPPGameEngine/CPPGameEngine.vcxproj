@@ -190,7 +190,6 @@
     <ClInclude Include="timing.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="installInstructions.txt" />
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>

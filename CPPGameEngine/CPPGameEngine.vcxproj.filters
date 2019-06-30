@@ -134,7 +134,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
-    <Text Include="installInstructions.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\deferred_light_box.fs">
