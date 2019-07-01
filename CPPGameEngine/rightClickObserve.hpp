@@ -2,7 +2,6 @@
 #pragma once
 #include "GameObject.hpp"
 #include "settings.hpp"
-#include "mousePicking.hpp"
 
 std::string displayString = "";
 
@@ -26,12 +25,12 @@ void updateDisplayString() {
 }
 
 void checkDisplayObject() {
-	if (mousePressedRight) {
+	/*if (mousePressedRight) {
 		dFloat param;
 		dVector posit, normal;
 		std::pair<dVector, dVector> worldPoints = screenToWorld();
 		NewtonBody* const body = MousePickByForce(world, worldPoints.first, worldPoints.second, param, posit, normal);
 		if (body)
 			displayObjectInfo((GameObject*)NewtonBodyGetUserData(body));
-	}
+	}*/
 }

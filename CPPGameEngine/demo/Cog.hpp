@@ -10,7 +10,7 @@ public:
 	bool wallMounted;
 	Cog(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, float rotSpeed, bool counterClockWise, bool wallMounted = true) : rotSpeed(rotSpeed), counterClockWise(counterClockWise), wallMounted(wallMounted), GameObject(position, rotationEA, scale, "cog") {
 		// make cogs massless when wall-mounted, so newton treats them as static
-		if (wallMounted) NewtonBodySetMassMatrix(body, 0, 1, 1, 1);
+		//if (wallMounted) NewtonBodySetMassMatrix(body, 0, 1, 1, 1);
 	}
 	void update(float deltaTime) override {
 		GameObject::update(deltaTime);

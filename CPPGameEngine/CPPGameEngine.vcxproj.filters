@@ -77,9 +77,6 @@
     <ClInclude Include="Player.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="mousePicking.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="terminalColors.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>

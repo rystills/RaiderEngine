@@ -421,7 +421,7 @@ callback for debugDrawNewton - provides us with a single body's transformed coll
 @param faceVertec: array of face vertices
 @param faceId:
 */
-void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
+/*void debugDrawPhysicsCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
 	int state = (int)userData;
 	int index = vertexCount - 1;
 	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
@@ -430,12 +430,12 @@ void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat
 		queueDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
 		p0 = p1;
 	}
-}
+}*/
 
 /*
-draw all newton colliders as wireframes
+draw all physics colliders as wireframes
 */
-void debugDrawNewton() {
+/*void debugDrawPhysics() {
 	dMatrix tm;
 	// draw GameObject bodies
 	for (int i = 0; i < gameObjects.size(); ++i) {
@@ -449,7 +449,7 @@ void debugDrawNewton() {
 	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
 
 	drawLines();
-}
+}*/
 
 /*
 initialize the contents of the g buffer used for deferred rendering
@@ -733,8 +733,8 @@ void renderLines() {
 	shaders["lineShader"]->use();
 	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
-	if (debugDraw)
-		debugDrawNewton();
+	if (debugDraw);
+		//debugDrawNewton();
 }
 
 /*

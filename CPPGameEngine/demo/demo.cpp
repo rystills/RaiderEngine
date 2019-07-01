@@ -14,7 +14,6 @@
 #include "../Light.hpp"
 
 #include "../rightClickObserve.hpp"
-#include "../mousePicking.hpp"
 #include "../FpsDisplay.hpp"
 #include "../audio.hpp"
 
@@ -61,7 +60,7 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		NewtonUpdate(world, deltaTime);
+		updatePhysics();
 
 		// update player
 		player.update(deltaTime);
@@ -70,9 +69,9 @@ int main() {
 
 		// picking and object info display
 		if (displayString.size() == 0) {
-			UpdatePickBody(deltaTime);
+			/*UpdatePickBody(deltaTime);
 			if (!m_targetPicked)
-				checkDisplayObject();
+				checkDisplayObject();*/
 		}
 		else
 			updateDisplayString();

@@ -52,7 +52,7 @@ public:
 	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	NewtonCollision* collisionShape;
+	//NewtonCollision* collisionShape;
 	bool isStaticMesh;
 	float volume;
 
@@ -76,7 +76,7 @@ public:
 	calculate the collision shape for this mesh, to be used by bullet physics
 	*/
 	void generateCollisionShape() {
-		if (isStaticMesh) {
+		/*if (isStaticMesh) {
 			// create mesh shape from model tris
 			collisionShape = NewtonCreateTreeCollision(world, 0);
 			NewtonTreeCollisionBeginBuild(collisionShape);
@@ -103,7 +103,7 @@ public:
 			collisionShape = NewtonCreateConvexHull(world, verts.size(), &dVerts[0].m_x, sizeof(dVector), 0.01f, 0, NULL);
 		}
 		volume = calculateVolume();
-		// push back a single instance of the default collision shape so objects with no scaling can share it
+		// push back a single instance of the default collision shape so objects with no scaling can share it*/
 	}
 
 	/*

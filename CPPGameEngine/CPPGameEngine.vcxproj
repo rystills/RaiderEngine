@@ -81,8 +81,8 @@
     <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\newton\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\freetype\include;$(ProjectDir)\libs\newton\include;$(ProjectDir)\libs\openalsoft\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\newton\lib;$(ProjectDir)\libs\openalsoft\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\freetype\include;$(ProjectDir)\libs\openalsoft\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\openalsoft\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -121,7 +121,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;freetype.lib;newton.lib;dMath.lib;dNewton.lib;dCustomJoints.lib;ex-common.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;freetype.lib;ex-common.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -176,7 +176,6 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
-    <ClInclude Include="mousePicking.hpp" />
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />

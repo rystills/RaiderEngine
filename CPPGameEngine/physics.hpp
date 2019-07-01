@@ -1,20 +1,28 @@
 #include "stdafx.h"
 #pragma once
-NewtonWorld* world;
+//NewtonWorld* world;
 #define GRAVITY_STRENGTH 16.0f
 // this file is responsible for initializing and maintaining the physics engine (currently Newton Dynamics)
 
 /*
-initialize newton physics
+initialize the physics engine
 */
 void initPhysics() {
-	world = NewtonCreate();
+	
 }
 
 /*
-cleanup the data allocated by newton physics
+cleanup the data allocated by the physics engine
 */
 void cleanupPhysics() {
-	NewtonDestroyAllBodies(world);
-	NewtonDestroy(world);
+	
 }
+
+/*
+step the physics engine
+*/
+void updatePhysics() {
+	//NewtonUpdate(world, deltaTime);
+}
+
+//TODO: engine agnostic raycast call to replace mousePicking.hpp

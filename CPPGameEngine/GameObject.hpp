@@ -5,7 +5,6 @@
 #include "model.hpp"
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
 
-void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex);
 class GameObject {
 public:
 	glm::vec3 position;
@@ -14,8 +13,8 @@ public:
 	std::shared_ptr<Model> model;
 	bool grabbable;
 	std::string modelName;
-	NewtonBody* body;
-	dFloat mass;
+	//NewtonBody* body;
+	float mass;
 	float gravityMultiplier = 1;
 	bool held = false;
 
@@ -66,7 +65,7 @@ public:
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;
 		
 		// rotation
-		dMatrix tm = glm::value_ptr(rotation);
+		/*dMatrix tm = glm::value_ptr(rotation);
 		
 		// translation
 		tm.m_posit.m_x += position.x;
@@ -83,7 +82,7 @@ public:
 		NewtonBodySetUserData(body, (void *)this);
 
 		// Install the callbacks to track the body positions.
-		NewtonBodySetForceAndTorqueCallback(body, applyForceCallbackRedirect);
+		NewtonBodySetForceAndTorqueCallback(body, applyForceCallbackRedirect);*/
 	}
 	
 	/*
@@ -92,14 +91,14 @@ public:
 	*/
 	virtual void update(float deltaTime) {
 		// update position
-		dFloat pos[4];
+		/*dFloat pos[4];
 		NewtonBodyGetPosition(body, pos);
 		position.x = pos[0]; position.y = pos[1]; position.z = pos[2];
 
 		// update rotation
 		dMatrix rot;
 		NewtonBodyGetRotation(body, &rot[0][0]);
-		rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));
+		rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));*/
 	}
 
 	/*
@@ -121,9 +120,9 @@ public:
 	@param timestep:
 	@param threadIjdex
 	*/
-	virtual void applyForceCallback(dFloat timestep, int threadIndex) {
+	virtual void applyForceCallback(float timestep, int threadIndex) {
 		// apply gravitational force
-		dFloat force[3] = { 0, -GRAVITY_STRENGTH * mass * gravityMultiplier * !held, 0 };
+		/*dFloat force[3] = { 0, -GRAVITY_STRENGTH * mass * gravityMultiplier * !held, 0 };
 		NewtonBodySetForce(body, force);
 
 		// disable omega and torque when held
@@ -131,7 +130,7 @@ public:
 			dVector zeroVector(0, 0, 0);
 			NewtonBodySetOmega(body, &zeroVector[0]);
 			NewtonBodySetTorque(body, &zeroVector[0]);
-		}
+		}*/
 	}
 };
 
@@ -141,9 +140,9 @@ apply force callback; called by newton each time the body is about to be simulat
 @param timestep: 
 @param threadIndex:
 */
-void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex) {
+/*void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex) {
 	// retrieve the corresponding GameObject from the body's user data
 	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
 	// allow the gameObject to handle applying force
 	GO->applyForceCallback(timestep, threadIndex);
-}
+}*/
