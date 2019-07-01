@@ -60,7 +60,7 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		updatePhysics();
+		updatePhysics(deltaTime);
 
 		// update player
 		player.update(deltaTime);
