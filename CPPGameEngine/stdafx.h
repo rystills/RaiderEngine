@@ -31,7 +31,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 // physx
-
+#define NDEBUG
+#include "PxPhysicsAPI.h"
 // freetype
 #include "ft2build.h"
 #include FT_FREETYPE_H

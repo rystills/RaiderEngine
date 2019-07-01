@@ -9,7 +9,7 @@ Here is the list of dependencies you'll need to build:
 - glad (openGL loader)
 - glfw (openGL framework)
 - glm (openGL mathematics)
-- newton (physics engine)
+- physX (physics engine)
 - openALsoft (audio playback)  
 
 Here is the list of additional dependencies that are already bundled with the engine:
