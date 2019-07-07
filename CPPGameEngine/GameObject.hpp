@@ -18,6 +18,7 @@ public:
 	float mass;
 	float gravityMultiplier = 1;
 	bool held = false;
+	bool isStatic = false;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -25,12 +26,13 @@ public:
 	@param rotationEA: the inital rotation (in Euler Angles) of this GameObject
 	@param scale: the initial scale of this GameObject
 	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
-	@param makeStatic: whether or not to force the newly created mesh to be static. Note that this has no effect if the mesh has already been created.
+	@param makeStatic: static state. 0 = non-static. 1 = static gameObject + static mesh (if the mesh was already loaded in as dynamic, this will be equivalent to 2). 2 = static gameObject + dynamic mesh.
 	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
-		setModel(modelName, makeStatic);
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
+		setModel(modelName, makeStatic == 1);
+		isStatic = makeStatic > 0;
 		addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
 
@@ -66,25 +68,22 @@ public:
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;
 		PxQuat physRot(rot.x, rot.y, rot.z, rot.w);
+		PxVec3 physPot(position.x, position.y, position.z);
 		PxMeshScale physScale(PxVec3(scale.x,scale.y,scale.z), PxQuat(PxIdentity));
 		
-		// create a static body if our model is static
-		if (model->isStaticMesh) {
-			body = gPhysics->createRigidStatic(PxTransform(PxVec3(position.x,position.y,position.z), physRot));
+		// our body type depends on our staticness, which may or may not match our model's staticness
+		if (isStatic)
+			body = gPhysics->createRigidStatic(PxTransform(physPot, physRot));
+		else
+			body = gPhysics->createRigidDynamic(PxTransform(physPot, physRot));
+		// our shape, unlike our body type, depends on our model's staticness
+		if (model->isStaticMesh)
 			PxRigidActorExt::createExclusiveShape(*body, PxTriangleMeshGeometry((PxTriangleMesh*)model->collisionMesh, physScale), *gMaterial);
-			gScene->addActor(*body);
-		}
-		// create a dynamic body if our model is non-static
-		else {
-			body = gPhysics->createRigidDynamic(PxTransform(PxVec3(position.x, position.y, position.z),physRot));
+		else 
 			PxRigidActorExt::createExclusiveShape(*body, PxConvexMeshGeometry((PxConvexMesh*)model->collisionMesh, physScale), *gMaterial);
-			body->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, false);
-			((PxRigidDynamic*)body)->setAngularVelocity(PxVec3(0.f, 0.f, 0.f));
-			//body->setAngularDamping(0.f);
-			gScene->addActor(*body);
-		}
-		// store a pointer to this GameObject in the body's data field
+		// store a pointer to this GameObject in the body's data field, then finally add the body to the physics scene
 		body->userData = this;
+		gScene->addActor(*body);
 	}
 	
 	/*

@@ -88,6 +88,7 @@ public:
 			inds.insert(inds.end(), meshes[i].indices.begin(), meshes[i].indices.end());
 		}
 		volume = calculateVolume();
+		// note: consider removing the isStaticMesh flag and allowing a Model to contain one or both of the triangle mesh and convex hull depending on the staticness of the GameObjects which use it
 		if (isStaticMesh) {
 			// create mesh shape from model tris
 			PxTriangleMeshDesc meshDesc;
