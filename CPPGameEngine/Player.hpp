@@ -62,6 +62,7 @@ public:
 		*/
 		// resync the camera position
 		//syncCameraPos(pos);
+		camera.moveFlycam();
 		camera.updateViewProj();
 	}
 };

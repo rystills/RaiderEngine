@@ -3,6 +3,7 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "model.hpp"
+using namespace physx;
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
 
 class GameObject {
@@ -13,7 +14,7 @@ public:
 	std::shared_ptr<Model> model;
 	bool grabbable;
 	std::string modelName;
-	//NewtonBody* body;
+	PxRigidActor* body;
 	float mass;
 	float gravityMultiplier = 1;
 	bool held = false;
@@ -61,28 +62,29 @@ public:
 	@param rot: the quaternion representation of our initial rotation
 	*/
 	void addPhysics(glm::quat rot) {
+		// calculate mass and prepare physics data structures
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;
+		PxQuat physRot(rot.x, rot.y, rot.z, rot.w);
+		PxMeshScale physScale(PxVec3(scale.x,scale.y,scale.z), PxQuat(PxIdentity));
 		
-		// rotation
-		/*dMatrix tm = glm::value_ptr(rotation);
-		
-		// translation
-		tm.m_posit.m_x += position.x;
-		tm.m_posit.m_y += position.y;
-		tm.m_posit.m_z += position.z;
-
-		body = NewtonCreateDynamicBody(world, model->collisionShape, &tm[0][0]);
-		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
-
-		// scale
-		NewtonBodySetCollisionScale(body, scale.x, scale.y, scale.z);
-
-		// Attach our custom data structure to the bodies.
-		NewtonBodySetUserData(body, (void *)this);
-
-		// Install the callbacks to track the body positions.
-		NewtonBodySetForceAndTorqueCallback(body, applyForceCallbackRedirect);*/
+		// create a static body if our model is static
+		if (model->isStaticMesh) {
+			body = gPhysics->createRigidStatic(PxTransform(PxVec3(position.x,position.y,position.z), physRot));
+			PxRigidActorExt::createExclusiveShape(*body, PxTriangleMeshGeometry((PxTriangleMesh*)model->collisionMesh, physScale), *gMaterial);
+			gScene->addActor(*body);
+		}
+		// create a dynamic body if our model is non-static
+		else {
+			body = gPhysics->createRigidDynamic(PxTransform(PxVec3(position.x, position.y, position.z),physRot));
+			PxRigidActorExt::createExclusiveShape(*body, PxConvexMeshGeometry((PxConvexMesh*)model->collisionMesh, physScale), *gMaterial);
+			body->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, false);
+			((PxRigidDynamic*)body)->setAngularVelocity(PxVec3(0.f, 0.f, 0.f));
+			//body->setAngularDamping(0.f);
+			gScene->addActor(*body);
+		}
+		// store a pointer to this GameObject in the body's data field
+		body->userData = this;
 	}
 	
 	/*
@@ -90,15 +92,10 @@ public:
 	@param deltaTime: the elapsed time (in seconds) since the previous frame
 	*/
 	virtual void update(float deltaTime) {
-		// update position
-		/*dFloat pos[4];
-		NewtonBodyGetPosition(body, pos);
-		position.x = pos[0]; position.y = pos[1]; position.z = pos[2];
-
-		// update rotation
-		dMatrix rot;
-		NewtonBodyGetRotation(body, &rot[0][0]);
-		rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));*/
+		// update position and rotation to match the physics body
+		PxTransform pose = body->getGlobalPose();
+		position.x = pose.p.x; position.y = pose.p.y; position.z = pose.p.z;
+		rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));
 	}
 
 	/*

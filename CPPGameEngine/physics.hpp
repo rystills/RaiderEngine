@@ -15,6 +15,7 @@ PxScene* gScene = NULL;
 PxPvd* gPvd = NULL;
 PxPvdSceneClient* pvdClient = NULL;
 PxMaterial* gMaterial = NULL;
+PxCooking* gCooking = NULL;
 
 /*
 initialize the physics engine
@@ -53,6 +54,15 @@ void initPhysics() {
 
 	// create material
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+
+	// cooking
+	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
+	if (!gCooking)
+		ERROR(std::cout << "PxCreateCooking failed!" << std::endl);
+
+	// debug visualization
+	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
 }
 
 /*
@@ -76,6 +86,23 @@ step the physics engine
 void updatePhysics(float deltaTime) {
 	gScene->simulate(deltaTime);
 	gScene->fetchResults(true);
+}
+
+void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);
+void drawLines();
+extern glm::vec3 stateColors[3];
+/*
+draw the physics wireframe
+*/
+void debugDrawPhysics() {
+	const PxRenderBuffer& rb = gScene->getRenderBuffer();
+	for (PxU32 i = 0; i < rb.getNbLines(); i++) {
+		const PxDebugLine& line = rb.getLines()[i];
+		//std::cout << "line at: [" << line.pos0.x << ", " << line.pos0.y << ", " << line.pos0.z << "], [" << line.pos1.x << ", " << line.pos1.y << ", " << line.pos1.z << "]" << std::endl;
+		// TODO: use correct state color, and draw PlayerController (same as before)
+		queueDrawLine(glm::vec3(line.pos0.x, line.pos0.y, line.pos0.z), glm::vec3(line.pos1.x, line.pos1.y, line.pos1.z), stateColors[2]);
+	}
+	drawLines();
 }
 
 //TODO: engine agnostic raycast call to replace mousePicking.hpp

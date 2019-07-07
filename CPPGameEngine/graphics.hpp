@@ -414,42 +414,6 @@ void drawLines() {
 }
 
 glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
-/*
-callback for debugDrawNewton - provides us with a single body's transformed collider info
-@param userData: newton's userData field; currently we use this as an enum where 2 = static, 1 = dynamic and asleep, 0 = dynamic and awake
-@param vertexCount: the total number of vertices
-@param faceVertec: array of face vertices
-@param faceId:
-*/
-/*void debugDrawPhysicsCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
-	int state = (int)userData;
-	int index = vertexCount - 1;
-	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
-	for (int i = 0; i < vertexCount; i++) {
-		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-		queueDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
-		p0 = p1;
-	}
-}*/
-
-/*
-draw all physics colliders as wireframes
-*/
-/*void debugDrawPhysics() {
-	dMatrix tm;
-	// draw GameObject bodies
-	for (int i = 0; i < gameObjects.size(); ++i) {
-		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
-		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, gameObjects[i]->model->isStaticMesh ? (void*)2 : (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
-	}
-
-	// draw Player body
-	NewtonBody* body = player.controller->GetBody();
-	NewtonBodyGetMatrix(body, &tm[0][0]);
-	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
-
-	drawLines();
-}*/
 
 /*
 initialize the contents of the g buffer used for deferred rendering
@@ -733,8 +697,8 @@ void renderLines() {
 	shaders["lineShader"]->use();
 	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
-	if (debugDraw);
-		//debugDrawNewton();
+	if (debugDraw)
+		debugDrawPhysics();
 }
 
 /*
