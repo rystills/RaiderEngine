@@ -80,6 +80,10 @@ public:
 			PxRigidActorExt::createExclusiveShape(*body, PxTriangleMeshGeometry((PxTriangleMesh*)model->collisionMesh, physScale), *gMaterial);
 		else 
 			PxRigidActorExt::createExclusiveShape(*body, PxConvexMeshGeometry((PxConvexMesh*)model->collisionMesh, physScale), *gMaterial);
+		// assign default raycast filter
+		PxShape* shape;
+		body->getShapes(&shape, 1);
+		shape->setQueryFilterData(defaultFilterData);
 		// store a pointer to this GameObject in the body's data field, then finally add the body to the physics scene
 		body->userData = this;
 		gScene->addActor(*body);

@@ -16,6 +16,7 @@ PxPvd* gPvd = NULL;
 PxPvdSceneClient* pvdClient = NULL;
 PxMaterial* gMaterial = NULL;
 PxCooking* gCooking = NULL;
+PxFilterData defaultFilterData;
 
 /*
 initialize the physics engine
@@ -59,6 +60,9 @@ void initPhysics() {
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
 	if (!gCooking)
 		ERROR(std::cout << "PxCreateCooking failed!" << std::endl);
+
+	// default filter group
+	defaultFilterData.word0 = (1 << 0);
 
 	// debug visualization
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
@@ -104,4 +108,20 @@ void debugDrawPhysics() {
 	drawLines();
 }
 
-//TODO: engine agnostic raycast call to replace mousePicking.hpp
+/*
+perform a raycast from the specified position in the specified direction, returning the closest hit
+@param startPos: the position in world space from which to start the raycast
+@param dir: the direction of the raycast
+@param maxDistance: the length of the raycast
+@param filterData: the shape filter group to check against
+@returns: a PxRaycastBuffer containing the hit data
+*/
+PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData = defaultFilterData) {
+	PxVec3 origin(startPos.x, startPos.y, startPos.z);
+	PxVec3 unitDir(dir.x, dir.y, dir.z);                // [in] Normalized ray direction
+	PxRaycastBuffer hit;                 // [out] Raycast results
+	PxQueryFilterData queryFilterData = PxQueryFilterData();
+	queryFilterData.data = filterData;
+	gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, queryFilterData);
+	return hit;
+}

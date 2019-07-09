@@ -69,6 +69,9 @@ int main() {
 
 		// picking and object info display
 		if (displayString.size() == 0) {
+			PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, 1000);
+			if (hit.hasBlock)
+				std::cout << ((GameObject*)hit.block.actor->userData)->modelName << std::endl;
 			/*UpdatePickBody(deltaTime);
 			if (!m_targetPicked)
 				checkDisplayObject();*/
