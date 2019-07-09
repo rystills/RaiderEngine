@@ -3,7 +3,6 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "assimpFlags.hpp"
-using namespace physx;
 
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
 

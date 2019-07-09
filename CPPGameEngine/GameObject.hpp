@@ -3,7 +3,6 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "model.hpp"
-using namespace physx;
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
 
 class GameObject {
