@@ -17,6 +17,7 @@ unsigned int textVBO, textVAO;
 #define NR_LIGHTS 4
 unsigned int depthMapFBO[NR_LIGHTS];
 unsigned int depthCubemap[NR_LIGHTS];
+glm::vec4 clearColor(0,0,0,1);
 
 std::vector<GLfloat> pointsQueue;
 std::vector<GLfloat> linesQueue;
@@ -606,7 +607,7 @@ void renderGeometryPass() {
 	glDisable(GL_BLEND);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(clearColor.r,clearColor.g,clearColor.b,clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// 1. geometry pass: render scene's geometry/color data into gbuffer
 	// -----------------------------------------------------------------
@@ -629,6 +630,7 @@ render the geometry in the gbuffer, along with lighting information, to the scre
 */
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderLightingPass"]->use();
 	glActiveTexture(GL_TEXTURE0);

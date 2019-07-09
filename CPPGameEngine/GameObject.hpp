@@ -36,7 +36,7 @@ public:
 	}
 
 	/*
-	return a string detailing information about this object, to be shown when the user right clicks the object
+	return a string detailing information about this object, used in the hallway demo when the user right clicks a GameObject
 	*/
 	virtual std::string getDisplayString() {
 		return "";

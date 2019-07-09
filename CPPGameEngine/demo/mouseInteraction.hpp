@@ -1,7 +1,7 @@
-#include "stdafx.h"
+#include "../stdafx.h"
 #pragma once
-#include "GameObject.hpp"
-#include "settings.hpp"
+#include "../GameObject.hpp"
+#include "../settings.hpp"
 
 std::string displayString = "";
 
@@ -24,13 +24,10 @@ void updateDisplayString() {
 	}
 }
 
-void checkDisplayObject() {
-	/*if (mousePressedRight) {
-		dFloat param;
-		dVector posit, normal;
-		std::pair<dVector, dVector> worldPoints = screenToWorld();
-		NewtonBody* const body = MousePickByForce(world, worldPoints.first, worldPoints.second, param, posit, normal);
-		if (body)
-			displayObjectInfo((GameObject*)NewtonBodyGetUserData(body));
-	}*/
+/*
+if the user right clicked on an object, attempt to update the display string
+*/
+void checkDisplayObject(PxRaycastBuffer hit) {
+	if (mousePressedRight && hit.hasBlock)
+		displayObjectInfo((GameObject*)hit.block.actor->userData);
 }

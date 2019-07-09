@@ -166,6 +166,7 @@
     <ClInclude Include="demo\Cog.hpp" />
     <ClInclude Include="demo\FlickerLight.hpp" />
     <ClInclude Include="demo\MovingPlatform.hpp" />
+    <ClInclude Include="demo\mouseInteraction.hpp" />
     <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />
@@ -179,7 +180,6 @@
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />
-    <ClInclude Include="rightClickObserve.hpp" />
     <ClInclude Include="settings.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
