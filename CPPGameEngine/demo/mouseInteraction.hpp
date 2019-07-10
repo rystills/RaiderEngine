@@ -3,6 +3,7 @@
 #include "../GameObject.hpp"
 #include "../settings.hpp"
 
+#define maxGrabRange 3
 std::string displayString = "";
 PxDistanceJoint* gMouseJoint = NULL;
 PxRigidDynamic* gMouseSphere = NULL;
@@ -68,7 +69,7 @@ void updateHeldBody(float deltaTime) {
 		sphereShape = gPhysics->createShape(PxSphereGeometry(.1f), *gMaterial, false, PxShapeFlag::eTRIGGER_SHAPE);
 	if (mousePressedLeft) {
 		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, 1000);
-		if (hit.hasBlock && ((GameObject*)hit.block.actor->userData)->grabbable) {
+		if (hit.hasBlock && hit.block.distance <= maxGrabRange && ((GameObject*)hit.block.actor->userData)->grabbable) {
 			// grab object
 			sphereDist = hit.block.distance;
 			hitBody = hit.block.actor;
@@ -79,17 +80,21 @@ void updateHeldBody(float deltaTime) {
 			gScene->addActor(*gMouseSphere);
 
 			//wake up hit object
-			((PxRigidDynamic*)hit.block.actor)->wakeUp();
+			((PxRigidDynamic*)hitBody)->wakeUp();
 			
 			// move hit object to custom filter so it does not block raycasts while held
 			hit.block.shape->setQueryFilterData(noHitFilterData);
 
 			// create joint between sphere and hit object
-			// TODO: localFrame1 calculation appears to be incorrect
-			gMouseJoint = PxDistanceJointCreate(*gPhysics, gMouseSphere, PxTransform(PxVec3(0,0,0)), hit.block.actor, PxTransform(hit.block.actor->getGlobalPose().p - hit.block.position));
+			// TODO: figure out localFrame calculation rather than forcing objects to be held by the center
+			gMouseJoint = PxDistanceJointCreate(*gPhysics, gMouseSphere, PxTransform(PxVec3(0,0,0)), hitBody, PxTransform(PxVec3(0,0,0)));
+			
+			/// TODO: disable held object rotation
 		}
 	}
 	if (mouseHeldLeft && gMouseSphere) {
+		//keep held object awake
+		((PxRigidDynamic*)hitBody)->wakeUp();
 		// continue to hold object
 		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, sphereDist);
 		// move held object sphere in front of obstacles to prevent it from clipping through walls / into other objects
