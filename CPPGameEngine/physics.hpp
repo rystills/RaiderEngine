@@ -17,6 +17,7 @@ PxPvdSceneClient* pvdClient = NULL;
 PxMaterial* gMaterial = NULL;
 PxCooking* gCooking = NULL;
 PxFilterData defaultFilterData;
+PxFilterData noHitFilterData;
 
 /*
 initialize the physics engine
@@ -61,9 +62,9 @@ void initPhysics() {
 	if (!gCooking)
 		ERROR(std::cout << "PxCreateCooking failed!" << std::endl);
 
-	// default filter group
+	// filter groups
 	defaultFilterData.word0 = (1 << 0);
-
+	noHitFilterData.word0 = (1 << 1);
 	// debug visualization
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);

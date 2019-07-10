@@ -8,6 +8,7 @@ PxDistanceJoint* gMouseJoint = NULL;
 PxRigidDynamic* gMouseSphere = NULL;
 PxShape* sphereShape = NULL;
 float sphereDist;
+PxRigidActor* hitBody;
 
 /*
 display an information box detailing the specified object
@@ -39,29 +40,38 @@ void checkDisplayObject() {
 	}
 }
 
+/*
+clear the mouse joint and sphere upon releasing the held object
+*/
 void ReleaseHelpers() {
-	puts("D");
 	if (gMouseJoint)
 		gMouseJoint->release();
 	gMouseJoint = NULL;
 	if (gMouseSphere) {
 		gScene->removeActor(*gMouseSphere);
 		gMouseSphere->release();
+		// set held object back to the default filter group
+		PxShape* shape;
+		hitBody->getShapes(&shape, 1);
+		shape->setQueryFilterData(defaultFilterData);
 	}
 	gMouseSphere = NULL;
 
 }
 
+/*
+update the held body, allowing the user to grab, hold, or let go of any grabbable GameObject
+@param deltaTime: the elapsed time since the last frame
+*/
 void updateHeldBody(float deltaTime) {
 	if (!sphereShape)
 		sphereShape = gPhysics->createShape(PxSphereGeometry(.1f), *gMaterial, false, PxShapeFlag::eTRIGGER_SHAPE);
 	if (mousePressedLeft) {
 		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, 1000);
-		puts("A");
 		if (hit.hasBlock && ((GameObject*)hit.block.actor->userData)->grabbable) {
 			// grab object
-			puts("B");
 			sphereDist = hit.block.distance;
+			hitBody = hit.block.actor;
 			// create collision point sphere actor
 			gMouseSphere = gPhysics->createRigidDynamic(PxTransform(hit.block.position));
 			gMouseSphere->attachShape(*sphereShape);
@@ -70,17 +80,20 @@ void updateHeldBody(float deltaTime) {
 
 			//wake up hit object
 			((PxRigidDynamic*)hit.block.actor)->wakeUp();
+			
+			// move hit object to custom filter so it does not block raycasts while held
+			hit.block.shape->setQueryFilterData(noHitFilterData);
 
 			// create joint between sphere and hit object
 			// TODO: localFrame1 calculation appears to be incorrect
 			gMouseJoint = PxDistanceJointCreate(*gPhysics, gMouseSphere, PxTransform(PxVec3(0,0,0)), hit.block.actor, PxTransform(hit.block.actor->getGlobalPose().p - hit.block.position));
-			puts("C");
 		}
 	}
 	if (mouseHeldLeft && gMouseSphere) {
 		// continue to hold object
-		glm::vec3 newPos = player.camera.Position + player.camera.Front * sphereDist;
-		// TODO: stop newPos short if an object passes in front of it
+		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, sphereDist);
+		// move held object sphere in front of obstacles to prevent it from clipping through walls / into other objects
+		glm::vec3 newPos = player.camera.Position + player.camera.Front * (hit.hasBlock ? hit.block.distance : sphereDist);
 		gMouseSphere->setGlobalPose(PxTransform(newPos.x,newPos.y,newPos.z));
 		
 	}

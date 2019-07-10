@@ -19,7 +19,6 @@ public:
 	glm::vec3 velocity;
 	bool crouching = false;
 	bool ctrlDown = false;
-	PxFilterData filterData;
 
 	Player() : camera(glm::vec3(0)) { }
 
@@ -40,10 +39,7 @@ public:
 		// set non-default raycast filter so that the player is ignored when raycasting
 		PxShape* shape;
 		controller->getActor()->getShapes(&shape, 1);
-		filterData.setToDefault();
-		filterData.word0 = (1 << 1);
-		shape->setQueryFilterData(filterData);
-		filterData.setToDefault();
+		shape->setQueryFilterData(noHitFilterData);
 	}
 
 	/*
