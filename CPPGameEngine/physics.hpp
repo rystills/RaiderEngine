@@ -67,6 +67,7 @@ void initPhysics() {
 	// debug visualization
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 1.0f);
 }
 
 /*

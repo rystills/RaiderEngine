@@ -125,7 +125,7 @@ void processMapNode(aiNode *node, const aiScene *scene) {
 				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene));
 			baseModel->generateCollisionShape();
 			models.insert({ tempProp.fullName, baseModel });
-			gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, true, false));
+			gameObjects.emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false));
 			goto clearTransform;
 		}
 		else {

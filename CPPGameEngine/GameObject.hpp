@@ -32,6 +32,8 @@ public:
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
 		setModel(modelName, makeStatic == 1);
 		isStatic = makeStatic > 0;
+		if (isStatic) 
+			this->grabbable = false;
 		addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
 

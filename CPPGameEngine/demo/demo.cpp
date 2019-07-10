@@ -69,18 +69,18 @@ int main() {
 		updateObjects();
 
 		// picking and object info display
-		if (displayString.size() == 0) {
-			PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, 1000);
-			if (hit.hasBlock) {
-				std::cout << ((GameObject*)hit.block.actor->userData)->modelName << std::endl;
-				checkDisplayObject(hit);
-			}
-			//updatePickBody(deltaTime);
-			//if (!holdingObject)
-		}
-		else
+		if (displayString.size() > 0)
+			// we're currently observing something; nothing to do until the user right clicks again
 			updateDisplayString();
-
+		else {
+			if (!gMouseJoint)
+				// there's nothing held at the moment, so check if the user is trying to observe something
+				checkDisplayObject();
+			if (displayString.size() == 0)
+				// the user didn't try to observe something, so check if the user is holding or trying to grab something
+				updateHeldBody(deltaTime);
+		}
+		
 		// render
 		renderDepthMap();
 		renderGeometryPass();
