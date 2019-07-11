@@ -21,6 +21,3 @@
 -split classes into separate .h and .cpp files
 -file paths should be handled in a more consistent manner throughout the project
 -instead of objects directly accessing the Player's camera, use a mainCamera pointer
-
-~Physics~
-Physx model collision shape generation is inconsistent; sometimes generates incorrect colliders or crashes outright. Check for a memory error.

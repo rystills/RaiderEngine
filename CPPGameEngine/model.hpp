@@ -96,7 +96,7 @@ public:
 			meshDesc.points.data = &verts[0];
 
 			// TODO: submeshes may need to be split, as this will create extra triangles between the end of one submesh and the start of another (static meshes probably shouldn't have submeshes anyway?)
-			meshDesc.triangles.count = inds.size();
+			meshDesc.triangles.count = inds.size()/3;
 			meshDesc.triangles.stride = 3 * sizeof(unsigned int);
 			meshDesc.triangles.data = &inds[0];
 
