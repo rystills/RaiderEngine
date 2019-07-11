@@ -1,0 +1,4 @@
+$ cat .gitattributes
+RaiderEngine/glad.c linguist-vendored=true
+RaiderEngine/stb_image.h linguist-vendored=true
+RaiderEngine/stb_vorbis.c linguist-vendored=true

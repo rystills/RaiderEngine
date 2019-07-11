@@ -140,7 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="alHelpers.c">
+    <ClCompile Include="alHelpers.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="demo\demo.cpp" />
@@ -159,7 +159,7 @@
     <ClCompile Include="TextObject.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="alHelpers.h" />
+    <ClInclude Include="alHelpers.hpp" />
     <ClInclude Include="assimpFlags.hpp" />
     <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />

@@ -33,14 +33,14 @@
     <ClCompile Include="TextObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="alHelpers.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="stb_vorbis.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="demo\demo.cpp">
       <Filter>Source Files\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="alHelpers.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,9 +110,6 @@
     <ClInclude Include="TextObject.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="alHelpers.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="audio.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -127,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="demo\mouseInteraction.hpp">
       <Filter>Source Files\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="alHelpers.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

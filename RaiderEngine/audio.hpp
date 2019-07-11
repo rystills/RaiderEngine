@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "alhelpers.h"
+#include "alhelpers.hpp"
 #include "settings.hpp"
 #include <stdio.h>
 #include <assert.h>

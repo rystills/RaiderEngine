@@ -37,7 +37,7 @@
 #include "AL/alc.h"
 #include "AL/alext.h"
 
-#include "alhelpers.h"
+#include "alhelpers.hpp"
 
 
   /* InitAL opens a device and sets up a context using default attributes, making
