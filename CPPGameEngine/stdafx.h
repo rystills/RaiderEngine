@@ -30,14 +30,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-// newton
-#include <dVector.h>
-#include <dMatrix.h>
-#include <Newton.h>
-#include <dNewton.h>
-#include <dNewtonCollision.h>
-#include <dNewtonDynamicBody.h>
-#include <dNewtonPlayerManager.h>
+// physx
+#define NDEBUG
+#include "PxPhysicsAPI.h"
 // freetype
 #include "ft2build.h"
 #include FT_FREETYPE_H

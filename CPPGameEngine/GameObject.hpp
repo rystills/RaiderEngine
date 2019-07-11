@@ -5,7 +5,6 @@
 #include "model.hpp"
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
 
-void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex);
 class GameObject {
 public:
 	glm::vec3 position;
@@ -14,10 +13,11 @@ public:
 	std::shared_ptr<Model> model;
 	bool grabbable;
 	std::string modelName;
-	NewtonBody* body;
-	dFloat mass;
+	PxRigidActor* body;
+	float mass;
 	float gravityMultiplier = 1;
 	bool held = false;
+	bool isStatic = false;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -25,17 +25,20 @@ public:
 	@param rotationEA: the inital rotation (in Euler Angles) of this GameObject
 	@param scale: the initial scale of this GameObject
 	@param modelName: the name of the model that this object uses; a reference to the model will be extracted from models, and the model will be hot loaded if not found
-	@param makeStatic: whether or not to force the newly created mesh to be static. Note that this has no effect if the mesh has already been created.
+	@param makeStatic: static state. 0 = non-static. 1 = static gameObject + static mesh (if the mesh was already loaded in as dynamic, this will be equivalent to 2). 2 = static gameObject + dynamic mesh.
 	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, bool makeStatic = false, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
-		setModel(modelName, makeStatic);
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
+		setModel(modelName, makeStatic == 1);
+		isStatic = makeStatic > 0;
+		if (isStatic) 
+			this->grabbable = false;
 		addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
 
 	/*
-	return a string detailing information about this object, to be shown when the user right clicks the object
+	return a string detailing information about this object, used in the hallway demo when the user right clicks a GameObject
 	*/
 	virtual std::string getDisplayString() {
 		return "";
@@ -62,28 +65,30 @@ public:
 	@param rot: the quaternion representation of our initial rotation
 	*/
 	void addPhysics(glm::quat rot) {
+		// calculate mass and prepare physics data structures
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;
+		PxQuat physRot(rot.x, rot.y, rot.z, rot.w);
+		PxVec3 physPot(position.x, position.y, position.z);
+		PxMeshScale physScale(PxVec3(scale.x,scale.y,scale.z), PxQuat(PxIdentity));
 		
-		// rotation
-		dMatrix tm = glm::value_ptr(rotation);
-		
-		// translation
-		tm.m_posit.m_x += position.x;
-		tm.m_posit.m_y += position.y;
-		tm.m_posit.m_z += position.z;
-
-		body = NewtonCreateDynamicBody(world, model->collisionShape, &tm[0][0]);
-		NewtonBodySetMassMatrix(body, mass, 1, 1, 1);
-
-		// scale
-		NewtonBodySetCollisionScale(body, scale.x, scale.y, scale.z);
-
-		// Attach our custom data structure to the bodies.
-		NewtonBodySetUserData(body, (void *)this);
-
-		// Install the callbacks to track the body positions.
-		NewtonBodySetForceAndTorqueCallback(body, applyForceCallbackRedirect);
+		// our body type depends on our staticness, which may or may not match our model's staticness
+		if (isStatic)
+			body = gPhysics->createRigidStatic(PxTransform(physPot, physRot));
+		else
+			body = gPhysics->createRigidDynamic(PxTransform(physPot, physRot));
+		// our shape, unlike our body type, depends on our model's staticness
+		if (model->isStaticMesh)
+			PxRigidActorExt::createExclusiveShape(*body, PxTriangleMeshGeometry((PxTriangleMesh*)model->collisionMesh, physScale), *gMaterial);
+		else 
+			PxRigidActorExt::createExclusiveShape(*body, PxConvexMeshGeometry((PxConvexMesh*)model->collisionMesh, physScale), *gMaterial);
+		// assign default raycast filter
+		PxShape* shape;
+		body->getShapes(&shape, 1);
+		shape->setQueryFilterData(defaultFilterData);
+		// store a pointer to this GameObject in the body's data field, then finally add the body to the physics scene
+		body->userData = this;
+		gScene->addActor(*body);
 	}
 	
 	/*
@@ -91,15 +96,10 @@ public:
 	@param deltaTime: the elapsed time (in seconds) since the previous frame
 	*/
 	virtual void update(float deltaTime) {
-		// update position
-		dFloat pos[4];
-		NewtonBodyGetPosition(body, pos);
-		position.x = pos[0]; position.y = pos[1]; position.z = pos[2];
-
-		// update rotation
-		dMatrix rot;
-		NewtonBodyGetRotation(body, &rot[0][0]);
-		rotation = glm::toMat4(glm::quat(rot[0].m_w, rot[0].m_x, rot[0].m_y, rot[0].m_z));
+		// update position and rotation to match the physics body
+		PxTransform pose = body->getGlobalPose();
+		position.x = pose.p.x; position.y = pose.p.y; position.z = pose.p.z;
+		rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));
 	}
 
 	/*
@@ -121,9 +121,9 @@ public:
 	@param timestep:
 	@param threadIjdex
 	*/
-	virtual void applyForceCallback(dFloat timestep, int threadIndex) {
+	virtual void applyForceCallback(float timestep, int threadIndex) {
 		// apply gravitational force
-		dFloat force[3] = { 0, -GRAVITY_STRENGTH * mass * gravityMultiplier * !held, 0 };
+		/*dFloat force[3] = { 0, -GRAVITY_STRENGTH * mass * gravityMultiplier * !held, 0 };
 		NewtonBodySetForce(body, force);
 
 		// disable omega and torque when held
@@ -131,7 +131,7 @@ public:
 			dVector zeroVector(0, 0, 0);
 			NewtonBodySetOmega(body, &zeroVector[0]);
 			NewtonBodySetTorque(body, &zeroVector[0]);
-		}
+		}*/
 	}
 };
 
@@ -141,9 +141,9 @@ apply force callback; called by newton each time the body is about to be simulat
 @param timestep: 
 @param threadIndex:
 */
-void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex) {
+/*void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex) {
 	// retrieve the corresponding GameObject from the body's user data
 	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
 	// allow the gameObject to handle applying force
 	GO->applyForceCallback(timestep, threadIndex);
-}
+}*/

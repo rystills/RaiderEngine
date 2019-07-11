@@ -77,9 +77,6 @@
     <ClInclude Include="Player.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="mousePicking.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="terminalColors.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -107,9 +104,6 @@
     <ClInclude Include="input.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="rightClickObserve.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="FpsDisplay.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -129,6 +123,9 @@
       <Filter>Source Files\demo</Filter>
     </ClInclude>
     <ClInclude Include="demo\FlickerLight.hpp">
+      <Filter>Source Files\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="demo\mouseInteraction.hpp">
       <Filter>Source Files\demo</Filter>
     </ClInclude>
   </ItemGroup>

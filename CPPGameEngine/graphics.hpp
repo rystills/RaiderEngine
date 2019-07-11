@@ -17,6 +17,7 @@ unsigned int textVBO, textVAO;
 #define NR_LIGHTS 4
 unsigned int depthMapFBO[NR_LIGHTS];
 unsigned int depthCubemap[NR_LIGHTS];
+glm::vec4 clearColor(0,0,0,1);
 
 std::vector<GLfloat> pointsQueue;
 std::vector<GLfloat> linesQueue;
@@ -414,42 +415,6 @@ void drawLines() {
 }
 
 glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
-/*
-callback for debugDrawNewton - provides us with a single body's transformed collider info
-@param userData: newton's userData field; currently we use this as an enum where 2 = static, 1 = dynamic and asleep, 0 = dynamic and awake
-@param vertexCount: the total number of vertices
-@param faceVertec: array of face vertices
-@param faceId:
-*/
-void debugDrawNewtonCallback(void* const userData, int vertexCount, const dFloat* const faceVertec, int faceId) {
-	int state = (int)userData;
-	int index = vertexCount - 1;
-	dVector p0(faceVertec[index * 3 + 0], faceVertec[index * 3 + 1], faceVertec[index * 3 + 2]);
-	for (int i = 0; i < vertexCount; i++) {
-		dVector p1(faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-		queueDrawLine(glm::vec3(GLfloat(p0.m_x), GLfloat(p0.m_y), GLfloat(p0.m_z)), glm::vec3(GLfloat(p1.m_x), GLfloat(p1.m_y), GLfloat(p1.m_z)), stateColors[state]);
-		p0 = p1;
-	}
-}
-
-/*
-draw all newton colliders as wireframes
-*/
-void debugDrawNewton() {
-	dMatrix tm;
-	// draw GameObject bodies
-	for (int i = 0; i < gameObjects.size(); ++i) {
-		NewtonBodyGetMatrix(gameObjects[i]->body, &tm[0][0]);
-		NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(gameObjects[i]->body), &tm[0][0], debugDrawNewtonCallback, gameObjects[i]->model->isStaticMesh ? (void*)2 : (void*)NewtonBodyGetSleepState(gameObjects[i]->body));
-	}
-
-	// draw Player body
-	NewtonBody* body = player.controller->GetBody();
-	NewtonBodyGetMatrix(body, &tm[0][0]);
-	NewtonCollisionForEachPolygonDo(NewtonBodyGetCollision(body), &tm[0][0], debugDrawNewtonCallback, (void*)2);
-
-	drawLines();
-}
 
 /*
 initialize the contents of the g buffer used for deferred rendering
@@ -642,7 +607,7 @@ void renderGeometryPass() {
 	glDisable(GL_BLEND);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(clearColor.r,clearColor.g,clearColor.b,clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// 1. geometry pass: render scene's geometry/color data into gbuffer
 	// -----------------------------------------------------------------
@@ -665,6 +630,7 @@ render the geometry in the gbuffer, along with lighting information, to the scre
 */
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderLightingPass"]->use();
 	glActiveTexture(GL_TEXTURE0);
@@ -734,7 +700,7 @@ void renderLines() {
 	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
 	if (debugDraw)
-		debugDrawNewton();
+		debugDrawPhysics();
 }
 
 /*

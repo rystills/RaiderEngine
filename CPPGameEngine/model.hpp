@@ -52,7 +52,7 @@ public:
 	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
-	NewtonCollision* collisionShape;
+	PxBase* collisionMesh;
 	bool isStaticMesh;
 	float volume;
 
@@ -76,34 +76,54 @@ public:
 	calculate the collision shape for this mesh, to be used by bullet physics
 	*/
 	void generateCollisionShape() {
+		// nothing to generate for an empty mesh
+		if (meshes.size() == 0) 
+			return;
+		// combine verts and tris
+		std::vector<Vertex> verts;
+		std::vector<unsigned int> inds;
+		for (int i = 0; i < meshes.size(); ++i) {
+			verts.insert(verts.end(), meshes[i].vertices.begin(), meshes[i].vertices.end());
+			inds.insert(inds.end(), meshes[i].indices.begin(), meshes[i].indices.end());
+		}
+		volume = calculateVolume();
+		// note: consider removing the isStaticMesh flag and allowing a Model to contain one or both of the triangle mesh and convex hull depending on the staticness of the GameObjects which use it
 		if (isStaticMesh) {
 			// create mesh shape from model tris
-			collisionShape = NewtonCreateTreeCollision(world, 0);
-			NewtonTreeCollisionBeginBuild(collisionShape);
-			for (Mesh mesh : meshes) {
-				for (int i = 0; i < mesh.indices.size()-2; i += 3) {
-					dVector verts[3] = {
-						dVector(mesh.vertices[mesh.indices[i]].Position.x, mesh.vertices[mesh.indices[i]].Position.y, mesh.vertices[mesh.indices[i]].Position.z),
-						dVector(mesh.vertices[mesh.indices[i + 1]].Position.x, mesh.vertices[mesh.indices[i + 1]].Position.y, mesh.vertices[mesh.indices[i + 1]].Position.z),
-						dVector(mesh.vertices[mesh.indices[i + 2]].Position.x, mesh.vertices[mesh.indices[i + 2]].Position.y, mesh.vertices[mesh.indices[i + 2]].Position.z) };
-					NewtonTreeCollisionAddFace(collisionShape, 3, &verts[0][0], sizeof(dVector), 0);
-				}
-			}
-			NewtonTreeCollisionEndBuild(collisionShape, 0);
+			PxTriangleMeshDesc meshDesc;
+			meshDesc.points.count = verts.size();
+			meshDesc.points.stride = sizeof(Vertex);
+			meshDesc.points.data = &verts[0];
+
+			// TODO: submeshes may need to be split, as this will create extra triangles between the end of one submesh and the start of another (static meshes probably shouldn't have submeshes anyway?)
+			meshDesc.triangles.count = inds.size()/3;
+			meshDesc.triangles.stride = 3 * sizeof(unsigned int);
+			meshDesc.triangles.data = &inds[0];
+
+			PxDefaultMemoryOutputStream writeBuffer;
+			PxTriangleMeshCookingResult::Enum result;
+			bool status = gCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
+			if (!status)
+				ERROR(std::cout << "error while cooking triangle mesh" << std::endl);
+
+			PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+			collisionMesh = gPhysics->createTriangleMesh(readBuffer);
 		}
 		else {
 			// create convex hull shape from mesh verts
-			std::vector<dVector> verts;
-			for (Mesh mesh : meshes) {
-				for (int meshInd : mesh.indices)
-					verts.push_back(dVector(mesh.vertices[meshInd].Position.x, mesh.vertices[meshInd].Position.y, mesh.vertices[meshInd].Position.z));
-			}
-			// tolerance of 0.01f = 1% vert removal threshold
-			dVector* dVerts = verts.data();
-			collisionShape = NewtonCreateConvexHull(world, verts.size(), &dVerts[0].m_x, sizeof(dVector), 0.01f, 0, NULL);
+			PxConvexMeshDesc convexDesc;
+			convexDesc.points.count = verts.size();
+			convexDesc.points.stride = sizeof(Vertex);
+			convexDesc.points.data = &verts[0];
+			convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX;
+
+			PxDefaultMemoryOutputStream buf;
+			if (!gCooking->cookConvexMesh(convexDesc, buf))
+				ERROR(std::cout << "error while cooking convex hull" << std::endl);
+			
+			PxDefaultMemoryInputData readBuffer(buf.getData(), buf.getSize());
+			collisionMesh = gPhysics->createConvexMesh(readBuffer);
 		}
-		volume = calculateVolume();
-		// push back a single instance of the default collision shape so objects with no scaling can share it
 	}
 
 	/*

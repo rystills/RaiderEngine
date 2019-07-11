@@ -13,11 +13,10 @@
 #include "../GameObject.hpp"
 #include "../Light.hpp"
 
-#include "../rightClickObserve.hpp"
-#include "../mousePicking.hpp"
 #include "../FpsDisplay.hpp"
 #include "../audio.hpp"
 
+#include "mouseInteraction.hpp"
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
 */
@@ -33,6 +32,7 @@ int main() {
 	// note: uncomment me and set me to the proper directory if you need to run Dr. Memory
 	// _chdir("C:\\Users\\Ryan\\Documents\\git-projects\\CPPGameEngine\\CPPGameEngine");
 	window = initGraphics();
+	clearColor = glm::vec4(.6f, .3f, .5f, 1);
 	initAudio();
 	player.init();
 
@@ -61,7 +61,7 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		NewtonUpdate(world, deltaTime);
+		updatePhysics(deltaTime);
 
 		// update player
 		player.update(deltaTime);
@@ -69,14 +69,18 @@ int main() {
 		updateObjects();
 
 		// picking and object info display
-		if (displayString.size() == 0) {
-			UpdatePickBody(deltaTime);
-			if (!m_targetPicked)
-				checkDisplayObject();
-		}
-		else
+		if (displayString.size() > 0)
+			// we're currently observing something; nothing to do until the user right clicks again
 			updateDisplayString();
-
+		else {
+			if (!gMouseJoint)
+				// there's nothing held at the moment, so check if the user is trying to observe something
+				checkDisplayObject();
+			if (displayString.size() == 0)
+				// the user didn't try to observe something, so check if the user is holding or trying to grab something
+				updateHeldBody(deltaTime);
+		}
+		
 		// render
 		renderDepthMap();
 		renderGeometryPass();
