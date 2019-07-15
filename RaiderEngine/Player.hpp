@@ -23,7 +23,7 @@ public:
 	Player() : camera(glm::vec3(0)) { }
 
 	/*
-	initialize the player, creating a new newton controller
+	initialize the player, creating a new physics controller
 	*/
 	void init() {
 		// create the controller manager

@@ -115,35 +115,4 @@ public:
 		rotation = glm::toMat4(q);
 		return q;
 	}
-
-	/*
-	apply force prior to the current object prior to the next simulation step
-	@param timestep:
-	@param threadIjdex
-	*/
-	virtual void applyForceCallback(float timestep, int threadIndex) {
-		// apply gravitational force
-		/*dFloat force[3] = { 0, -GRAVITY_STRENGTH * mass * gravityMultiplier * !held, 0 };
-		NewtonBodySetForce(body, force);
-
-		// disable omega and torque when held
-		if (held) {
-			dVector zeroVector(0, 0, 0);
-			NewtonBodySetOmega(body, &zeroVector[0]);
-			NewtonBodySetTorque(body, &zeroVector[0]);
-		}*/
-	}
 };
-
-/*
-apply force callback; called by newton each time the body is about to be simulated
-@param body: the body that is about to be simulated
-@param timestep: 
-@param threadIndex:
-*/
-/*void applyForceCallbackRedirect(const NewtonBody* const body, dFloat timestep, int threadIndex) {
-	// retrieve the corresponding GameObject from the body's user data
-	GameObject* GO = (GameObject*)NewtonBodyGetUserData(body);
-	// allow the gameObject to handle applying force
-	GO->applyForceCallback(timestep, threadIndex);
-}*/

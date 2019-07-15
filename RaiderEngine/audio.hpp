@@ -30,6 +30,7 @@ load the sound file with the specified name
 @returns: the shared pointer in the sounds map to the sound
 */
 std::shared_ptr<ALuint> loadSound(std::string soundName) {
+	std::cout << "Loading sound '" << soundName << "'" << std::endl;
 	// check if the sound has already been loaded
 	std::unordered_map<std::string, std::shared_ptr<ALuint>>::iterator search = sounds.find(soundName);
 	if (search != sounds.end())
@@ -57,6 +58,7 @@ std::shared_ptr<ALuint> loadSound(std::string soundName) {
 	// now cleanup, add to the sound map, and return
 	alDeleteBuffers(1,&buffer);
 	sounds.insert({ soundName, source });
+	SUCCESS(std::cout << "Finished loading sound '" << soundName << "'" << std::endl);
 	return source;
 }
 

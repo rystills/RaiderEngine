@@ -55,7 +55,7 @@ void initPhysics() {
 	}
 
 	// create material
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.4f);
 
 	// cooking
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
