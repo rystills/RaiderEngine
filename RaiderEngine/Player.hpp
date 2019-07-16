@@ -13,8 +13,11 @@ public:
 	float height = 1.9f;
 	float crouchScale = .3f;
 	float radius = .5f;
-	float playerGravity = .75f;
+	float playerGravity = .7f;
 	float jumpStrength = .14f;
+	float groundStoppingSpeed = 3;
+	float airStoppingSpeed = .2f;
+	float airControl = .1f;
 	
 	glm::vec3 velocity;
 	bool crouching = false;
@@ -79,6 +82,7 @@ public:
 
 	void update(float deltaTime) {
 		if (camera.controllable) {
+			bool grounded = canJump();
 			// normalize camera front to get a constant speed regardless of pitch
 			glm::vec3 normalFront = glm::normalize(glm::cross(camera.WorldUp, camera.Right));
 			// movement
@@ -91,21 +95,40 @@ public:
 				forwardSpeed *= invMag;
 				strafeSpeed *= invMag;
 			}
-			// TODO: apply move force to existing gravity, rather than instantly starting and stopping movement
-			velocity = glm::vec3(0, velocity.y, 0);
-			velocity += normalFront * forwardSpeed * deltaTime;
-			velocity += camera.Right * strafeSpeed * deltaTime;
-			// As long as we're grounded, keep velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
+			velocity += normalFront * forwardSpeed * (grounded ? 1 : airControl) * deltaTime;
+			velocity += camera.Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
+			// As long as we're grounded, keep vertical velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
 			// TODO: keep the player tethered to slopes / steps without relying on an artificial gravity
-			if (canJump())
+			if (grounded)
 				velocity.y = -playerGravity * 10 * deltaTime;
 			else
 				velocity.y -= playerGravity * deltaTime;
 			
+			// cap horizontal velocity depending on whether the player is walking or running
+			float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+			if (moveVel > baseMoveSpeed * deltaTime) {
+				float velDiff = (baseMoveSpeed * deltaTime) / moveVel;
+				velocity.x *= velDiff;
+				velocity.z *= velDiff;
+			}
+			// if the player is not inputting movement in any direction, slow them down or stop them entirely
+			if (forwardSpeed == 0 && strafeSpeed == 0) {
+				float stopSpeed = (grounded ? groundStoppingSpeed : airStoppingSpeed) * deltaTime;
+				moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+				if (moveVel <= stopSpeed) {
+					velocity.x = 0;
+					velocity.z = 0;
+				}
+				else {
+					float velDir = std::atan2(velocity.z, velocity.x);
+					velocity.x -= cos(velDir) * stopSpeed;
+					velocity.z -= sin(velDir) * stopSpeed;
+				}
+			}
 			// jump
 			PxControllerState s;
 			controller->getState(s);
-			if (canJump() && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			if (grounded && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 				// jump velocity is a burst, so deltaTime is ignored
 				velocity.y = jumpStrength;
 			// apply to controller
