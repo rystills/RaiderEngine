@@ -57,7 +57,6 @@ void ReleaseHelpers() {
 		shape->setQueryFilterData(defaultFilterData);
 	}
 	gMouseSphere = NULL;
-
 }
 
 /*
@@ -88,13 +87,15 @@ void updateHeldBody(float deltaTime) {
 			// create joint between sphere and hit object
 			// TODO: figure out localFrame calculation rather than forcing objects to be held by the center
 			gMouseJoint = PxDistanceJointCreate(*gPhysics, gMouseSphere, PxTransform(PxVec3(0,0,0)), hitBody, PxTransform(PxVec3(0,0,0)));
-			
-			/// TODO: disable held object rotation
 		}
 	}
 	if (mouseHeldLeft && gMouseSphere) {
-		//keep held object awake
+		// keep held object awake
 		((PxRigidDynamic*)hitBody)->wakeUp();
+		// reset held object angular velocity each step so that held objects can reorient themselves against collisions, but won't spin out of control
+		((PxRigidDynamic*)hitBody)->setAngularVelocity(PxVec3(0, 0, 0), false);
+		// reset held object linear velocity as well
+		((PxRigidDynamic*)hitBody)->setLinearVelocity(PxVec3(0, 0, 0), false);
 		// continue to hold object
 		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, sphereDist);
 		// move held object sphere in front of obstacles to prevent it from clipping through walls / into other objects
