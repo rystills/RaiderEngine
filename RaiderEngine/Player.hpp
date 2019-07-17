@@ -7,10 +7,10 @@ class Player {
 public:
 	Camera camera;
 	PxControllerManager* manager;
-	PxController* controller;
+	PxCapsuleController* controller;
 	float walkSpeed = 5;
 	float runSpeed = 8;
-	float height = 1.9f;
+	float height = 1;
 	float crouchScale = .3f;
 	float radius = .5f;
 	float playerGravity = .7f;
@@ -18,7 +18,7 @@ public:
 	float groundStoppingSpeed = 3;
 	float airStoppingSpeed = .2f;
 	float airControl = .1f;
-	
+
 	glm::vec3 velocity;
 	bool crouching = false;
 	bool ctrlDown = false;
@@ -36,7 +36,7 @@ public:
 		desc.height = height;
 		desc.radius = radius;
 		desc.material = gMaterial;
-		controller = manager->createController(desc);
+		controller = (PxCapsuleController*)manager->createController(desc);
 		// set the player controller's user data
 		controller->setUserData(this);
 		// set non-default raycast filter so that the player is ignored when raycasting
@@ -54,7 +54,7 @@ public:
 	void setPos(glm::vec3 pos, bool relative = false, bool isFeetPos = true) {
 		if (relative) {
 			PxExtendedVec3 curPos = controller->getPosition();
-			controller->setPosition(PxExtendedVec3(pos.x + curPos.x, pos.y + curPos.y + (isFeetPos ? height/2 : 0), pos.z + curPos.z));
+			controller->setPosition(PxExtendedVec3(pos.x + curPos.x, pos.y + curPos.y + (isFeetPos ? height / 2 : 0), pos.z + curPos.z));
 		}
 		else
 			controller->setPosition(PxExtendedVec3(pos.x, pos.y + (isFeetPos ? height / 2 : 0), pos.z));
@@ -67,10 +67,10 @@ public:
 		PxExtendedVec3 playerPos = controller->getPosition();
 		camera.Position.x = playerPos.x;
 		// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-		camera.Position.y = playerPos.y + (height * (crouching ? 1 - crouchScale : 1) / 2 - .12f);
+		camera.Position.y = playerPos.y + (height * (crouching ? crouchScale : 1) / 2 + radius);
 		camera.Position.z = playerPos.z;
 	}
-	
+
 	/*
 	return whether or not the player is currently able to jump
 	*/
@@ -103,7 +103,7 @@ public:
 				velocity.y = -playerGravity * 10 * deltaTime;
 			else
 				velocity.y -= playerGravity * deltaTime;
-			
+
 			// cap horizontal velocity depending on whether the player is walking or running
 			float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
 			if (moveVel > baseMoveSpeed * deltaTime) {
@@ -139,8 +139,23 @@ public:
 				ctrlDown = true;
 			else if (ctrlDown) {
 				ctrlDown = false;
-				// TODO: reimplement crouching. See: https://github.com/NVIDIAGameWorks/PhysX/blob/4050bbfdc2699dfab7edbf0393df8ff96bbe06c5/physx/samples/samplecctsharedcode/SampleCCTActor.cpp#L212
-				crouching = !crouching;
+				// we can always crouch, but if we're trying to stand back up, make sure we won't hit our head on something
+				if (crouching) {
+					PxSceneReadLock scopedLock(*gScene);
+					PxCapsuleGeometry geom(radius,height/2);
+					PxExtendedVec3 position = controller->getPosition();
+					PxVec3 pos((float)position.x, (float)position.y + ((height - height * crouchScale) / 2), (float)position.z);
+					PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
+
+					PxOverlapBuffer hit;
+					if (!gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
+						goto toggleCrouch;
+				}
+				else {
+				toggleCrouch:
+					crouching = !crouching;
+					controller->resize(height * (crouching ? crouchScale : 1));
+				}
 			}
 		}
 		syncCameraPos();
