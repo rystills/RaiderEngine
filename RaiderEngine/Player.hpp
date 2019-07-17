@@ -81,81 +81,82 @@ public:
 	}
 
 	void update(float deltaTime) {
+		// normalize camera front to get a constant speed regardless of pitch
+		glm::vec3 normalFront = glm::normalize(glm::cross(camera.WorldUp, camera.Right));
+		bool grounded = canJump();
+		// movement
+		float baseMoveSpeed = walkSpeed, forwardSpeed = 0, strafeSpeed = 0;
 		if (camera.controllable) {
-			bool grounded = canJump();
-			// normalize camera front to get a constant speed regardless of pitch
-			glm::vec3 normalFront = glm::normalize(glm::cross(camera.WorldUp, camera.Right));
-			// movement
-			float baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed);
-			float forwardSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
-			float strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
+			baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed);
+			forwardSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
+			strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
 			if (forwardSpeed && strafeSpeed) {
 				// average forward and strafe speeds to prevent diagonal movement from being faster
 				float invMag = baseMoveSpeed / sqrt(forwardSpeed * forwardSpeed + strafeSpeed * strafeSpeed);
 				forwardSpeed *= invMag;
 				strafeSpeed *= invMag;
 			}
-			velocity += normalFront * forwardSpeed * (grounded ? 1 : airControl) * deltaTime;
-			velocity += camera.Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
-			// As long as we're grounded, keep vertical velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
-			// TODO: keep the player tethered to slopes / steps without relying on an artificial gravity
-			if (grounded)
-				velocity.y = -playerGravity * 10 * deltaTime;
-			else
-				velocity.y -= playerGravity * deltaTime;
+		}
+		velocity += normalFront * forwardSpeed * (grounded ? 1 : airControl) * deltaTime;
+		velocity += camera.Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
+		// As long as we're grounded, keep vertical velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
+		// TODO: keep the player tethered to slopes / steps without relying on an artificial gravity
+		if (grounded)
+			velocity.y = -playerGravity * 10 * deltaTime;
+		else
+			velocity.y -= playerGravity * deltaTime;
 
-			// cap horizontal velocity depending on whether the player is walking or running
-			float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-			if (moveVel > baseMoveSpeed * deltaTime) {
-				float velDiff = (baseMoveSpeed * deltaTime) / moveVel;
-				velocity.x *= velDiff;
-				velocity.z *= velDiff;
+		// cap horizontal velocity depending on whether the player is walking or running
+		float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+		if (moveVel > baseMoveSpeed * deltaTime) {
+			float velDiff = (baseMoveSpeed * deltaTime) / moveVel;
+			velocity.x *= velDiff;
+			velocity.z *= velDiff;
+		}
+		// if the player is not inputting movement in any direction, slow them down or stop them entirely
+		if (forwardSpeed == 0 && strafeSpeed == 0) {
+			float stopSpeed = (grounded ? groundStoppingSpeed : airStoppingSpeed) * deltaTime;
+			moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+			if (moveVel <= stopSpeed) {
+				velocity.x = 0;
+				velocity.z = 0;
 			}
-			// if the player is not inputting movement in any direction, slow them down or stop them entirely
-			if (forwardSpeed == 0 && strafeSpeed == 0) {
-				float stopSpeed = (grounded ? groundStoppingSpeed : airStoppingSpeed) * deltaTime;
-				moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-				if (moveVel <= stopSpeed) {
-					velocity.x = 0;
-					velocity.z = 0;
-				}
-				else {
-					float velDir = std::atan2(velocity.z, velocity.x);
-					velocity.x -= cos(velDir) * stopSpeed;
-					velocity.z -= sin(velDir) * stopSpeed;
-				}
+			else {
+				float velDir = std::atan2(velocity.z, velocity.x);
+				velocity.x -= cos(velDir) * stopSpeed;
+				velocity.z -= sin(velDir) * stopSpeed;
 			}
-			// jump
-			PxControllerState s;
-			controller->getState(s);
+		}
+		// jump
+		if (camera.controllable)
 			if (grounded && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 				// jump velocity is a burst, so deltaTime is ignored
 				velocity.y = jumpStrength;
-			// apply to controller
-			PxVec3 physVelocity(velocity.x, velocity.y, velocity.z);
-			controller->move(physVelocity, 0, deltaTime, NULL);
-			// crouch toggle
-			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-				ctrlDown = true;
-			else if (ctrlDown) {
-				ctrlDown = false;
-				// we can always crouch, but if we're trying to stand back up, make sure we won't hit our head on something
-				if (crouching) {
-					PxSceneReadLock scopedLock(*gScene);
-					PxCapsuleGeometry geom(radius,height/2);
-					PxExtendedVec3 position = controller->getPosition();
-					PxVec3 pos((float)position.x, (float)position.y + ((height - height * crouchScale) / 2), (float)position.z);
-					PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
 
-					PxOverlapBuffer hit;
-					if (!gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
-						goto toggleCrouch;
-				}
-				else {
-				toggleCrouch:
-					crouching = !crouching;
-					controller->resize(height * (crouching ? crouchScale : 1));
-				}
+		// apply to controller
+		PxVec3 physVelocity(velocity.x, velocity.y, velocity.z);
+		controller->move(physVelocity, 0, deltaTime, NULL);
+		// crouch toggle
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+			ctrlDown = true;
+		else if (ctrlDown) {
+			ctrlDown = false;
+			// we can always crouch, but if we're trying to stand back up, make sure we won't hit our head on something
+			if (crouching) {
+				PxSceneReadLock scopedLock(*gScene);
+				PxCapsuleGeometry geom(radius,height/2);
+				PxExtendedVec3 position = controller->getPosition();
+				PxVec3 pos((float)position.x, (float)position.y + ((height - height * crouchScale) / 2), (float)position.z);
+				PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
+
+				PxOverlapBuffer hit;
+				if (!gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
+					goto toggleCrouch;
+			}
+			else {
+			toggleCrouch:
+				crouching = !crouching;
+				controller->resize(height * (crouching ? crouchScale : 1));
 			}
 		}
 		syncCameraPos();
