@@ -68,6 +68,10 @@ void main() {
     vec2 texCoords = fs_in.TexCoords;
     
     texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir);
+
+	// discard transparent pixels
+	if(texture(texture_diffuse1, texCoords).a < .5)
+        discard;
 	// uncomment me to discard texture coordinates outside the [0:1] range; creates dynamic silhouette but causes black borders between perpendicular faces and breaks tiling     
 //    if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
 //        discard;    

@@ -567,10 +567,14 @@ void loadShaders() {
 /*
 draw all GameObjects to the specified shader
 @param shaderName: the shader to which to render the GameObjects
-@param shouldSendTextures: whether or not to render with textures (performance gain by disabling this when generating the depthMap) */
-void drawGameObjects(std::string shaderName, bool shouldSendTextures = true) {
+@param shouldSendTextures: whether or not to render with textures (performance gain by disabling this when generating the depthMap) 
+@param ignoreNonShadowCasters: whether or not to skip GameObjects that are set to not cast shadows
+*/
+void drawGameObjects(std::string shaderName, bool shouldSendTextures = true, bool ignoreNonShadowCasters = false) {
 	for (auto&& kv : gameObjects) {
 		if (kv.second.size() == 0)
+			continue;
+		if (ignoreNonShadowCasters && !kv.second[0]->castShadows)
 			continue;
 		// toggle face culling when drawing a double-sided object
 		if (kv.second[0]->drawTwoSided != twoSidedDrawing) {
@@ -630,7 +634,7 @@ void renderDepthMap() {
 			for (unsigned int i = 0; i < 6; ++i)
 				shaders["pointShadowsDepth"]->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 			shaders["pointShadowsDepth"]->setVec3("lightPos", lightPos);
-			drawGameObjects("pointShadowsDepth", false);
+			drawGameObjects("pointShadowsDepth", false, true);
 		}
 	}
 }

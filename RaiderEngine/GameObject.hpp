@@ -20,6 +20,7 @@ public:
 	bool isStatic = false;
 	bool usePhysics = true;
 	bool drawTwoSided = false;
+	bool castShadows = true;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
