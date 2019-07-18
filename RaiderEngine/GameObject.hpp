@@ -36,8 +36,7 @@ public:
 		isStatic = makeStatic > 0;
 		if (isStatic) 
 			this->grabbable = false;
-		if (usePhysics)
-			addPhysics(setRotation(rotationEA, fixInitialRotation));
+		addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
 
 	/*
@@ -68,6 +67,7 @@ public:
 	@param rot: the quaternion representation of our initial rotation
 	*/
 	void addPhysics(glm::quat rot) {
+		if (!usePhysics) return;
 		// calculate mass and prepare physics data structures
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
 		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;

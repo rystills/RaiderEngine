@@ -565,6 +565,34 @@ void loadShaders() {
 }
 
 /*
+draw all GameObjects to the specified shader
+@param shaderName: the shader to which to render the GameObjects
+@param shouldSendTextures: whether or not to render with textures (performance gain by disabling this when generating the depthMap) */
+void drawGameObjects(std::string shaderName, bool shouldSendTextures = true) {
+	for (auto&& kv : gameObjects) {
+		// no instancing can be done if only a single GameObject uses this model
+		if (kv.second.size() == 1) {
+			shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[0]->position) * kv.second[0]->rotation, kv.second[0]->scale));
+			kv.second[0]->model->draw(*shaders[shaderName], shouldSendTextures);
+		}
+		else {
+			// iterate through all submeshes
+			for (int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
+				// transfer the textures for the current submesh once initially
+				if (shouldSendTextures)
+					kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
+				// now render the current submesh for all GameObjects
+				// TODO: further optimize this with instanced rendering via glDrawElementsInstanced (will require some alterations to the shader)
+				for (int r = 0; r < kv.second.size(); ++r) {
+					shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[r]->position) * kv.second[r]->rotation, kv.second[r]->scale));
+					kv.second[r]->model->meshes[i].draw(*shaders[shaderName], false);
+				}
+			}
+		}
+	}
+}
+
+/*
 render the depth information from each of NR_LIGHTS to the scene
 */
 void renderDepthMap() {
@@ -592,10 +620,7 @@ void renderDepthMap() {
 			for (unsigned int i = 0; i < 6; ++i)
 				shaders["pointShadowsDepth"]->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 			shaders["pointShadowsDepth"]->setVec3("lightPos", lightPos);
-			for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-				shaders["pointShadowsDepth"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
-				gameObjects[i]->model->draw(*shaders["pointShadowsDepth"]);
-			}
+			drawGameObjects("pointShadowsDepth", false);
 		}
 	}
 }
@@ -618,10 +643,8 @@ void renderGeometryPass() {
 	shaders["shaderGeometryPass"]->setMat4("projection", player.camera.projection);
 	shaders["shaderGeometryPass"]->setMat4("view", player.camera.view);
 	shaders["shaderGeometryPass"]->setVec3("viewPos", player.camera.Position);
-	for (unsigned int i = 0; i < gameObjects.size(); ++i) {
-		shaders["shaderGeometryPass"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), gameObjects[i]->position) * gameObjects[i]->rotation, gameObjects[i]->scale));
-		gameObjects[i]->model->draw(*shaders["shaderGeometryPass"]);
-	}
+	drawGameObjects("shaderGeometryPass");
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -723,8 +746,9 @@ update all objects in all object lists
 */
 void updateObjects() {
 	updateDebugToggle(window);
-	for (int i = 0; i < gameObjects.size(); ++i)
-		gameObjects[i]->update(deltaTime);
+	for (auto &&kv : gameObjects)
+		for (int i = 0; i < kv.second.size(); ++i)
+			kv.second[i]->update(deltaTime);
 	for (int i = 0; i < lights.size(); ++i)
 		lights[i]->update(deltaTime);
 	for (int i = 0; i < textObjects.size(); ++i)

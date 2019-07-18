@@ -52,29 +52,37 @@ public:
         setupMesh();
     }
 
-    // render the mesh
-    void draw(Shader shader) {
-        // bind appropriate textures
-        unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, heightNr = 0;
-        for(unsigned int i = 0; i < textures.size(); i++) {
-            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-            // retrieve texture number (the N in diffuse_textureN)
+	/*
+	bind all of the textures used by this mesh for rendering, and update the shader uniforms accordingly
+	*/
+	void sendTexturesToShader(Shader shader) {
+		// bind appropriate textures
+		unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, heightNr = 0;
+		for (unsigned int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+			// retrieve texture number (the N in diffuse_textureN)
 			std::string number;
 			std::string name = textures[i].type;
-            if(name == "texture_diffuse")
+			if (name == "texture_diffuse")
 				number = std::to_string(++diffuseNr);
-			else if(name == "texture_specular")
+			else if (name == "texture_specular")
 				number = std::to_string(++specularNr);
-            else if(name == "texture_normal")
+			else if (name == "texture_normal")
 				number = std::to_string(++normalNr);
-             else if(name == "texture_height")
-			    number = std::to_string(++heightNr);
+			else if (name == "texture_height")
+				number = std::to_string(++heightNr);
 
 			// now set the sampler to the correct texture unit
-            glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
-            // and finally bind the texture
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
-        }
+			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+			// and finally bind the texture
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+	}
+
+    // render the mesh
+    void draw(Shader shader, bool shouldSendTextures = true) {
+		if (shouldSendTextures)
+			sendTexturesToShader(shader);
         
         // draw mesh
         glBindVertexArray(*VAO);

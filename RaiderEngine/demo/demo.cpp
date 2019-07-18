@@ -40,7 +40,7 @@ int main() {
 	setTextureDir("demo/textures");
 	setSoundDir("demo/sounds");
 	setFontDir("demo/fonts");
-	loadMap("hallway");
+	loadMap("field");
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
 	// add fps indicator

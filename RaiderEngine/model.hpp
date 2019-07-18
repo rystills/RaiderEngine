@@ -143,10 +143,11 @@ public:
 	/*
 	draw the model using the specified shader
 	@param shader: the shader to use while drawing the model
+	@param shouldSendTextures: whether or not to bind the appropriate textures before rendering
 	*/
-	void draw(Shader shader) {
+	void draw(Shader shader, bool shouldSendTextures = true) {
         for(unsigned int i = 0; i < meshes.size(); ++i)
-            meshes[i].draw(shader);
+            meshes[i].draw(shader, shouldSendTextures);
     }
 
 	/*

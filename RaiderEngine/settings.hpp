@@ -2,7 +2,7 @@
 #pragma once
 // this file holds global settings and shared engine data
 unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720;
-bool useVsync = true;
+bool useVsync = false;
 bool fullScreen = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 bool debugDraw = false;
@@ -20,7 +20,8 @@ Player player;
 #include "TextObject.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
 std::unordered_map<std::string, std::shared_ptr<ALuint>> sounds;
-std::vector<std::unique_ptr<GameObject>> gameObjects;
+// GameObjects are indexed by their model name when created, allowing for automatic optimizations
+std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject>>> gameObjects;
 std::vector<std::unique_ptr<Light>> lights;
 std::vector<std::unique_ptr<TextObject>> textObjects;
 std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;

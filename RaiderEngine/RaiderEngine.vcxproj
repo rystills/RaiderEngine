@@ -165,6 +165,7 @@
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="demo\Cog.hpp" />
     <ClInclude Include="demo\FlickerLight.hpp" />
+    <ClInclude Include="demo\FoliageGrass.hpp" />
     <ClInclude Include="demo\MovingPlatform.hpp" />
     <ClInclude Include="demo\mouseInteraction.hpp" />
     <ClInclude Include="filesystem.hpp" />
