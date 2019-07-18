@@ -8,15 +8,16 @@ public:
 	Camera camera;
 	PxControllerManager* manager;
 	PxCapsuleController* controller;
-	float walkSpeed = 5;
-	float runSpeed = 8;
+	float walkSpeed = 300;
+	float runSpeed = 480;
+	float maxMoveSpeedRatio = 1 / 60.f;
 	float height = 1;
 	float crouchScale = .3f;
 	float radius = .5f;
-	float playerGravity = .7f;
-	float jumpStrength = .14f;
-	float groundStoppingSpeed = 3;
-	float airStoppingSpeed = .2f;
+	float playerGravity = 42;
+	float jumpStrength = 9;
+	float groundStoppingSpeed = 180;
+	float airStoppingSpeed = 12;
 	float airControl = .1f;
 
 	glm::vec3 velocity;
@@ -77,7 +78,7 @@ public:
 	bool canJump() {
 		PxControllerState cctState;
 		controller->getState(cctState);
-		return (cctState.collisionFlags & PxControllerCollisionFlag::eCOLLISION_DOWN) != 0;
+		return ((cctState.collisionFlags & PxControllerCollisionFlag::eCOLLISION_DOWN) != 0) && (velocity.y <= 0);
 	}
 
 	void update(float deltaTime) {
@@ -107,9 +108,10 @@ public:
 			velocity.y -= playerGravity * deltaTime;
 
 		// cap horizontal velocity depending on whether the player is walking or running
+		float maxMoveSpeed = baseMoveSpeed * maxMoveSpeedRatio;
 		float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-		if (moveVel > baseMoveSpeed * deltaTime) {
-			float velDiff = (baseMoveSpeed * deltaTime) / moveVel;
+		if (moveVel > maxMoveSpeed) {
+			float velDiff = (maxMoveSpeed) / moveVel;
 			velocity.x *= velDiff;
 			velocity.z *= velDiff;
 		}
@@ -134,7 +136,7 @@ public:
 				velocity.y = jumpStrength;
 
 		// apply to controller
-		PxVec3 physVelocity(velocity.x, velocity.y, velocity.z);
+		PxVec3 physVelocity(velocity.x*deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
 		controller->move(physVelocity, 0, deltaTime, NULL);
 		// crouch toggle
 		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
