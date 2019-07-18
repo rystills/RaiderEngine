@@ -19,6 +19,7 @@ public:
 	bool held = false;
 	bool isStatic = false;
 	bool usePhysics = true;
+	bool drawTwoSided = false;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model

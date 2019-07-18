@@ -21,6 +21,7 @@ glm::vec4 clearColor(0,0,0,1);
 
 std::vector<GLfloat> pointsQueue;
 std::vector<GLfloat> linesQueue;
+bool twoSidedDrawing = true;
 
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
@@ -535,7 +536,6 @@ GLFWwindow* initWindow() {
 
 	// required capabilities
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	glEnable(GL_CULL_FACE);
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	return window;
@@ -570,6 +570,16 @@ draw all GameObjects to the specified shader
 @param shouldSendTextures: whether or not to render with textures (performance gain by disabling this when generating the depthMap) */
 void drawGameObjects(std::string shaderName, bool shouldSendTextures = true) {
 	for (auto&& kv : gameObjects) {
+		if (kv.second.size() == 0)
+			continue;
+		// toggle face culling when drawing a double-sided object
+		if (kv.second[0]->drawTwoSided != twoSidedDrawing) {
+			if (kv.second[0]->drawTwoSided)
+				glDisable(GL_CULL_FACE);
+			else 
+				glEnable(GL_CULL_FACE);
+			twoSidedDrawing = !twoSidedDrawing;
+		}
 		// no instancing can be done if only a single GameObject uses this model
 		if (kv.second.size() == 1) {
 			shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[0]->position) * kv.second[0]->rotation, kv.second[0]->scale));

@@ -4,5 +4,7 @@
 
 class FoliageGrass : public GameObject {
 public:
-	FoliageGrass(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale) : GameObject(position, rotationEA, scale, "foliageGrass", 1, false, true, false) {}
+	FoliageGrass(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale) : GameObject(position, rotationEA, scale, "foliageGrass", 1, false, true, false) { 
+		drawTwoSided = true;
+	}
 };
