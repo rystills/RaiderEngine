@@ -18,6 +18,7 @@ public:
 	float gravityMultiplier = 1;
 	bool held = false;
 	bool isStatic = false;
+	bool usePhysics = true;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -28,13 +29,15 @@ public:
 	@param makeStatic: static state. 0 = non-static. 1 = static gameObject + static mesh (if the mesh was already loaded in as dynamic, this will be equivalent to 2). 2 = static gameObject + dynamic mesh.
 	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
+	@param usePhysics: whether or not this GameObject should be added to the physics world
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation=true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName) {
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation=true, bool usePhysics = true) : position(position), scale(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics) {
 		setModel(modelName, makeStatic == 1);
 		isStatic = makeStatic > 0;
 		if (isStatic) 
 			this->grabbable = false;
-		addPhysics(setRotation(rotationEA, fixInitialRotation));
+		if (usePhysics)
+			addPhysics(setRotation(rotationEA, fixInitialRotation));
 	}
 
 	/*
@@ -97,9 +100,11 @@ public:
 	*/
 	virtual void update(float deltaTime) {
 		// update position and rotation to match the physics body
-		PxTransform pose = body->getGlobalPose();
-		position.x = pose.p.x; position.y = pose.p.y; position.z = pose.p.z;
-		rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));
+		if (usePhysics) {
+			PxTransform pose = body->getGlobalPose();
+			position.x = pose.p.x; position.y = pose.p.y; position.z = pose.p.z;
+			rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));
+		}
 	}
 
 	/*
