@@ -13,7 +13,7 @@ uniform samplerCube depthMap1;
 uniform samplerCube depthMap2;
 uniform samplerCube depthMap3;
 uniform float far_plane;
-
+uniform float ambientStrength = 0;
 
 struct Light {
     vec3 Position;
@@ -101,7 +101,7 @@ void main()
     float Specular = texture(gAlbedoSpec, TexCoords).a;
     
     // then calculate lighting as usual
-    vec3 ambient = Diffuse *0.0; // hard-coded ambient component
+    vec3 ambient = Diffuse * ambientStrength;
 	vec3 diffuseSpec = vec3(0,0,0);
     vec3 viewDir  = normalize(viewPos - FragPos);
     for(int i = 0; i < NR_LIGHTS; ++i) {

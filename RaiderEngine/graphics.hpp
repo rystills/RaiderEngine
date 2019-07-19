@@ -22,6 +22,7 @@ glm::vec4 clearColor(0,0,0,1);
 std::vector<GLfloat> pointsQueue;
 std::vector<GLfloat> linesQueue;
 bool twoSidedDrawing = true;
+float ambientStrength = .3f;
 
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
@@ -690,8 +691,9 @@ void renderLightingPass() {
 			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", false);
 	}
 	shaders["shaderLightingPass"]->setVec3("viewPos", player.camera.Position);
-	// shadow uniforms
+	// shadow and lighting uniforms
 	shaders["shaderLightingPass"]->setFloat("far_plane", player.camera.far_plane);
+	shaders["shaderLightingPass"]->setFloat("ambientStrength", ambientStrength);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
 	glActiveTexture(GL_TEXTURE4);

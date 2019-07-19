@@ -29,10 +29,14 @@ void drawCenterIndicator() {
 }
 
 int main() {
+	// initialization
 	window = initGraphics();
-	clearColor = glm::vec4(.6f, .3f, .5f, 1);
 	initAudio();
 	player.init();
+	// render settings
+	clearColor = glm::vec4(.6f, .3f, .5f, 1);
+	ambientStrength = .4f;
+	
 
 	// load map
 	setMapDir("demo/maps");
@@ -40,7 +44,7 @@ int main() {
 	setTextureDir("demo/textures");
 	setSoundDir("demo/sounds");
 	setFontDir("demo/fonts");
-	loadMap("hallway");
+	loadMap("field");
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
 	// add fps indicator
