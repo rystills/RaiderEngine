@@ -23,6 +23,11 @@ void resetSingleFrameInput() {
 	mouseReleasedLeft = false;
 	mousePressedRight = false;
 	mouseReleasedRight = false;
+	// reset pressed and released state for each key
+	for (int i = 0; i < GLFW_KEY_LAST; ++i) {
+		keyStates[i][pressed] = false;
+		keyStates[i][released] = false;
+	}
 }
 
 /*
@@ -30,12 +35,8 @@ toggle debugDraw on f3 press
 */
 void updateDebugToggle(GLFWwindow* window) {
 	// debug key update
-	if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
-		f3Pressed = true;
-	else if (f3Pressed) {
-		f3Pressed = false;
+	if (keyStates[GLFW_KEY_F3][pressed])
 		debugDraw = !debugDraw;
-	}
 }
 
 // glfw: whenever the mouse moves, this callback is called
@@ -56,6 +57,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	player.camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (action == GLFW_PRESS) {
+		keyStates[key][pressed] = true;
+		keyStates[key][held] = true;
+	}
+	else if (action == GLFW_RELEASE) {
+		keyStates[key][released] = true;
+		keyStates[key][held] = false;
+	}
+}
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -63,7 +76,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 			mousePressedLeft = true;
 			mouseHeldLeft = true;
 		}
-		else {
+		else if (action == GLFW_RELEASE) {
 			mouseReleasedLeft = true;
 			mouseHeldLeft = false;
 		}
@@ -73,7 +86,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 			mousePressedRight = true;
 			mouseHeldRight = true;
 		}
-		else {
+		else if (action == GLFW_RELEASE) {
 			mouseReleasedRight = true;
 			mouseHeldRight = false;
 		}

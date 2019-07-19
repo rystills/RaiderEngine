@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 // this file is responsible for maintaining timing information within the main game loop
+float totalTime = 0.0f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 int framesThisSecond = 0;
@@ -22,4 +23,5 @@ void updateTime() {
 	// if fps goes below 30, slow down the game speed rather than trying to interpolate (this should prevent occasional jitters from breaking the physics)
 	if (deltaTime > .034f) deltaTime = .034f;
 	lastFrame = currentFrame;
+	totalTime += deltaTime;
 }

@@ -139,10 +139,7 @@ public:
 		PxVec3 physVelocity(velocity.x*deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
 		controller->move(physVelocity, 0, deltaTime, NULL);
 		// crouch toggle
-		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-			ctrlDown = true;
-		else if (ctrlDown) {
-			ctrlDown = false;
+		if (keyStates[GLFW_KEY_LEFT_CONTROL][pressed]) {
 			// we can always crouch, but if we're trying to stand back up, make sure we won't hit our head on something
 			if (crouching) {
 				PxSceneReadLock scopedLock(*gScene);

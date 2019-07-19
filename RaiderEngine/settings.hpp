@@ -7,6 +7,10 @@ bool fullScreen = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 bool debugDraw = false;
 
+// TODO: move these vars into input.hpp
+enum keyState { pressed = 0, held = 1, released = 2 };
+int keyStates[GLFW_KEY_LAST][3] = { 0 };
+
 std::string mapDir = "", modelDir = "", textureDir = "", soundDir = "", fontDir = "";
 
 GLFWwindow* window;
