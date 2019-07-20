@@ -28,23 +28,63 @@ void drawCenterIndicator() {
 	drawPoints();
 }
 
+int scene = 0;
+/*
+attempt to switch to the selected map
+@param mapNum: the number corresponding to the map we should switch to
+*/
+// TODO: scene switching has some graphical artifacts; this is likely symptomatic of the deferred shader not explicitly setting the number of lights via a uniform
+void checkSwitchMap(int mapNum) {
+	// base case: can't switch to the same scene or an invalid scene
+	if (mapNum == scene || (mapNum < 1 || mapNum > 3))
+		return;
+	//cear the current scene
+	for (auto&& kv : gameObjects)
+		for (int i = 0; i < kv.second.size(); ++i)
+			if (kv.second[i]->usePhysics)
+				gScene->removeActor(*kv.second[i]->body);
+	gameObjects.clear();
+	models.clear();
+	lights.clear();
+	// load the new scene
+	scene = mapNum;
+	switch (scene) {
+	case 1:
+		clearColor = glm::vec4(.6f, .3f, .5f, 1);
+		ambientStrength = 0;
+		loadMap("hallway");
+		break;
+	case 2:
+		clearColor = glm::vec4(0, .75f, 1, 1);
+		ambientStrength = 0.4f;
+		loadMap("field");
+		break;
+	case 3:
+		clearColor = glm::vec4(0, 0, .2f, 1);
+		ambientStrength = 0.15f;
+		loadMap("bookshelf");
+		break;
+	}
+}
 int main() {
 	// initialization
 	window = initGraphics();
 	initAudio();
 	player.init();
-	// render settings
-	clearColor = glm::vec4(.6f, .3f, .5f, 1);
-	ambientStrength = .4f;
-	
 
-	// load map
+	// directories
 	setMapDir("demo/maps");
 	setModelDir("demo/models");
 	setTextureDir("demo/textures");
 	setSoundDir("demo/sounds");
 	setFontDir("demo/fonts");
-	loadMap("field");
+
+	// sound
+	playSound("Julie_Li_-_01_-_resound.ogg");
+
+	// demo settings
+	checkSwitchMap(1);
+	
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
 	// add fps indicator
@@ -54,9 +94,20 @@ int main() {
 	textObjects.emplace_back(new TextObject("Press f3 to toggle physics wireframes",6,30, glm::vec3(.8f, .2f, .5f), 24));
 	textObjects.emplace_back(new TextObject("Use WASD to move, space to jump, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), 24));
 	textObjects.emplace_back(new TextObject("Press left mouse to grab objects, and right mouse to observe", 6, 90, glm::vec3(.2f, .5f, .8f), 24));
-	playSound("Julie_Li_-_01_-_resound.ogg");
+	textObjects.emplace_back(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), 24));
 
 	while (!glfwWindowShouldClose(window)) {
+		// switch scenes on number key press
+		if (keyStates[GLFW_KEY_1][pressed])
+			checkSwitchMap(1);
+		else if (keyStates[GLFW_KEY_2][pressed])
+			checkSwitchMap(2);
+		else if (keyStates[GLFW_KEY_3][pressed])
+			checkSwitchMap(3);
+
+		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
+		if (scene == 2) 
+			ambientStrength = .5f*sin(totalTime) + .5f;
 		// update frame
 		updateTime();
 		resetSingleFrameInput();
