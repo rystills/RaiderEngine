@@ -23,9 +23,9 @@ struct Light {
     float Quadratic;
     float Radius;
 };
-// TODO: allow variable # of lights rather than fixed 4 light maximum
-const int NR_LIGHTS = 4;
-uniform Light lights[NR_LIGHTS];
+// TODO: allow variable # of lights rather than fixed 5 light maximum
+uniform int NR_LIGHTS;
+uniform Light lights[5]; // hard-coded maximum of 5 lights for now
 uniform vec3 viewPos;
 
 // array of offset direction for sampling

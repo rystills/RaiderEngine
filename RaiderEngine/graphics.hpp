@@ -679,6 +679,7 @@ void renderLightingPass() {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gBuffer.albedoSpec);
 	// send light relevant uniforms
+	shaders["shaderLightingPass"]->setInt("NR_LIGHTS", lights.size());
 	for (unsigned int i = 0; i < lights.size(); ++i) {
 		if (lights[i]->on) {
 			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", true);

@@ -33,7 +33,6 @@ int scene = 0;
 attempt to switch to the selected map
 @param mapNum: the number corresponding to the map we should switch to
 */
-// TODO: scene switching has some graphical artifacts; this is likely symptomatic of the deferred shader not explicitly setting the number of lights via a uniform
 void checkSwitchMap(int mapNum) {
 	// base case: can't switch to the same scene or an invalid scene
 	if (mapNum == scene || (mapNum < 1 || mapNum > 3))
