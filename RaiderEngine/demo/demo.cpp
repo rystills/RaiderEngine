@@ -37,7 +37,7 @@ void checkSwitchMap(int mapNum) {
 	// base case: can't switch to the same scene or an invalid scene
 	if (mapNum == scene || (mapNum < 1 || mapNum > 3))
 		return;
-	//cear the current scene
+	// clear the current scene
 	for (auto&& kv : gameObjects)
 		for (int i = 0; i < kv.second.size(); ++i)
 			if (kv.second[i]->usePhysics)

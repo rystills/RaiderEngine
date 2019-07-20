@@ -39,7 +39,9 @@ std::shared_ptr<ALuint> loadSound(std::string soundName) {
 	// load sound file via stb_vorbis
 	int numChannels, sample_rate;
 	ALshort* output;
-	int slen = stb_vorbis_decode_filename((soundDir + soundName).c_str(), &numChannels, &sample_rate, &output);
+	std::ifstream input(soundDir + soundName, std::ios::binary);
+	std::vector<unsigned char> vec{ std::istreambuf_iterator<char>(input),std::istreambuf_iterator<char>() };
+	int slen = stb_vorbis_decode_memory(&vec[0], vec.size(), &numChannels, &sample_rate, &output);
 
 	// convert sound data into an ALuint buffer
 	// TODO: handle remaining formats
