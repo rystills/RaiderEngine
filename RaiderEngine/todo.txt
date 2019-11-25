@@ -3,6 +3,7 @@
 -reimplement forward rendering techniques in deferred renderer
 	-HDR
 	-bloom
+	-emissive map
 	-blending (using forward pass)
 	-spotlights w/ shadows
 	-bake static shadows for stationary lights
@@ -23,3 +24,6 @@
 -file paths should be handled in a more consistent manner throughout the project
 -instead of objects directly accessing the Player's camera, use a mainCamera pointer
 -add a flag to mark Objects as non shadow casting or non shadow receiving
+
+~Demo~
+-reimplement throwing held object on right mouse button

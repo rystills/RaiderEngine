@@ -91,8 +91,8 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 24);
 	textObjects.emplace_back(new FpsDisplay(6,6,glm::vec3(1,1,1),18));
 	textObjects.emplace_back(new TextObject("Press f3 to toggle physics wireframes",6,30, glm::vec3(.8f, .2f, .5f), 24));
-	textObjects.emplace_back(new TextObject("Use WASD to move, space to jump, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), 24));
-	textObjects.emplace_back(new TextObject("Press left mouse to grab objects, and right mouse to observe", 6, 90, glm::vec3(.2f, .5f, .8f), 24));
+	textObjects.emplace_back(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), 24));
+	textObjects.emplace_back(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, 90, glm::vec3(.2f, .5f, .8f), 24));
 	textObjects.emplace_back(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), 24));
 
 	while (!glfwWindowShouldClose(window)) {

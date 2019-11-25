@@ -37,6 +37,7 @@ std::shared_ptr<ALuint> loadSound(std::string soundName) {
 		return search->second;
 	
 	// load sound file via stb_vorbis
+	float sTime = glfwGetTime();
 	int numChannels, sample_rate;
 	ALshort* output;
 	std::ifstream input(soundDir + soundName, std::ios::binary);
@@ -60,7 +61,7 @@ std::shared_ptr<ALuint> loadSound(std::string soundName) {
 	// now cleanup, add to the sound map, and return
 	alDeleteBuffers(1,&buffer);
 	sounds.insert({ soundName, source });
-	SUCCESS(std::cout << "Finished loading sound '" << soundName << "'" << std::endl);
+	SUCCESS(std::cout << "Finished loading sound '" << soundName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl);
 	return source;
 }
 

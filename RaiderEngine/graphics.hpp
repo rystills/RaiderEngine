@@ -696,6 +696,7 @@ void renderLightingPass() {
 	// shadow and lighting uniforms
 	shaders["shaderLightingPass"]->setFloat("far_plane", player.camera.far_plane);
 	shaders["shaderLightingPass"]->setFloat("ambientStrength", ambientStrength);
+	shaders["shaderLightingPass"]->setVec4("clearColor", clearColor);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
 	glActiveTexture(GL_TEXTURE4);

@@ -14,6 +14,7 @@ uniform samplerCube depthMap2;
 uniform samplerCube depthMap3;
 uniform float far_plane;
 uniform float ambientStrength = 0;
+uniform vec4 clearColor;
 
 struct Light {
     vec3 Position;
@@ -127,5 +128,8 @@ void main()
 		}
     }    
 	vec3 lighting = ambient + diffuseSpec;// * Diffuse;   
+	// apply linear fog matching clear color, starting at 10 units and capping out at 20 units
+	float fog = min(1,-1+.1*max(10,distance(viewPos,FragPos)));
+	lighting = mix(lighting,clearColor.xyz*ambientStrength,fog);
     FragColor = vec4(lighting, 1.0);
 }

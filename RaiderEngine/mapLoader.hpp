@@ -147,8 +147,8 @@ load the specified map, instantiating all referenced objects and creating an emp
 @param mapName: the name of the map to load
 */
 void loadMap(std::string mapName) {
-	// TODO: don't use hard-coded map folder
 	// load the map as a typical model via ASSIMP
+	float sTime = glfwGetTime();
 	std::string directory = FileSystem::getPath(mapDir + '/' + mapName + ".fbx");
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
@@ -161,5 +161,5 @@ void loadMap(std::string mapName) {
 	// now process nodes recursively with custom instructions since this is a map model
 	tempProp.prevName = "";
 	processMapNode(scene->mRootNode, scene);
-	SUCCESS(std::cout << "Finished loading map '" << mapName << "'" << std::endl);
+	SUCCESS(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl);
 }

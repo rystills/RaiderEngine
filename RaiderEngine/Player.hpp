@@ -134,6 +134,7 @@ public:
 			if (grounded && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 				// jump velocity is a burst, so deltaTime is ignored
 				velocity.y = jumpStrength;
+		// TODO: set velocity to 0 if the player bumps their head on a ceiling
 
 		// apply to controller
 		PxVec3 physVelocity(velocity.x*deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
