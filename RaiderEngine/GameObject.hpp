@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "mesh.hpp"
-#include "shader.hpp"
 #include "model.hpp"
 extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
 

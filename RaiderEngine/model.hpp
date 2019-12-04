@@ -11,7 +11,7 @@ load the specified texture from the specified directory
 @param path: the name of the texture file to load
 @returns: the texture id returned by glGenTextures
 */
-unsigned int textureFromFile(std::string fileName, bool gamma = false) {
+void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S = GL_REPEAT, GLuint Wrap_T = GL_REPEAT, GLuint Filter_Min = GL_LINEAR_MIPMAP_LINEAR, GLuint Filter_Max = GL_LINEAR) {
 	// generate a new opengl texture to which to write the texture data
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -30,10 +30,10 @@ unsigned int textureFromFile(std::string fileName, bool gamma = false) {
 			glGenerateMipmap(GL_TEXTURE_2D);
 
 			// set wrap and magnification filters
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Wrap_S);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, Wrap_T);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter_Min);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter_Max);
 		}
 		else
 			ERROR(std::cout << "Error Loading texture '" << fileName << "': invalid number of components '" << nrComponents << "'" << std::endl);
@@ -43,7 +43,11 @@ unsigned int textureFromFile(std::string fileName, bool gamma = false) {
 	
 	// cleanup
 	stbi_image_free(data);
-	return textureID;
+	// save to input Texture struct
+	texIn.id = textureID;
+	texIn.path = fileName;
+	texIn.width = width;
+	texIn.height = height;
 }
 
 class Model {
@@ -214,21 +218,42 @@ public:
 	load the default map files for each supported map type
 	*/
 	static void loadDefaultMaterialMaps() {
-		Model::defaultDiffuseMap.id = textureFromFile("defaultDiffuseMap.png", ".");
+		textureFromFile("defaultDiffuseMap.png", Model::defaultDiffuseMap);
 		Model::defaultDiffuseMap.type = "texture_diffuse";
-		Model::defaultDiffuseMap.path = "defaultDiffuseMap.png";
 
-		Model::defaultNormalMap.id = textureFromFile("defaultNormalMap.png", ".");
+		textureFromFile("defaultNormalMap.png", Model::defaultNormalMap);
 		Model::defaultNormalMap.type = "texture_normal";
-		Model::defaultNormalMap.path = "defaultNormalMap.png";
 
-		Model::defaultSpecularMap.id = textureFromFile("defaultSpecularMap.png", ".");
+		textureFromFile("defaultSpecularMap.png", Model::defaultSpecularMap);
 		Model::defaultSpecularMap.type = "texture_specular";
-		Model::defaultSpecularMap.path = "defaultSpecularMap.png";
 
-		Model::defaultHeightMap.id = textureFromFile("defaultHeightMap.png", ".");
+		textureFromFile("defaultHeightMap.png", Model::defaultHeightMap);
 		Model::defaultHeightMap.type = "texture_height";
-		Model::defaultHeightMap.path = "defaultHeightMap.png";
+	}
+
+	/*
+	load a single diffuse texture file if it does not already exist
+	*/
+	static Texture loadTextureSimple(std::string texFullName) {
+		// check if the current texture has already been loaded
+		std::string texName = texFullName.substr(texFullName.find_last_of('/') + 1);
+		std::unordered_map<std::string, Texture>::iterator search = texturesLoaded.find(texName);
+		if (search != texturesLoaded.end())
+			// texture already exists
+			return search->second;
+
+		// texture does not exist yet; try to load it 
+		if (std::filesystem::exists(textureDir + texFullName)) {
+			Texture loadedTex;
+			textureFromFile(textureDir + texFullName, loadedTex);
+			loadedTex.type = "texture_diffuse";
+			texturesLoaded[texName] = loadedTex;
+			SUCCESS(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl);
+			return loadedTex;
+		}
+
+		ERROR(std::cout << "unable to load texture: '" << texName << "' at path: '" << texFullName << "'; falling back to default diffuse map" << std::endl);
+		return defaultDiffuseMap;
 	}
     
 private:
@@ -244,8 +269,6 @@ private:
             ERROR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
             return;
         }
-        // retrieve the directory path of the filepath
-        std::string directory = path.substr(0, path.find_last_of('/'));
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
@@ -301,9 +324,8 @@ private:
 					// texture does not exist yet; try to load it 
 					if (std::filesystem::exists(textureDir + mapBaseName + '/' + mapName)) {
 						Texture extraTex;
-						extraTex.id = textureFromFile(textureDir + mapBaseName + '/' + mapName);
+						textureFromFile(textureDir + mapBaseName + '/' + mapName, extraTex);
 						extraTex.type = mapTypes[k];
-						extraTex.path = mapName.c_str();
 						textures.push_back(extraTex);
 						texturesLoaded[mapName] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 						SUCCESS(std::cout << "loaded " << mapTypes[k] << " texture: '" << mapName << "'" << std::endl);

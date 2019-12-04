@@ -17,6 +17,7 @@
 #include "../audio.hpp"
 
 #include "mouseInteraction.hpp"
+#include "Compass.hpp"
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
 */
@@ -94,6 +95,8 @@ int main() {
 	textObjects.emplace_back(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), 24));
 	textObjects.emplace_back(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, 90, glm::vec3(.2f, .5f, .8f), 24));
 	textObjects.emplace_back(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), 24));
+	gameObject2Ds["compass"].emplace_back(new Compass(glm::vec2(1146,586),0,glm::vec2(1), glm::vec3(1), "UI/compass.png"));
+
 
 	while (!glfwWindowShouldClose(window)) {
 		// switch scenes on number key press
@@ -141,7 +144,7 @@ int main() {
 		renderLines();
 		if (displayString.size() == 0)
 			drawCenterIndicator();
-		renderText();
+		render2D();
 		if (displayString.size() != 0)
 			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);

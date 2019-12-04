@@ -3,6 +3,7 @@
 #include "settings.hpp"
 #include "model.hpp"
 #include "GameObject.hpp"
+#include "GameObject2D.hpp"
 #include "Light.hpp"
 #include "TextObject.hpp"
 #include "input.hpp"
@@ -42,6 +43,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
+}
+
+void glfwErrorCallback(int errorno, const char* errmsg) {
+	ERROR(std::cout << "GLFW Error #" << errorno << ": " << errmsg << std::endl);
 }
 
 // renderQuad() renders a 1x1 XY quad in NDC
@@ -553,6 +558,7 @@ void loadShaders() {
 	shaders["shaderLightBox"] = std::make_unique<Shader>("shaders/deferred_light_box.vs", "shaders/deferred_light_box.fs");
 	shaders["lineShader"] = std::make_unique<Shader>("shaders/lineShader.vs", "shaders/lineShader.fs");
 	shaders["textShader"] = std::make_unique<Shader>("shaders/textShader.vs", "shaders/textShader.fs");
+	shaders["2DShader"] = std::make_unique<Shader>("shaders/2DShader.vs", "shaders/2DShader.fs");
 	shaders["pointShadowsDepth"] = std::make_unique<Shader>("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.fs", "shaders/point_shadows_depth.gs");
 
 	// configure shaders
@@ -564,6 +570,9 @@ void loadShaders() {
 	shaders["shaderLightingPass"]->setInt("depthMap1", 4);
 	shaders["shaderLightingPass"]->setInt("depthMap2", 5);
 	shaders["shaderLightingPass"]->setInt("depthMap3", 6);
+
+	shaders["2DShader"]->use();
+	shaders["2DShader"]->setInt("image", 0);
 }
 
 /*
@@ -746,15 +755,23 @@ void renderLines() {
 }
 
 /*
-configure the text shader, and draw all TextObjects
+draw all 2D elements, including TextObjects and GameObject2Ds
 */
-void renderText() {
-	// render text
-	shaders["textShader"]->use();
+void render2D() {
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
+	// render GameObject2Ds
+	shaders["2DShader"]->use();
+	// TODO: glm::ortho and glm::perspective calls only need to be performed when viewport size changes - not every tick
+	glUniformMatrix4fv(glGetUniformLocation(shaders["2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
+	for (auto&& kv : gameObject2Ds)
+		for (int i = 0; i < kv.second.size(); ++i)
+			kv.second[i]->draw(*shaders["2DShader"],true);
 
+	// render text
+	shaders["textShader"]->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);
 }
@@ -770,6 +787,9 @@ void updateObjects() {
 			kv.second[i]->update(deltaTime);
 	for (int i = 0; i < lights.size(); ++i)
 		lights[i]->update(deltaTime);
+	for (auto&& kv : gameObject2Ds)
+		for (int i = 0; i < kv.second.size(); ++i)
+			kv.second[i]->update(deltaTime);
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->update(deltaTime);
 }
@@ -779,6 +799,7 @@ call all of the graphics initialization steps in order
 @returns the newly created GLFWwindow pointer
 */
 GLFWwindow* initGraphics() {
+	glfwSetErrorCallback(glfwErrorCallback);
 	GLFWwindow* window = initWindow();
 	initGBuffer();
 	initDepthMaps();
@@ -788,6 +809,7 @@ GLFWwindow* initGraphics() {
 
 	loadShaders();
 	Model::loadDefaultMaterialMaps();
+	GameObject2D::initStaticVertexBuffer();
 
 	return window;
 }

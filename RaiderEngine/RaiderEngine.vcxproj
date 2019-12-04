@@ -164,6 +164,7 @@
     <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="demo\Cog.hpp" />
+    <ClInclude Include="demo\Compass.hpp" />
     <ClInclude Include="demo\FlickerLight.hpp" />
     <ClInclude Include="demo\FoliageGrass.hpp" />
     <ClInclude Include="demo\MovingPlatform.hpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="GameObject2D.hpp" />
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mapLoader.hpp" />
     <ClInclude Include="ObjectRegistry.hpp" />
@@ -193,6 +195,8 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\2DShader.fs" />
+    <None Include="shaders\2DShader.vs" />
     <None Include="shaders\lineShader.fs" />
     <None Include="shaders\lineShader.vs" />
     <None Include="shaders\deferred_light_box.fs" />

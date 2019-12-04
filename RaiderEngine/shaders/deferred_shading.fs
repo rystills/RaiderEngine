@@ -128,8 +128,9 @@ void main()
 		}
     }    
 	vec3 lighting = ambient + diffuseSpec;// * Diffuse;   
-	// apply linear fog matching clear color, starting at 10 units and capping out at 20 units
-	float fog = min(1,-1+.1*max(10,distance(viewPos,FragPos)));
+	// apply linear fog matching clear color, starting at 10 units and capping out at 50 units
+	// formula: min(1,-x + y*max(minval,dist)) where y = 1/(maxval-minval), x = -y*minval
+	float fog = min(1,-.25+.025*max(10,distance(viewPos,FragPos)));
 	lighting = mix(lighting,clearColor.xyz*ambientStrength,fog);
     FragColor = vec4(lighting, 1.0);
 }

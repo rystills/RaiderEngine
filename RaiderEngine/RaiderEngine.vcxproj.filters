@@ -131,6 +131,12 @@
     <ClInclude Include="demo\FoliageGrass.hpp">
       <Filter>Source Files\demo</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject2D.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="demo\Compass.hpp">
+      <Filter>Source Files\demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -173,6 +179,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\lineShader.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\2DShader.fs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\2DShader.vs">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

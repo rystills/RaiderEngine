@@ -20,12 +20,14 @@ Player player;
 
 #include "model.hpp"
 #include "GameObject.hpp"
+#include "GameObject2D.hpp"
 #include "Light.hpp"
 #include "TextObject.hpp"
 std::unordered_map<std::string, std::shared_ptr<Model>> models;
 std::unordered_map<std::string, std::shared_ptr<ALuint>> sounds;
 // GameObjects are indexed by their model name when created, allowing for automatic optimizations
 std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject>>> gameObjects;
+std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject2D>>> gameObject2Ds;
 std::vector<std::unique_ptr<Light>> lights;
 std::vector<std::unique_ptr<TextObject>> textObjects;
 std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
