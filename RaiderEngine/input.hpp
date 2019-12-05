@@ -54,7 +54,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	lastX = xpos;
 	lastY = ypos;
 
-	player.camera.ProcessMouseMovement(xoffset, yoffset);
+	mainCam->ProcessMouseMovement(xoffset, yoffset);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -96,5 +96,5 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	player.camera.ProcessMouseScroll(yoffset);
+	mainCam->ProcessMouseScroll(yoffset);
 }

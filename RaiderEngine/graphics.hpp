@@ -626,8 +626,8 @@ void renderDepthMap() {
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	shaders["pointShadowsDepth"]->use();
-	shaders["pointShadowsDepth"]->setFloat("far_plane", player.camera.far_plane);
-	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, player.camera.near_plane, player.camera.far_plane);
+	shaders["pointShadowsDepth"]->setFloat("far_plane", mainCam->far_plane);
+	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, mainCam->near_plane, mainCam->far_plane);
 	for (int k = 0; k < lights.size(); ++k) {
 		if (lights[k]->on) {
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
@@ -665,9 +665,9 @@ void renderGeometryPass() {
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderGeometryPass"]->use();
-	shaders["shaderGeometryPass"]->setMat4("projection", player.camera.projection);
-	shaders["shaderGeometryPass"]->setMat4("view", player.camera.view);
-	shaders["shaderGeometryPass"]->setVec3("viewPos", player.camera.Position);
+	shaders["shaderGeometryPass"]->setMat4("projection", mainCam->projection);
+	shaders["shaderGeometryPass"]->setMat4("view", mainCam->view);
+	shaders["shaderGeometryPass"]->setVec3("viewPos", mainCam->Position);
 	drawGameObjects("shaderGeometryPass");
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -701,9 +701,9 @@ void renderLightingPass() {
 		else
 			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", false);
 	}
-	shaders["shaderLightingPass"]->setVec3("viewPos", player.camera.Position);
+	shaders["shaderLightingPass"]->setVec3("viewPos", mainCam->Position);
 	// shadow and lighting uniforms
-	shaders["shaderLightingPass"]->setFloat("far_plane", player.camera.far_plane);
+	shaders["shaderLightingPass"]->setFloat("far_plane", mainCam->far_plane);
 	shaders["shaderLightingPass"]->setFloat("ambientStrength", ambientStrength);
 	shaders["shaderLightingPass"]->setVec4("clearColor", clearColor);
 	glActiveTexture(GL_TEXTURE3);
@@ -732,8 +732,8 @@ render colored, unlit cubes indicating the position of lights in the scene
 void debugDrawLightCubes() {
 	// render lights on top of scene
 	shaders["shaderLightBox"]->use();
-	shaders["shaderLightBox"]->setMat4("projection", player.camera.projection);
-	shaders["shaderLightBox"]->setMat4("view", player.camera.view);
+	shaders["shaderLightBox"]->setMat4("projection", mainCam->projection);
+	shaders["shaderLightBox"]->setMat4("view", mainCam->view);
 	for (unsigned int i = 0; i < lights.size(); i++) {
 		shaders["shaderLightBox"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
 		shaders["shaderLightBox"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
@@ -748,8 +748,8 @@ void renderLines() {
 	// render UI
 	glDisable(GL_DEPTH_TEST);
 	shaders["lineShader"]->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(player.camera.projection));
-	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(player.camera.view));
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(mainCam->projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(mainCam->view));
 	if (debugDraw)
 		debugDrawPhysics();
 }
@@ -795,6 +795,13 @@ void updateObjects() {
 }
 
 /*
+initialize the main camera
+*/
+void initMainCamera() {
+	mainCam = new Camera(glm::vec3(0));
+}
+
+/*
 call all of the graphics initialization steps in order
 @returns the newly created GLFWwindow pointer
 */
@@ -806,6 +813,7 @@ GLFWwindow* initGraphics() {
 	initPhysics();
 	initFreetype();
 	initBuffers();
+	initMainCamera();
 
 	loadShaders();
 	Model::loadDefaultMaterialMaps();

@@ -17,7 +17,7 @@ display an information box detailing the specified object
 */
 void displayObjectInfo(GameObject* go) {
 	displayString = go->getDisplayString();
-	player.camera.controllable = displayString.length() == 0;
+	mainCam->controllable = displayString.length() == 0;
 }
 
 /*
@@ -26,7 +26,7 @@ update the current display string, clearing it and reenabling camera control if 
 void updateDisplayString() {
 	if (mousePressedRight) {
 		displayString.clear();
-		player.camera.controllable = true;
+		mainCam->controllable = true;
 	}
 }
 
@@ -35,7 +35,7 @@ if the user right clicked on an object, attempt to update the display string
 */
 void checkDisplayObject() {
 	if (mousePressedRight) {
-		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, 1000);
+		PxRaycastBuffer hit = raycast(mainCam->Position, mainCam->Front, 1000);
 		if (hit.hasBlock)
 			displayObjectInfo((GameObject*)hit.block.actor->userData);
 	}
@@ -67,7 +67,7 @@ void updateHeldBody(float deltaTime) {
 	if (!sphereShape)
 		sphereShape = gPhysics->createShape(PxSphereGeometry(.1f), *gMaterial, false, PxShapeFlag::eTRIGGER_SHAPE);
 	if (mousePressedLeft) {
-		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, 1000);
+		PxRaycastBuffer hit = raycast(mainCam->Position, mainCam->Front, 1000);
 		if (hit.hasBlock && hit.block.distance <= maxGrabRange && ((GameObject*)hit.block.actor->userData)->grabbable) {
 			// grab object
 			sphereDist = hit.block.distance;
@@ -97,9 +97,9 @@ void updateHeldBody(float deltaTime) {
 		// reset held object linear velocity as well
 		((PxRigidDynamic*)hitBody)->setLinearVelocity(PxVec3(0, 0, 0), false);
 		// continue to hold object
-		PxRaycastBuffer hit = raycast(player.camera.Position, player.camera.Front, sphereDist);
+		PxRaycastBuffer hit = raycast(mainCam->Position, mainCam->Front, sphereDist);
 		// move held object sphere in front of obstacles to prevent it from clipping through walls / into other objects
-		glm::vec3 newPos = player.camera.Position + player.camera.Front * (hit.hasBlock ? hit.block.distance : sphereDist);
+		glm::vec3 newPos = mainCam->Position + mainCam->Front * (hit.hasBlock ? hit.block.distance : sphereDist);
 		gMouseSphere->setGlobalPose(PxTransform(newPos.x,newPos.y,newPos.z));
 		
 	}

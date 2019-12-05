@@ -7,6 +7,6 @@ public:
 	Compass(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName) : GameObject2D(position, rotation, scale, color, spriteName) {}
 	void update(float deltaTime) override {
 		GameObject2D::update(deltaTime);
-		rotation = glm::radians(player.camera.Yaw);
+		rotation = glm::radians(mainCam->Yaw);
 	}
 };

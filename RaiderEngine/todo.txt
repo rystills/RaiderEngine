@@ -22,7 +22,6 @@
 -send lights to shader in order of distance from player and importance, and render shadows for first N lights
 -split classes into separate .h and .cpp files
 -file paths should be handled in a more consistent manner throughout the project
--instead of objects directly accessing the Player's camera, use a mainCamera pointer
 -add a flag to mark Objects as non shadow casting or non shadow receiving
 
 ~Demo~

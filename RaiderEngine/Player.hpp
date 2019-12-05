@@ -5,7 +5,6 @@
 
 class Player {
 public:
-	Camera camera;
 	PxControllerManager* manager;
 	PxCapsuleController* controller;
 	float walkSpeed = 300;
@@ -24,7 +23,7 @@ public:
 	bool crouching = false;
 	bool ctrlDown = false;
 
-	Player() : camera(glm::vec3(0)) { }
+	Player() { }
 
 	/*
 	initialize the player, creating a new physics controller
@@ -66,10 +65,10 @@ public:
 	*/
 	void syncCameraPos() {
 		PxExtendedVec3 playerPos = controller->getPosition();
-		camera.Position.x = playerPos.x;
+		mainCam->Position.x = playerPos.x;
 		// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-		camera.Position.y = playerPos.y + (height * (crouching ? crouchScale : 1) / 2 + radius);
-		camera.Position.z = playerPos.z;
+		mainCam->Position.y = playerPos.y + (height * (crouching ? crouchScale : 1) / 2 + radius);
+		mainCam->Position.z = playerPos.z;
 	}
 
 	/*
@@ -83,11 +82,11 @@ public:
 
 	void update(float deltaTime) {
 		// normalize camera front to get a constant speed regardless of pitch
-		glm::vec3 normalFront = glm::normalize(glm::cross(camera.WorldUp, camera.Right));
+		glm::vec3 normalFront = glm::normalize(glm::cross(mainCam->WorldUp, mainCam->Right));
 		bool grounded = canJump();
 		// movement
 		float baseMoveSpeed = walkSpeed, forwardSpeed = 0, strafeSpeed = 0;
-		if (camera.controllable) {
+		if (mainCam->controllable) {
 			baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed);
 			forwardSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
 			strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
@@ -99,7 +98,7 @@ public:
 			}
 		}
 		velocity += normalFront * forwardSpeed * (grounded ? 1 : airControl) * deltaTime;
-		velocity += camera.Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
+		velocity += mainCam->Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
 		// As long as we're grounded, keep vertical velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
 		// TODO: keep the player tethered to slopes / steps without relying on an artificial gravity
 		if (grounded)
@@ -130,7 +129,7 @@ public:
 			}
 		}
 		// jump
-		if (camera.controllable)
+		if (mainCam->controllable)
 			if (grounded && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 				// jump velocity is a burst, so deltaTime is ignored
 				velocity.y = jumpStrength;
@@ -160,6 +159,6 @@ public:
 			}
 		}
 		syncCameraPos();
-		camera.updateViewProj();
+		mainCam->updateViewProj();
 	}
 };
