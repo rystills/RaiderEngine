@@ -71,9 +71,6 @@
     <ClInclude Include="PlayerSpawn.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectRegistry.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Player.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -135,6 +132,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="demo\Compass.hpp">
+      <Filter>Source Files\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectRegistryBase.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="demo\ObjectRegistry.hpp">
       <Filter>Source Files\demo</Filter>
     </ClInclude>
   </ItemGroup>

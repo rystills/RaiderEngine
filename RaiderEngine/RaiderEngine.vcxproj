@@ -167,15 +167,18 @@
     <ClInclude Include="demo\Compass.hpp" />
     <ClInclude Include="demo\FlickerLight.hpp" />
     <ClInclude Include="demo\FoliageGrass.hpp" />
-    <ClInclude Include="demo\MovingPlatform.hpp" />
+    <ClInclude Include="demo\MovingPlatform.hpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="demo\mouseInteraction.hpp" />
+    <ClInclude Include="demo\ObjectRegistry.hpp" />
     <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GameObject2D.hpp" />
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mapLoader.hpp" />
-    <ClInclude Include="ObjectRegistry.hpp" />
+    <ClInclude Include="ObjectRegistryBase.hpp" />
     <ClInclude Include="input.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />

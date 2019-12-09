@@ -5,6 +5,7 @@
 #include "../timing.hpp"
 #include "../physics.hpp"
 #include "../settings.hpp"
+#include "ObjectRegistry.hpp"
 #include "../mapLoader.hpp"
 #include "../graphics.hpp"
 #include "../shader.hpp"
@@ -71,6 +72,7 @@ int main() {
 	window = initGraphics();
 	initAudio();
 	player.init();
+	objectRegistry = new ObjectRegistry();
 
 	// directories
 	setMapDir("demo/maps");

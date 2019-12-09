@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #pragma once
 #include "assimpFlags.hpp"
-#include "ObjectRegistry.hpp"
+#include "ObjectRegistryBase.hpp"
 #include "settings.hpp"
 
 // this file is responsible for loading maps from special FBX files
@@ -106,13 +106,13 @@ void processMapNode(aiNode *node, const aiScene *scene) {
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
-			instantiateGameObject(name, tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
+			objectRegistry->instantiateGameObject(name, tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
 			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
 			// create a light
-			instantiateLight(name, tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
+			objectRegistry->instantiateLight(name, tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
 			goto clearTransform;
 		}
 		else if (node->mNumMeshes > 0) {
