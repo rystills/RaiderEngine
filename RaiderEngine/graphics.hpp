@@ -553,13 +553,13 @@ load all engine default shaders and populate them as necessary
 */
 void loadShaders() {
 	// load shaders
-	shaders["shaderGeometryPass"] = std::make_unique<Shader>("shaders/g_buffer.vs", "shaders/g_buffer.fs");
-	shaders["shaderLightingPass"] = std::make_unique<Shader>("shaders/deferred_shading.vs", "shaders/deferred_shading.fs");
-	shaders["shaderLightBox"] = std::make_unique<Shader>("shaders/deferred_light_box.vs", "shaders/deferred_light_box.fs");
-	shaders["lineShader"] = std::make_unique<Shader>("shaders/lineShader.vs", "shaders/lineShader.fs");
-	shaders["textShader"] = std::make_unique<Shader>("shaders/textShader.vs", "shaders/textShader.fs");
-	shaders["2DShader"] = std::make_unique<Shader>("shaders/2DShader.vs", "shaders/2DShader.fs");
-	shaders["pointShadowsDepth"] = std::make_unique<Shader>("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.fs", "shaders/point_shadows_depth.gs");
+	shaders["shaderGeometryPass"] = std::make_unique<Shader>("g_buffer.vs", "g_buffer.fs");
+	shaders["shaderLightingPass"] = std::make_unique<Shader>("deferred_shading.vs", "deferred_shading.fs");
+	shaders["shaderLightBox"] = std::make_unique<Shader>("deferred_light_box.vs", "deferred_light_box.fs");
+	shaders["lineShader"] = std::make_unique<Shader>("lineShader.vs", "lineShader.fs");
+	shaders["textShader"] = std::make_unique<Shader>("textShader.vs", "textShader.fs");
+	shaders["2DShader"] = std::make_unique<Shader>("2DShader.vs", "2DShader.fs");
+	shaders["pointShadowsDepth"] = std::make_unique<Shader>("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
 
 	// configure shaders
 	shaders["shaderLightingPass"]->use();

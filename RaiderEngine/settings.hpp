@@ -37,20 +37,31 @@ std::vector<std::unique_ptr<TextObject>> textObjects;
 std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 
 void setMapDir(std::string newDir) {
-	mapDir = newDir + '/';
+	mapDir = newDir + (newDir.ends_with('/') ? "" : "/");
 }
 void setModelDir(std::string newDir) {
-	modelDir = newDir + '/';
+	modelDir = newDir + (newDir.ends_with('/') ? "" : "/");
 }
 
 void setTextureDir(std::string newDir) {
-	textureDir = newDir + '/';
+	textureDir = newDir + (newDir.ends_with('/') ? "" : "/");
 }
 
 void setSoundDir(std::string newDir) {
-	soundDir = newDir + '/';
+	soundDir = newDir + (newDir.ends_with('/') ? "" : "/");
 }
 
 void setFontDir(std::string newDir) {
-	fontDir = newDir + '/';
+	fontDir = newDir + (newDir.ends_with('/') ? "" : "/");
+}
+
+void setShaderDir(std::string newDir) {
+	Shader::shaderDir = newDir + (newDir.ends_with('/') ? "" : "/");
+}
+
+/*
+set the fallback directory from which to load shaders; useful when testing in an IDE where the working directory may not match the executable folder
+*/
+void setFallbackShaderDir(std::string newDir) {
+	Shader::fallbackShaderDir = newDir + (newDir.ends_with('/') ? "" : "/");
 }
