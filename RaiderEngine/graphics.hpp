@@ -816,7 +816,7 @@ GLFWwindow* initGraphics() {
 	initMainCamera();
 
 	loadShaders();
-	Model::loadDefaultMaterialMaps();
+	Model::createDefaultMaterialMaps();
 	GameObject2D::initStaticVertexBuffer();
 
 	return window;

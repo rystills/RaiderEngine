@@ -5,6 +5,8 @@
 #include "assimpFlags.hpp"
 
 std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
+const int numMapTypes = 4;
+std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height" };
 
 /*
 load the specified texture from the specified directory
@@ -215,20 +217,34 @@ public:
 	}
 
 	/*
-	load the default map files for each supported map type
+	generate the default material maps, used as fallbacks when the respective map type is not present for a texture
 	*/
-	static void loadDefaultMaterialMaps() {
-		textureFromFile("defaultDiffuseMap.png", Model::defaultDiffuseMap);
-		Model::defaultDiffuseMap.type = "texture_diffuse";
+	static void createDefaultMaterialMaps() {
+		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap };
+		std::vector<std::vector<unsigned char>> mapColors = { {255,0,255},{122,122,255},{122,122,122},{0,0,0} };
+		for (int i = 0; i < numMapTypes; ++i) {
+			// setup a new texture
+			unsigned int textureID;
+			glGenTextures(1, &textureID);
+			glBindTexture(GL_TEXTURE_2D, textureID);
 
-		textureFromFile("defaultNormalMap.png", Model::defaultNormalMap);
-		Model::defaultNormalMap.type = "texture_normal";
+			// copy in our texture data
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, &mapColors[i][0]);
+			glGenerateMipmap(GL_TEXTURE_2D);
 
-		textureFromFile("defaultSpecularMap.png", Model::defaultSpecularMap);
-		Model::defaultSpecularMap.type = "texture_specular";
+			// set texture flags
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		textureFromFile("defaultHeightMap.png", Model::defaultHeightMap);
-		Model::defaultHeightMap.type = "texture_height";
+			// save to input Texture struct
+			mapDefaults[i]->id = textureID;
+			mapDefaults[i]->path = "";
+			mapDefaults[i]->width = 1;
+			mapDefaults[i]->height = 1;
+			mapDefaults[i]->type = mapTypes[i];
+		}
 	}
 
 	/*
@@ -304,11 +320,9 @@ private:
             aiString str;
             mat->GetTexture(type, i, &str);
 			// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
-			const int numMapTypes = 4;
 			// TODO: don't hardcode png as extension
 			std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png" };
-			std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height" };
-			Texture mapDefaults[numMapTypes] = { defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap };
+			Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap };
 			for (int k = 0; k < numMapTypes; ++k) {
 				// get current map name
 				std::string mapName = str.C_Str();
@@ -332,7 +346,7 @@ private:
 					}
 					else {
 						// can't find texture; fall back to default of matching type
-						textures.push_back(mapDefaults[k]);
+						textures.push_back(*mapDefaults[k]);
 						if (k) WARNING(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[k] << " map" << std::endl)
 						else ERROR(std::cout << "unable to find diffuse map for texture: '" << str.C_Str() << "'; falling back to default diffuse map" << std::endl);
 					}
