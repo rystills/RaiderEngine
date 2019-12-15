@@ -16,9 +16,7 @@ std::string mapDir = "", modelDir = "", textureDir = "", soundDir = "", fontDir 
 GLFWwindow* window;
 #include "camera.hpp"
 Camera* mainCam;
-#include "Player.hpp"
 // TODO: we should not force usage of the Player base class
-Player player;
 #include "ObjectRegistryBase.hpp"
 ObjectRegistryBase* objectRegistry;
 

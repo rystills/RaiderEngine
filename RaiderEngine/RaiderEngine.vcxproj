@@ -184,7 +184,7 @@
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
     <ClInclude Include="physics.hpp" />
-    <ClInclude Include="Player.hpp" />
+    <ClInclude Include="PlayerBase.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />
     <ClInclude Include="settings.hpp" />
     <ClInclude Include="shader.hpp" />

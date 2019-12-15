@@ -71,9 +71,6 @@
     <ClInclude Include="PlayerSpawn.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Player.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="terminalColors.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -139,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="demo\ObjectRegistry.hpp">
       <Filter>Source Files\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerBase.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

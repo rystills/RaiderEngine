@@ -16,6 +16,7 @@
 
 #include "../FpsDisplay.hpp"
 #include "../audio.hpp"
+#include "../PlayerBase.hpp"
 
 #include "mouseInteraction.hpp"
 #include "Compass.hpp"
@@ -71,7 +72,9 @@ int main() {
 	// initialization
 	window = initGraphics();
 	initAudio();
+	PlayerBase player;
 	player.init();
+	PlayerSpawn::player = &player;
 	objectRegistry = new ObjectRegistry();
 
 	// directories

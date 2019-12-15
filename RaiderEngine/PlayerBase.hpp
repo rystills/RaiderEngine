@@ -3,7 +3,7 @@
 #include "camera.hpp"
 // see this page for the physx CCT demo: https://github.com/NVIDIAGameWorks/PhysX/blob/4050bbfdc2699dfab7edbf0393df8ff96bbe06c5/physx/samples/samplecctsharedcode/SampleCCTCameraController.cpp
 
-class Player {
+class PlayerBase {
 public:
 	PxControllerManager* manager;
 	PxCapsuleController* controller;
@@ -23,7 +23,7 @@ public:
 	bool crouching = false;
 	bool ctrlDown = false;
 
-	Player() { }
+	PlayerBase() { }
 
 	/*
 	initialize the player, creating a new physics controller
