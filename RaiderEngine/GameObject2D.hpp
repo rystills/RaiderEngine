@@ -5,7 +5,7 @@
 
 class GameObject2D {
 public:
-	glm::vec2 position;
+	glm::vec2 position;  // topleft position
 	float rotation;
 	glm::vec2 scale;
 	glm::vec3 color;
@@ -16,8 +16,12 @@ public:
 	GameObject2D constructor: creates a new GameObject2D with the specified transforms and sprite
 	@param
 	*/
-	GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName) : position(position), rotation(rotation), color(color), scale(scale) {
+	GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter = false) : position(position), rotation(rotation), color(color), scale(scale) {
 		sprite = Model::loadTextureSimple(spriteName);
+		if (posIsCenter) {
+			glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
+			position -= halfExtents;
+		}
 	}
 
 	static void initStaticVertexBuffer() {
@@ -52,6 +56,23 @@ public:
 	@param deltaTime: the elapsed time (in seconds) since the previous frame
 	*/
 	virtual void update(float deltaTime) {
+	}
+
+	/*
+	set this object's center coordinates
+	@param newCenter: the position to which to set this object's center position
+	*/
+	void setCenter(glm::vec2 newCenter) {
+		glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
+		position = newCenter - halfExtents;
+	}
+
+	/*
+	retrieve this object's center coordinates
+	*/
+	glm::vec2 center() {
+		glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
+		return position + halfExtents;
 	}
 
 	/*
