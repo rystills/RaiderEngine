@@ -6,7 +6,7 @@
 class GameObject2D {
 public:
 	glm::vec2 position;  // topleft position
-	float rotation;
+	float rotation;  // rotation measured in radians
 	glm::vec2 scale;
 	glm::vec3 color;
 	Texture sprite;
@@ -65,6 +65,15 @@ public:
 	void setCenter(glm::vec2 newCenter) {
 		glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
 		position = newCenter - halfExtents;
+	}
+
+	/*
+	check whether or not any part of this sprite is inside of the current screen boundaries
+	@returns: whether or not any part of this sprite is within the screen bounds
+	*/
+	bool inScreenBounds() {
+		glm::vec2 appliedScale(scale.x * sprite.width, scale.y * sprite.height);
+		return ((position.y + appliedScale.y < 0 || position.y >= SCR_HEIGHT) || (position.x + appliedScale.x < 0 || position.x >= SCR_WIDTH));
 	}
 
 	/*
