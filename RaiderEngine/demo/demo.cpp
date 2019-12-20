@@ -102,7 +102,6 @@ int main() {
 	textObjects.emplace_back(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), 24));
 	gameObject2Ds["compass"].emplace_back(new Compass(glm::vec2(1146,586),0,glm::vec2(1), glm::vec3(1), "UI/compass.png"));
 
-
 	while (!glfwWindowShouldClose(window)) {
 		// switch scenes on number key press
 		if (keyStates[GLFW_KEY_1][pressed])

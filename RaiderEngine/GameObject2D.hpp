@@ -10,13 +10,14 @@ public:
 	glm::vec2 scale;
 	glm::vec3 color;
 	Texture sprite;
+	float depth;  // depth in NDC coordinates; this means the range is [-1,1], with larger values appearing closer to the screen (rendering in front)
 	inline static std::shared_ptr<unsigned int> VAO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
 
 	/*
 	GameObject2D constructor: creates a new GameObject2D with the specified transforms and sprite
 	@param
 	*/
-	GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter = false) : position(position), rotation(rotation), color(color), scale(scale) {
+	GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter = false, float depth = 0.5f) : position(position), rotation(rotation), color(color), scale(scale), depth(depth) {
 		sprite = Model::loadTextureSimple(spriteName);
 		if (posIsCenter) {
 			glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
@@ -94,7 +95,7 @@ public:
 
 		// Prepare transformations
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(position, 0.0f));
+		model = glm::translate(model, glm::vec3(position, depth));
 
 		// multiply scaling factor by sprite dimensions so that a scale of 1,1 = original size
 		glm::vec2 appliedScale(scale.x * sprite.width, scale.y * sprite.height);
