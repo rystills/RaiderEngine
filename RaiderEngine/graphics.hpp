@@ -756,20 +756,30 @@ void renderLines() {
 
 /*
 draw all 2D elements, including TextObjects and GameObject2Ds
+@param useRenderOrder: if true, renders only the sprites listed in GO2DRenderOrder, and renders them in the order in which they appear in that list
 */
-void render2D() {
+void render2D(bool useRenderOrder = false) {
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// render GameObject2Ds
 	shaders["2DShader"]->use();
 	// TODO: glm::ortho and glm::perspective calls only need to be performed when viewport size changes - not every tick
 	glUniformMatrix4fv(glGetUniformLocation(shaders["2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
-	for (auto&& kv : gameObject2Ds)
-		for (int i = 0; i < kv.second.size(); ++i)
-			kv.second[i]->draw(*shaders["2DShader"],true);
+	if (useRenderOrder)
+		// render gameObjects by their assigned render order
+		for (std::string s : GO2DRenderOrder)
+			for (int i = 0; i < gameObject2Ds[s].size(); ++i)
+				gameObject2Ds[s][i]->draw(*shaders["2DShader"], true);
+	else
+		// render gameObjects in whatever order in which they hapepen to appear
+		for (auto&& kv : gameObject2Ds)
+			for (int i = 0; i < kv.second.size(); ++i)
+				kv.second[i]->draw(*shaders["2DShader"], true);
 
 	// render text
+	// TODO: text rendering should be orderable too
 	shaders["textShader"]->use();
 	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
 	for (int i = 0; i < textObjects.size(); ++i)
