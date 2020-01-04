@@ -28,4 +28,3 @@
 ~Demo~
 -reimplement throwing held object on right mouse button
 -reset object to starting position if it falls below the lowest map position - 100
--fix objects seemingly dampening angular velocity at too slow of a rate

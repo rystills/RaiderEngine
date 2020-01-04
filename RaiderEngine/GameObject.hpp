@@ -70,7 +70,7 @@ public:
 		if (!usePhysics) return;
 		// calculate mass and prepare physics data structures
 		float averageScale = (scale.x + scale.y + scale.z) / 3;
-		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*10;
+		mass = model->isStaticMesh ? 0.0f : model->volume*averageScale*1000;
 		PxQuat physRot(rot.x, rot.y, rot.z, rot.w);
 		PxVec3 physPot(position.x, position.y, position.z);
 		PxMeshScale physScale(PxVec3(scale.x,scale.y,scale.z), PxQuat(PxIdentity));
@@ -78,8 +78,11 @@ public:
 		// our body type depends on our staticness, which may or may not match our model's staticness
 		if (isStatic)
 			body = gPhysics->createRigidStatic(PxTransform(physPot, physRot));
-		else
+		else {
 			body = gPhysics->createRigidDynamic(PxTransform(physPot, physRot));
+			static_cast<PxRigidDynamic*>(body)->setMass(mass);
+		}
+			
 		// our shape, unlike our body type, depends on our model's staticness
 		if (model->isStaticMesh)
 			PxRigidActorExt::createExclusiveShape(*body, PxTriangleMeshGeometry((PxTriangleMesh*)model->collisionMesh, physScale), *gMaterial);

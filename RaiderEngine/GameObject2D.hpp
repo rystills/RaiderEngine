@@ -10,14 +10,20 @@ public:
 	glm::vec2 scale;
 	glm::vec3 color;
 	Texture sprite;
-	float depth;  // depth in NDC coordinates; this means the range is [-1,1], with larger values appearing closer to the screen (rendering in front)
+	float depth;  // depth in NDC coordinates
 	inline static std::shared_ptr<unsigned int> VAO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
 
 	/*
 	GameObject2D constructor: creates a new GameObject2D with the specified transforms and sprite
-	@param
+	@param position: the GameObject2D's initial position
+	@param rotation: the GameObject2D's initial rotation (in radians)
+	@param scale: the GameObject2D's initial scale, with 0-1 being equivalent to 0-100% of the original size
+	@param color: the color by which to multiply the sprite, with each channel in the range of 0-1; set to white (1,1,1) for no color modification
+	@param spriteName: the name of the sprite that this GameObject should use; will attempt to load the sprite if it is not present in the image map
+	@param posIsCenter: whether the initial position marks the center of the sprite, or the topleft corner of the sprite
+	@param depth: the GameObject2D's depth in NDC coordinates; this means the range is [-1,1], with larger values appearing closer to the screen (rendering in front)
 	*/
-	GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter = false, float depth = 0.5f) : position(position), rotation(rotation), color(color), scale(scale), depth(depth) {
+	GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter = false, float depth = 0) : position(position), rotation(rotation), color(color), scale(scale), depth(depth) {
 		sprite = Model::loadTextureSimple(spriteName);
 		if (posIsCenter) {
 			glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
@@ -25,6 +31,9 @@ public:
 		}
 	}
 
+	/*
+	initialize the VAO which defines the quad used when rendering any GameObject2D; this need only be called once at game start
+	*/
 	static void initStaticVertexBuffer() {
 		// Configure VAO and temporary VBO
 		GLuint VBO;
