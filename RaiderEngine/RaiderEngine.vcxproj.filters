@@ -16,7 +16,10 @@
     <Filter Include="Source Files\shaders">
       <UniqueIdentifier>{be50f23d-d022-481d-a4c3-93fc2ce01d15}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\demo">
+    <Filter Include="Source Files\demos">
+      <UniqueIdentifier>{1d9a9c58-44e2-4195-9d53-9cb6495e0c31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\demos\demo3dCarousel">
       <UniqueIdentifier>{494b09d3-35c0-4024-93e2-04d2bcac0aca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -36,11 +39,11 @@
     <ClCompile Include="stb_vorbis.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="demo\demo.cpp">
-      <Filter>Source Files\demo</Filter>
-    </ClCompile>
     <ClCompile Include="alHelpers.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,38 +110,38 @@
     <ClInclude Include="audio.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="demo\MovingPlatform.hpp">
-      <Filter>Source Files\demo</Filter>
-    </ClInclude>
-    <ClInclude Include="demo\Cog.hpp">
-      <Filter>Source Files\demo</Filter>
-    </ClInclude>
-    <ClInclude Include="demo\FlickerLight.hpp">
-      <Filter>Source Files\demo</Filter>
-    </ClInclude>
-    <ClInclude Include="demo\mouseInteraction.hpp">
-      <Filter>Source Files\demo</Filter>
-    </ClInclude>
     <ClInclude Include="alHelpers.hpp">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="demo\FoliageGrass.hpp">
-      <Filter>Source Files\demo</Filter>
     </ClInclude>
     <ClInclude Include="GameObject2D.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="demo\Compass.hpp">
-      <Filter>Source Files\demo</Filter>
-    </ClInclude>
     <ClInclude Include="ObjectRegistryBase.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="demo\ObjectRegistry.hpp">
-      <Filter>Source Files\demo</Filter>
-    </ClInclude>
     <ClInclude Include="PlayerBase.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\Cog.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\Compass.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\FlickerLight.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\FoliageGrass.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\mouseInteraction.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\MovingPlatform.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo3dCarousel\ObjectRegistry.hpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

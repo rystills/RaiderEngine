@@ -117,6 +117,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -143,7 +144,7 @@
     <ClCompile Include="alHelpers.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="demo\demo.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -163,15 +164,13 @@
     <ClInclude Include="assimpFlags.hpp" />
     <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />
-    <ClInclude Include="demo\Cog.hpp" />
-    <ClInclude Include="demo\Compass.hpp" />
-    <ClInclude Include="demo\FlickerLight.hpp" />
-    <ClInclude Include="demo\FoliageGrass.hpp" />
-    <ClInclude Include="demo\MovingPlatform.hpp">
-      <FileType>CppHeader</FileType>
-    </ClInclude>
-    <ClInclude Include="demo\mouseInteraction.hpp" />
-    <ClInclude Include="demo\ObjectRegistry.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\Cog.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\Compass.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\FlickerLight.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\FoliageGrass.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\mouseInteraction.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\MovingPlatform.hpp" />
+    <ClInclude Include="demos\demo3dCarousel\ObjectRegistry.hpp" />
     <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />

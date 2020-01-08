@@ -1,7 +1,7 @@
-#include "../stdafx.h"
+#include "stdafx.h"
 #pragma once
-#include "../GameObject.hpp"
-#include "../settings.hpp"
+#include "GameObject.hpp"
+#include "settings.hpp"
 
 #define maxGrabRange 3
 std::string displayString = "";

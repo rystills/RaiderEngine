@@ -1,22 +1,22 @@
 #include "stdafx.h"
 // engine includes (import order matters here, at least for the time being)
-#include "../terminalColors.hpp"
-#include "../filesystem.hpp"
-#include "../timing.hpp"
-#include "../physics.hpp"
-#include "../settings.hpp"
+#include "terminalColors.hpp"
+#include "filesystem.hpp"
+#include "timing.hpp"
+#include "physics.hpp"
+#include "settings.hpp"
 #include "ObjectRegistry.hpp"
-#include "../mapLoader.hpp"
-#include "../graphics.hpp"
-#include "../shader.hpp"
+#include "mapLoader.hpp"
+#include "graphics.hpp"
+#include "shader.hpp"
 
-#include "../model.hpp"
-#include "../GameObject.hpp"
-#include "../Light.hpp"
+#include "model.hpp"
+#include "GameObject.hpp"
+#include "Light.hpp"
 
-#include "../FpsDisplay.hpp"
-#include "../audio.hpp"
-#include "../PlayerBase.hpp"
+#include "FpsDisplay.hpp"
+#include "audio.hpp"
+#include "PlayerBase.hpp"
 
 #include "mouseInteraction.hpp"
 #include "Compass.hpp"
@@ -78,11 +78,11 @@ int main() {
 	objectRegistry = new ObjectRegistry();
 
 	// directories
-	setMapDir("demo/maps");
-	setModelDir("demo/models");
-	setTextureDir("demo/textures");
-	setSoundDir("demo/sounds");
-	setFontDir("demo/fonts");
+	setMapDir("demos/demo3dCarousel/maps");
+	setModelDir("demos/demo3dCarousel/models");
+	setTextureDir("demos/demo3dCarousel/textures");
+	setSoundDir("demos/demo3dCarousel/sounds");
+	setFontDir("demos/demo3dCarousel/fonts");
 
 	// sound
 	playSound("Julie_Li_-_01_-_resound.ogg");

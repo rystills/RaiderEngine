@@ -1,6 +1,6 @@
 #pragma once
-#include "../stdafx.h"
-#include "../GameObject2D.hpp"
+#include "stdafx.h"
+#include "GameObject2D.hpp"
 
 class Compass : public GameObject2D {
 public:

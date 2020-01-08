@@ -1,13 +1,13 @@
 #pragma once
-#include "../stdafx.h"
+#include "stdafx.h"
 #include "MovingPlatform.hpp"
-#include "../PlayerSpawn.hpp"
+#include "PlayerSpawn.hpp"
 #include "Cog.hpp"
 #include "FoliageGrass.hpp"
-#include "../Light.hpp"
+#include "Light.hpp"
 #include "FlickerLight.hpp"
-#include "../settings.hpp"
-#include "../ObjectRegistryBase.hpp"
+#include "settings.hpp"
+#include "ObjectRegistryBase.hpp"
 
 class ObjectRegistry : public ObjectRegistryBase {
 public:
