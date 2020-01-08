@@ -149,7 +149,7 @@ load the specified map, instantiating all referenced objects and creating an emp
 void loadMap(std::string mapName) {
 	// load the map as a typical model via ASSIMP
 	float sTime = glfwGetTime();
-	std::string directory = FileSystem::getPath(mapDir + '/' + mapName + ".fbx");
+	std::string directory = mapDir + '/' + mapName + ".fbx";
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors

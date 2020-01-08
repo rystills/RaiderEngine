@@ -1,0 +1,163 @@
+#include "stdafx.h"
+// engine includes (import order matters here, at least for the time being)
+#include "terminalColors.hpp"
+#include "timing.hpp"
+#include "physics.hpp"
+#include "settings.hpp"
+#include "graphics.hpp"
+#include "shader.hpp"
+#include "FpsDisplay.hpp"
+#include "audio.hpp"
+#include "GameObject2D.hpp"
+
+void restartGame();
+int score = 0;
+
+class Paddle : public GameObject2D {
+public:
+	float speed = 800;
+	Paddle(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), glm::vec3(1), "paddle.png") {}
+
+	void restart() {
+		position = glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT - 80);
+	}
+
+	void update(float deltaTime) override {
+		position.x += (keyStates[GLFW_KEY_D][held] - keyStates[GLFW_KEY_A][held]) * speed * deltaTime;
+		setCenter(glm::vec2(std::fmax(0, std::fmin(SCR_WIDTH, center().x)), center().y));
+	}
+};
+
+class Ball : public GameObject2D {
+public:
+	float speed = 700;
+	Ball(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), glm::vec3(1), "ball.png") {}
+
+	void restart() {
+		position = glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT / 2);
+		rotation = -glm::quarter_pi<float>();
+	}
+
+	bool collision(GameObject2D &o) {
+		// simple AABB collision check
+		return (position.x + sprite.width > o.position.x&& position.x < o.position.x + o.sprite.width &&
+			position.y + sprite.height > o.position.y&& position.y < o.position.y + o.sprite.height);
+	}
+
+	void bounce(bool isVert) {
+		// bounce by flipping either the x or y component of the rotation vector
+		rotation = std::atan2(sin(rotation) * (isVert ? -1 : 1), cos(rotation) * (isVert ? 1 : -1));
+	}
+
+	void update(float deltaTime) override {
+		// move forward
+		position.x += cos(rotation) * speed * deltaTime;
+		position.y += sin(rotation) * speed * deltaTime;
+
+		// bounce off of screen borders, restarting the game on contact with the bottom of the screen
+		if (center().y > SCR_HEIGHT)
+			return restartGame();
+		if (center().y < 0) {
+			setCenter(glm::vec2(center().x, 0));
+			bounce(1);
+		}
+
+		if (center().x > SCR_WIDTH) {
+			setCenter(glm::vec2(SCR_WIDTH, center().y));
+			bounce(0);
+		}
+		else if (center().x < 0) {
+			setCenter(glm::vec2(0, center().y));
+			bounce(0);
+		}
+
+		// bounce off of bricks, breaking them in the process
+		for (int i = 0; i < gameObject2Ds["brick"].size(); ++i) {
+			if (collision(*gameObject2Ds["brick"][i])) {
+				GameObject2D o = *gameObject2Ds["brick"][i];
+				// if we are moving away from the brick on one axis, the correct bounce must be on the other axis
+				if (center().x > o.center().x && cos(rotation) > 0 || center().x < o.center().x && cos(rotation) < 0)
+					bounce(1);
+				else if (center().y > o.center().y && sin(rotation) > 0 || center().y < o.center().y && sin(rotation) < 0)
+					bounce(0);
+				else {
+					// either axis could be a valid bounce, so choose the axis on which we are penetrating the brick the least
+					float xPen = std::fmin(std::abs(position.x + sprite.width - o.position.x), std::abs(o.position.x + o.sprite.width - position.x));
+					float yPen = std::fmin(std::abs(position.y + sprite.height - o.position.y), std::abs(o.position.y + o.sprite.height - position.y));
+					bounce(xPen > yPen);
+				}
+				// destroy the brick and update our score
+				gameObject2Ds["brick"].erase(gameObject2Ds["brick"].begin() + i);
+				score += 100;
+				textObjects[1]->text = "Score: " + std::to_string(score);
+				break;
+			}
+		}
+
+		// bounce off of the paddle, picking a new direction based off of our horizontal distance from the paddle's center
+		if (collision(*gameObject2Ds["paddle"][0])) {
+			GameObject2D o = *gameObject2Ds["paddle"][0];
+			float xOff = center().x - o.center().x;
+			position.y = o.position.y - sprite.height;
+			rotation = -glm::half_pi<float>() + (3 * glm::pi<float>() / 8) * (xOff / (sprite.width/2 + o.sprite.width/2));
+		}
+	}
+};
+
+class Brick : public GameObject2D {
+public:
+	Brick(glm::vec2 position, glm::vec3 color) : GameObject2D(position, 0, glm::vec2(1), color, "brick.png") {};
+};
+
+void restartGame() {
+	// reset objects
+	score = 0;
+	textObjects[1]->text = "Score: " + std::to_string(score);
+	((Paddle*)(&*gameObject2Ds["paddle"][0]))->restart();
+	((Ball*)(&*gameObject2Ds["ball"][0]))->restart();
+
+	// clear and rebuild bricks
+	gameObject2Ds["brick"].clear();
+	for (int i = 0; i < 20; ++i)
+		for (int r = 0; r < 4; ++r)
+			gameObject2Ds["brick"].emplace_back(new Brick(glm::vec2(i * 64, r * 32), glm::vec3(i / 20.f, r / 4.f, .5f)));
+}
+
+int main() {
+	// directories
+	setTextureDir("demos/demoBrickBreaker/images");
+	setSoundDir("demos/demoBrickBreaker/sounds");
+	setFontDir("demos/demo3dCarousel/fonts");
+
+	// initialization
+	window = initGraphics();
+	initAudio();
+	freetypeLoadFont("Inter-Regular", 18);
+	
+	clearColor = glm::vec4(.8f, .8f, 1, 1);
+	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+	gameObject2Ds["paddle"].emplace_back(new Paddle(glm::vec2(0)));
+	gameObject2Ds["ball"].emplace_back(new Ball(glm::vec2(0)));
+	textObjects.emplace_back(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), 18));
+	textObjects.emplace_back(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), 18));
+	restartGame();
+
+	while (!glfwWindowShouldClose(window)) {
+		// update frame
+		updateTime();
+		resetSingleFrameInput();
+		glfwPollEvents();
+
+		// update objects
+		updateObjects();
+
+		// render
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		render2D();
+		glfwSwapBuffers(window);
+		// set the close flag if the player presses the escape key
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
+	}
+	glfwTerminate();
+}

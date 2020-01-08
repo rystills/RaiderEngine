@@ -23,8 +23,8 @@
 
 ~Organization~
 -split classes into separate .h and .cpp files
--file paths should be handled in a more consistent manner throughout the project
 
 ~Demo~
 -reimplement throwing held object on right mouse button
 -reset object to starting position if it falls below the lowest map position - 100
+-reduce speed while crouched

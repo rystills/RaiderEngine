@@ -22,6 +22,9 @@
     <Filter Include="Source Files\demos\demo3dCarousel">
       <UniqueIdentifier>{494b09d3-35c0-4024-93e2-04d2bcac0aca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\demos\demoBrickBreaker">
+      <UniqueIdentifier>{3d205c56-9c76-4409-98ea-0f1fca2095c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -42,8 +45,8 @@
     <ClCompile Include="alHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp">
-      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -54,9 +57,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="shader.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="filesystem.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.hpp">

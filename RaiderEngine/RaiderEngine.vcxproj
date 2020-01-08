@@ -144,7 +144,7 @@
     <ClCompile Include="alHelpers.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp" />
+    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -171,7 +171,6 @@
     <ClInclude Include="demos\demo3dCarousel\mouseInteraction.hpp" />
     <ClInclude Include="demos\demo3dCarousel\MovingPlatform.hpp" />
     <ClInclude Include="demos\demo3dCarousel\ObjectRegistry.hpp" />
-    <ClInclude Include="filesystem.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GameObject2D.hpp" />
