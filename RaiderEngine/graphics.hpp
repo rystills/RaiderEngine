@@ -768,10 +768,11 @@ void render2D() {
 	shaders["2DShader"]->use();
 	// TODO: glm::ortho and glm::perspective calls only need to be performed when viewport size changes - not every tick
 	glUniformMatrix4fv(glGetUniformLocation(shaders["2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
+	glBindVertexArray(*GameObject2D::VAO);
 	for (auto&& kv : gameObject2Ds)
 		for (int i = 0; i < kv.second.size(); ++i)
-			kv.second[i]->draw(*shaders["2DShader"], true);
-
+			kv.second[i]->draw(*shaders["2DShader"], i==0);
+	glBindVertexArray(0);
 	// render text
 	// TODO: text rendering should be orderable too
 	glDisable(GL_DEPTH_TEST);

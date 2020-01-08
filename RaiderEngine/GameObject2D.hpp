@@ -100,8 +100,6 @@ public:
 	@param shouldSendTextures: whether or not to bind the sprite before rendering
 	*/
 	virtual void draw(Shader shader, bool shouldSendTextures = true) {
-		// TODO: conditionally send texture based on provided flag for optimization when rendering many objects which share the same sprite
-
 		// Prepare transformations
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(position, depth));
@@ -110,20 +108,21 @@ public:
 		glm::vec2 appliedScale(scale.x * sprite.width, scale.y * sprite.height);
 
 		// translate by the half extents to achieve centered rotation
-		model = glm::translate(model, glm::vec3(0.5f * appliedScale.x, 0.5f * appliedScale.y, 0.0f));
-		model = glm::rotate(model, rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::translate(model, glm::vec3(-0.5f * appliedScale.x, -0.5f * appliedScale.y, 0.0f));
+		if (rotation != 0) {
+			model = glm::translate(model, glm::vec3(0.5f * appliedScale.x, 0.5f * appliedScale.y, 0.0f));
+			model = glm::rotate(model, rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::translate(model, glm::vec3(-0.5f * appliedScale.x, -0.5f * appliedScale.y, 0.0f));
+		}
 
 		model = glm::scale(model, glm::vec3(appliedScale, 1.0f));
 
 		shader.setMat4("model", model);
 		shader.setVec3("spriteColor", color);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, sprite.id);
-
-		glBindVertexArray(*VAO);
+		if (shouldSendTextures) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, sprite.id);
+		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);
 	}
 };
