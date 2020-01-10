@@ -13,6 +13,7 @@
 #include <map>
 #include <filesystem>
 #include <utility>
+#include <algorithm>
 
 // external library includes
 // glad

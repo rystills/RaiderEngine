@@ -95,7 +95,7 @@ public:
 					bounce(xPen > yPen);
 				}
 				// destroy the brick and update our score
-				gameObject2Ds["brick"].erase(gameObject2Ds["brick"].begin() + i);
+				removeGameObject2D("brick", i);
 				score += 100;
 				textObjects[1]->text = "Score: " + std::to_string(score);
 				break;
@@ -132,7 +132,7 @@ void restartGame(bool clearScore = true) {
 	gameObject2Ds["brick"].clear();
 	for (int i = 0; i < 20; ++i)
 		for (int r = 0; r < 4; ++r)
-			gameObject2Ds["brick"].emplace_back(new Brick(glm::vec2(i * 64, r * 32), glm::vec3(i / 20.f, r / 4.f, .5f)));
+			addGameObject2D(new Brick(glm::vec2(i * 64, r * 32), glm::vec3(i / 20.f, r / 4.f, .5f)));
 }
 
 void incrementLevel() {
@@ -152,13 +152,14 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 	freetypeLoadFont("Inter-Regular", 24);
 	
+	setVsync(true);
 	clearColor = glm::vec4(.8f, .8f, 1, 1);
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	gameObject2Ds["paddle"].emplace_back(new Paddle(glm::vec2(0)));
-	gameObject2Ds["ball"].emplace_back(new Ball(glm::vec2(0)));
-	textObjects.emplace_back(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), 18));
-	textObjects.emplace_back(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), 18));
-	textObjects.emplace_back(new TextObject("Level: 1", 6, 54, glm::vec3(.6f, .4f, .5f), 18));
+	addGameObject2D(new Paddle(glm::vec2(0)));
+	addGameObject2D(new Ball(glm::vec2(0)));
+	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), 18));
+	addTextObject(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), 18));
+	addTextObject(new TextObject("Level: 1", 6, 54, glm::vec3(.6f, .4f, .5f), 18));
 	restartGame();
 
 	while (!glfwWindowShouldClose(window)) {

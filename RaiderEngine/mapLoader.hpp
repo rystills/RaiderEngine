@@ -100,7 +100,7 @@ void processMapNode(aiNode *node, const aiScene *scene) {
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			//std::cout << "generating object: " << name << std::endl;
-			gameObjects[name].emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, name));
+			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, name));
 			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
@@ -125,7 +125,7 @@ void processMapNode(aiNode *node, const aiScene *scene) {
 				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene));
 			baseModel->generateCollisionShape();
 			models.insert({ tempProp.fullName, baseModel });
-			gameObjects[tempProp.fullName].emplace_back(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false));
+			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false));
 			goto clearTransform;
 		}
 		else {
