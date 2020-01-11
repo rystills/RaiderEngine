@@ -32,6 +32,8 @@ public:
 	}
 };
 
+Paddle* paddle;
+
 class Ball : public GameObject2D {
 public:
 	float speed = 700;
@@ -42,10 +44,10 @@ public:
 		rotation = -glm::quarter_pi<float>();
 	}
 
-	bool collision(GameObject2D &o) {
+	bool collision(GameObject2D* o) {
 		// simple AABB collision check
-		return (position.x + sprite.width > o.position.x&& position.x < o.position.x + o.sprite.width &&
-			position.y + sprite.height > o.position.y&& position.y < o.position.y + o.sprite.height);
+		return (position.x + sprite.width > o->position.x&& position.x < o->position.x + o->sprite.width &&
+			position.y + sprite.height > o->position.y&& position.y < o->position.y + o->sprite.height);
 	}
 
 	void bounce(bool isVert) {
@@ -81,7 +83,7 @@ public:
 
 		// bounce off of bricks, breaking them in the process
 		for (int i = 0; i < gameObject2Ds["brick"].size(); ++i) {
-			if (collision(*gameObject2Ds["brick"][i])) {
+			if (collision(&*gameObject2Ds["brick"][i])) {
 				GameObject2D o = *gameObject2Ds["brick"][i];
 				// if we are moving away from the brick on one axis, the correct bounce must be on the other axis
 				if (center().x > o.center().x && cos(rotation) > 0 || center().x < o.center().x && cos(rotation) < 0)
@@ -103,14 +105,15 @@ public:
 		}
 
 		// bounce off of the paddle, picking a new direction based off of our horizontal distance from the paddle's center
-		if (collision(*gameObject2Ds["paddle"][0])) {
-			GameObject2D o = *gameObject2Ds["paddle"][0];
-			position.y = o.position.y - sprite.height;
-			float xOff = center().x - o.center().x;
-			rotation = -glm::half_pi<float>() + (3 * glm::pi<float>() / 8) * (xOff / (sprite.width/2 + o.sprite.width/2));
+		if (collision(paddle)) {
+			position.y = paddle->position.y - sprite.height;
+			float xOff = center().x - paddle->center().x;
+			rotation = -glm::half_pi<float>() + (3 * glm::pi<float>() / 8) * (xOff / (sprite.width/2 + paddle->sprite.width/2));
 		}
 	}
 };
+
+Ball* ball;
 
 class Brick : public GameObject2D {
 public:
@@ -125,8 +128,8 @@ void restartGame(bool clearScore = true) {
 		level = 1;
 	}
 	textObjects[2]->text = "Level: " + std::to_string(level);
-	((Paddle*)(&*gameObject2Ds["paddle"][0]))->restart();
-	((Ball*)(&*gameObject2Ds["ball"][0]))->restart();
+	paddle->restart();
+	ball->restart();
 
 	// clear and rebuild bricks
 	gameObject2Ds["brick"].clear();
@@ -155,8 +158,8 @@ int main() {
 	setVsync(true);
 	clearColor = glm::vec4(.8f, .8f, 1, 1);
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	addGameObject2D(new Paddle(glm::vec2(0)));
-	addGameObject2D(new Ball(glm::vec2(0)));
+	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));
+	ball = (Ball*)addGameObject2D(new Ball(glm::vec2(0)));
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), 18));
 	addTextObject(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), 18));
 	addTextObject(new TextObject("Level: 1", 6, 54, glm::vec3(.6f, .4f, .5f), 18));

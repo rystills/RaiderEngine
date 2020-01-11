@@ -35,8 +35,9 @@ std::vector<std::unique_ptr<TextObject>> textObjects;
 std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 
 /* methods to add/remove objects from the engine */
-void addGameObject(GameObject* go) {
+GameObject* addGameObject(GameObject* go) {
 	gameObjects[go->modelName].emplace_back(go);
+	return go;
 }
 
 void removeGameObject(GameObject* go) {
@@ -51,8 +52,9 @@ void removeGameObject(std::string modelName, int ind) {
 	gameObjects[modelName].erase(gameObjects[modelName].begin() + ind);
 }
 
-void addGameObject2D(GameObject2D* go) {
+GameObject2D* addGameObject2D(GameObject2D* go) {
 	gameObject2Ds[std::filesystem::path(go->sprite.path).stem().string()].emplace_back(go);
+	return go;
 }
 
 void removeGameObject2D(GameObject2D* go) {
@@ -64,8 +66,9 @@ void removeGameObject2D(std::string spriteName, int ind) {
 	gameObject2Ds[spriteName].erase(gameObject2Ds[spriteName].begin() + ind);
 }
 
-void addTextObject(TextObject* go) {
+TextObject* addTextObject(TextObject* go) {
 	textObjects.emplace_back(go);
+	return go;
 }
 
 void removeTextObject(TextObject* go) {
@@ -76,8 +79,9 @@ void removeTextObject(int ind) {
 	textObjects.erase(textObjects.begin() + ind);
 }
 
-void addLight(Light* go) {
+Light* addLight(Light* go) {
 	lights.emplace_back(go);
+	return go;
 }
 
 void removeLight(Light* go) {
