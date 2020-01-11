@@ -29,12 +29,11 @@ load the sound file with the specified name
 @param soundName: the name of the sound file to load (including the extension; must be .ogg for now)
 @returns: the shared pointer in the sounds map to the sound
 */
-std::shared_ptr<ALuint> loadSound(std::string soundName) {
+ALuint loadSound(std::string soundName) {
 	std::cout << "Loading sound '" << soundName << "'" << std::endl;
 	// check if the sound has already been loaded
-	std::unordered_map<std::string, std::shared_ptr<ALuint>>::iterator search = sounds.find(soundName);
-	if (search != sounds.end())
-		return search->second;
+	if (sounds.contains(soundName))
+		return *sounds[soundName];
 	
 	// load sound file via stb_vorbis
 	float sTime = glfwGetTime();
@@ -53,23 +52,21 @@ std::shared_ptr<ALuint> loadSound(std::string soundName) {
 	alBufferData(buffer, format, output, sizeof(ALshort) * slen * numChannels, sample_rate);
 	
 	// create source to play the buffered sound data
-	std::shared_ptr<ALuint> source(new ALuint(0), deleteAudioBuffer);
-	alGenSources(1, &*source);
+	ALuint* source = new ALuint(0);
+	alGenSources(1, source);
 	alSourcei(*source, AL_BUFFER, buffer);
 	if (alGetError() != AL_NO_ERROR) ERROR(std::cout << "Failed to load and/or play sound '" << soundName << "'" << std::endl);
 	
 	// now cleanup, add to the sound map, and return
 	alDeleteBuffers(1,&buffer);
-	sounds.insert({ soundName, source });
+	sounds.insert({ soundName, std::unique_ptr<ALuint, std::function<void(ALuint*)>>(source, std::bind(&deleteAudioBuffer,std::placeholders::_1))});
 	SUCCESS(std::cout << "Finished loading sound '" << soundName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl);
-	return source;
+	return *source;
 }
 
 /*play the specified sound
 @param soundName: the name of the sound to play
 */
 void playSound(std::string soundName) {
-	std::unordered_map<std::string, std::shared_ptr<ALuint>>::iterator search = sounds.find(soundName);
-	std::shared_ptr<ALuint> buffer = (search == sounds.end() ? loadSound(soundName) : search->second);
-	alSourcePlay(*buffer);
+	alSourcePlay(sounds.contains(soundName) ? *sounds[soundName] : loadSound(soundName));
 }

@@ -11,7 +11,7 @@ public:
 	glm::vec3 color;
 	Texture sprite;
 	float depth;  // depth in NDC coordinates
-	inline static std::shared_ptr<unsigned int> VAO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
+	inline static std::unique_ptr<ALuint, std::function<void(ALuint*)>> VAO;
 
 	/*
 	GameObject2D constructor: creates a new GameObject2D with the specified transforms and sprite
@@ -35,6 +35,7 @@ public:
 	initialize the VAO which defines the quad used when rendering any GameObject2D; this need only be called once at game start
 	*/
 	static void initStaticVertexBuffer() {
+		VAO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
 		// Configure VAO and temporary VBO
 		GLuint VBO;
 		GLfloat vertices[] = {
@@ -48,7 +49,7 @@ public:
 			1.0f, 0.0f, 1.0f, 0.0f
 		};
 
-		glGenVertexArrays(1, &*VAO);
+		glGenVertexArrays(1, VAO.get());
 		glGenBuffers(1, &VBO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);

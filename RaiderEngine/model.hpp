@@ -139,9 +139,9 @@ public:
 	float calculateVolume() {
 		float volume = 0;
 		for (int j = 0; j < meshes.size(); ++j) {
-			Mesh mesh = meshes[j];
-			for (int i = 0; i < mesh.indices.size() - 2; i += 3)
-				volume += glm::determinant(glm::mat3(mesh.vertices[mesh.indices[i]].Position, mesh.vertices[mesh.indices[i + 1]].Position, mesh.vertices[mesh.indices[i + 2]].Position));
+			for (int i = 0; i < meshes[j].indices.size() - 2; i += 3)
+				volume += glm::determinant(glm::mat3(meshes[j].vertices[meshes[j].indices[i]].Position, 
+					meshes[j].vertices[meshes[j].indices[i + 1]].Position, meshes[j].vertices[meshes[j].indices[i + 2]].Position));
 		}
 		return volume / 6.0f;  // since the determinant give 6 times tetra volume
 	}

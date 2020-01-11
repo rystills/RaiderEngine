@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <utility>
 #include <algorithm>
+#include <functional>
 
 // external library includes
 // glad

@@ -120,11 +120,11 @@ void processMapNode(aiNode *node, const aiScene *scene) {
 			// generate a new model from the mesh list
 			//TODO: consider using name here rather than fullName so we can re-use static geometry too
 			//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
-			std::shared_ptr<Model> baseModel = std::make_shared<Model>();
+			Model* baseModel = new Model();
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene));
 			baseModel->generateCollisionShape();
-			models.insert({ tempProp.fullName, baseModel });
+			models.insert({ tempProp.fullName, std::unique_ptr<Model>(baseModel) });
 			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false));
 			goto clearTransform;
 		}

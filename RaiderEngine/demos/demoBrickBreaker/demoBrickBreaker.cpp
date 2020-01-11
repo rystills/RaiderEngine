@@ -155,7 +155,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 	freetypeLoadFont("Inter-Regular", 24);
 	
-	setVsync(true);
+	setVsync(false);
 	clearColor = glm::vec4(.8f, .8f, 1, 1);
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));

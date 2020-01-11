@@ -36,7 +36,7 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
-	std::shared_ptr<unsigned int> VAO;
+	std::unique_ptr<ALuint, std::function<void(ALuint*)>> VAO;
 
 	/*
 	Mesh constructor: creates a new mesh with the provided vertex, index, and texture data
@@ -95,19 +95,19 @@ public:
     }
 
 private:
-	std::shared_ptr<unsigned int> VBO, EBO;
+	std::unique_ptr<ALuint, std::function<void(ALuint*)>> VBO, EBO;
 
     /*
 	initialize all the buffer objects/arrays
 	*/
     void setupMesh() {
         // create buffers/arrays
-		VAO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
-		VBO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
-		EBO = std::shared_ptr<unsigned int>(new unsigned int(0), deleteGraphicsBuffer);
-        glGenVertexArrays(1, &*VAO);
-        glGenBuffers(1, &*VBO);
-        glGenBuffers(1, &*EBO);
+		VAO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+		VBO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+		EBO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+        glGenVertexArrays(1, VAO.get());
+        glGenBuffers(1, VBO.get());
+        glGenBuffers(1, EBO.get());
 
         glBindVertexArray(*VAO);
         // load data into vertex buffers

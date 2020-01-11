@@ -2,14 +2,14 @@
 #include "stdafx.h"
 #include "mesh.hpp"
 #include "model.hpp"
-extern std::unordered_map<std::string, std::shared_ptr<Model>> models;
+extern std::unordered_map<std::string, std::unique_ptr<Model>> models;
 
 class GameObject {
 public:
 	glm::vec3 position;
 	glm::mat4 rotation;
 	glm::vec3 scale;
-	std::shared_ptr<Model> model;
+	Model* model;
 	bool grabbable;
 	std::string modelName;
 	PxRigidActor* body;
@@ -54,13 +54,9 @@ public:
 	*/
 	void setModel(std::string modelName, bool makeStatic = false) {
 		// note: this function should only be called once at initialization, as the object's physics depend on its set model
-		std::unordered_map<std::string, std::shared_ptr<Model>>::iterator search = models.find(modelName);
-		if (search != models.end())
-			model = search->second;
-		else {
-			model = std::make_shared<Model>(modelDir + modelName + '/' + modelName + ".fbx", makeStatic);
-			models.insert({ modelName, model });
-		}
+		if (!models.contains(modelName))
+			models.insert({ modelName, std::make_unique<Model>(modelDir + modelName + '/' + modelName + ".fbx", makeStatic) });
+		model = models[modelName].get();
 	}
 	/*
 	grant physics information to this GameObject (collision shape and rigidbody) and add it to the bullet physics simulation
