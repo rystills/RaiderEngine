@@ -1,14 +1,10 @@
 #include "stdafx.h"
-// engine includes (import order matters here, at least for the time being)
-#include "terminalColors.hpp"
-#include "timing.hpp"
-#include "physics.hpp"
-#include "settings.hpp"
-#include "graphics.hpp"
-#include "shader.hpp"
-#include "FpsDisplay.hpp"
-#include "audio.hpp"
 #include "GameObject2D.hpp"
+#include "settings.hpp"
+#include "timing.hpp"
+#include "audio.hpp"
+#include "FpsDisplay.hpp"
+#include "input.hpp"
 
 void restartGame(bool clearScore);
 int score = 0, level = 1;
@@ -24,7 +20,7 @@ public:
 		setCenter(glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT - 80));
 	}
 
-	void update(float deltaTime) override {
+	void update() override {
 		if (paused)
 			return;
 		position.x += (keyStates[GLFW_KEY_D][held] - keyStates[GLFW_KEY_A][held]) * speed * deltaTime * levelMultiplier;
@@ -55,7 +51,7 @@ public:
 		rotation = std::atan2(sin(rotation) * (isVert ? -1 : 1), cos(rotation) * (isVert ? 1 : -1));
 	}
 
-	void update(float deltaTime) override {
+	void update() override {
 		if (paused)
 			return;
 		// move forward

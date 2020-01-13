@@ -1,24 +1,12 @@
 #include "stdafx.h"
-// engine includes (import order matters here, at least for the time being)
-#include "terminalColors.hpp"
-#include "timing.hpp"
-#include "physics.hpp"
 #include "settings.hpp"
-#include "ObjectRegistry.hpp"
 #include "mapLoader.hpp"
-#include "graphics.hpp"
-#include "shader.hpp"
-
-#include "model.hpp"
-#include "GameObject.hpp"
-#include "Light.hpp"
-
-#include "FpsDisplay.hpp"
-#include "audio.hpp"
-#include "PlayerBase.hpp"
-
 #include "mouseInteraction.hpp"
+#include "audio.hpp"
+#include "ObjectRegistry.hpp"
+#include "FpsDisplay.hpp"
 #include "Compass.hpp"
+
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
 */
@@ -119,10 +107,10 @@ int main() {
 		glfwPollEvents();
 
 		// update physics
-		updatePhysics(deltaTime);
+		updatePhysics();
 
 		// update player
-		player.update(deltaTime);
+		player.update();
 		// update objects
 		updateObjects();
 
@@ -136,7 +124,7 @@ int main() {
 				checkDisplayObject();
 			if (displayString.size() == 0)
 				// the user didn't try to observe something, so check if the user is holding or trying to grab something
-				updateHeldBody(deltaTime);
+				updateHeldBody();
 		}
 		
 		// render

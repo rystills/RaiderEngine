@@ -1,14 +1,13 @@
 #ifndef terminalColors
 #define terminalColors
-#include "stdafx.h"
 
 // add support for colored terminal output by enclosing print statements in ERROR, WARNING, or SUCCESS
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
-CONSOLE_SCREEN_BUFFER_INFO cbInfo;
-HANDLE hConsole;
-int originalColor;
+inline CONSOLE_SCREEN_BUFFER_INFO cbInfo;
+inline HANDLE hConsole;
+inline int originalColor;
 #define WARNING(msg) { SetConsoleTextAttribute(hConsole, 14); msg; SetConsoleTextAttribute(hConsole, originalColor); }
 #define ERROR(msg) { SetConsoleTextAttribute(hConsole, 12); msg; SetConsoleTextAttribute(hConsole, originalColor); }
 #define SUCCESS(msg) { SetConsoleTextAttribute(hConsole, 10); msg; SetConsoleTextAttribute(hConsole, originalColor); }

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #pragma once
 // this file houses the assimp flags used for loading different mesh types
-unsigned int aiMapProcessFlags =
+inline unsigned int aiMapProcessFlags =
 aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
 aiProcess_JoinIdenticalVertices | // join identical vertices/ optimize indexing
 aiProcess_Triangulate | // Ensure all verticies are triangulated (each 3 vertices are triangle)
@@ -15,4 +15,4 @@ aiProcess_LimitBoneWeights | // limit bone weights to 4 per vertex
 aiProcess_OptimizeMeshes | // join small meshes, if possible;
 aiProcess_SplitByBoneCount | // split meshes with too many bones. Necessary for our (limited) hardware skinning shader
 0;
-unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead
+inline unsigned int aiModelProcessFlags = aiMapProcessFlags | aiProcess_PreTransformVertices; // models should not import with nonstandard transforms; bake the transform instead

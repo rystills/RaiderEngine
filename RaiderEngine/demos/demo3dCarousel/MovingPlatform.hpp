@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "GameObject.hpp"
+#include "timing.hpp"
 
 class MovingPlatform : public GameObject {
 public:
@@ -30,11 +31,11 @@ public:
 		*/
 	}
 	
-	void update(float deltaTime) override {
+	void update() override {
 		// update transform position based on time
 		elapsedTime += deltaTime;
 		//body->activate(true);		
-		GameObject::update(deltaTime);
+		GameObject::update();
 		//btVector3 origin = moveConstraint->getFrameOffsetA().getOrigin();
 		//moveConstraint->getFrameOffsetA().setOrigin(btVector3(origin.getX(),origin.getY()+sin(elapsedTime)*.01f, origin.getZ()));
 	}

@@ -2,6 +2,7 @@
 #pragma once
 #include "GameObject.hpp"
 #include "settings.hpp"
+#include "input.hpp"
 
 #define maxGrabRange 3
 std::string displayString = "";
@@ -61,9 +62,8 @@ void ReleaseHelpers() {
 
 /*
 update the held body, allowing the user to grab, hold, or let go of any grabbable GameObject
-@param deltaTime: the elapsed time since the last frame
 */
-void updateHeldBody(float deltaTime) {
+void updateHeldBody() {
 	if (!sphereShape)
 		sphereShape = gPhysics->createShape(PxSphereGeometry(.1f), *gMaterial, false, PxShapeFlag::eTRIGGER_SHAPE);
 	if (mousePressedLeft) {

@@ -144,11 +144,27 @@
     <ClCompile Include="alHelpers.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="audio.cpp" />
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp" />
+    <ClCompile Include="FpsDisplay.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GameObject2D.cpp" />
     <ClCompile Include="glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="input.cpp" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="mapLoader.cpp" />
+    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="model.cpp" />
+    <ClCompile Include="physics.cpp" />
+    <ClCompile Include="PlayerBase.cpp" />
+    <ClCompile Include="PlayerSpawn.cpp" />
+    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_vorbis.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -158,6 +174,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TextObject.cpp" />
+    <ClCompile Include="timing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alHelpers.hpp" />

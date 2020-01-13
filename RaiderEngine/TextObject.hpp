@@ -11,7 +11,7 @@ public:
 	int fontSize;
 	TextObject(std::string text, float x, float y, glm::vec3 color, int fontSize, bool centered = false) : text(text), x(x), y(y), color(color), fontSize(fontSize), centered(centered) {};
 
-	virtual void update(float deltaTime) {}
+	virtual void update() {}
 
 	/*
 	render the text contained in this textObject

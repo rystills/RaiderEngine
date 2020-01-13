@@ -9,8 +9,8 @@ public:
 	bool counterClockWise;
 	bool wallMounted;
 	Cog(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, float rotSpeed, bool counterClockWise, bool wallMounted = true) : rotSpeed(rotSpeed), counterClockWise(counterClockWise), wallMounted(wallMounted), GameObject(position, rotationEA, scale, "cog", wallMounted ? 2 : 0) {}
-	void update(float deltaTime) override {
-		GameObject::update(deltaTime);
+	void update() override {
+		GameObject::update();
 		elapsedTime += deltaTime;
 		if (wallMounted) {
 			// rotation for wall-mounted cogs is purely graphical; no need to get the physics engine involved

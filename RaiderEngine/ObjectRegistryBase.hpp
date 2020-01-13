@@ -1,8 +1,4 @@
 #pragma once
-#include "stdafx.h"
-#include "PlayerSpawn.hpp"
-#include "Light.hpp"
-#include "settings.hpp"
 
 class ObjectRegistryBase {
 public:

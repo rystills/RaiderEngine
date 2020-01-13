@@ -17,12 +17,9 @@
 -automate building, similar to how glitter lays it out
 
 ~Optimization~
--add automatic object instancing
+-add automatic GameObject & GameObject2D render instancing
 -send lights to shader in order of distance from player and importance, and render shadows for first N lights
 -add a flag to mark Objects as non shadow casting or non shadow receiving
-
-~Organization~
--split classes into separate .h and .cpp files
 
 ~Demo~
 -reimplement throwing held object on right mouse button

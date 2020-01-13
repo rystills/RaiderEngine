@@ -1,7 +1,4 @@
 #pragma once
-#include "stdafx.h"
-#include "mesh.hpp"
-#include "shader.hpp"
 
 class Light {
 public:
@@ -11,27 +8,18 @@ public:
 	float radius;
 	float maxBrightness;
 	bool on = true;
-	Light(glm::vec3 position, float strength, glm::vec3 color) : position(position), color(color) {
-		offColor = glm::vec3(color.r / 8, color.g / 8, color.b / 8);
-		linear = 7/strength*.7f;
-		quadratic = 7/strength*1.8;
-		calculateMaxBrightness();
-		calculateRadius();
-	}
+	Light(glm::vec3 position, float strength, glm::vec3 color);
 	
-	virtual void update(float deltaTime) { }
+	virtual void update() {}
 
 private:
 	/*
 	calculate the lights maximum brightness using its rgb components
 	*/
-	void calculateMaxBrightness() {
-		maxBrightness = std::fmaxf(std::fmaxf(color.r, color.g), color.b);
-	}
+	void calculateMaxBrightness();
+
 	/*
 	calcuate the light's radius given linear and quadratic constants and its max brightness
 	*/
-	void calculateRadius() {
-		radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (1 - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
-	}
+	void calculateRadius();
 };

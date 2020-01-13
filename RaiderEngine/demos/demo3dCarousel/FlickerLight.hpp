@@ -17,9 +17,9 @@ public:
 		return (rand()) / static_cast <float> (RAND_MAX/maxSeconds);
 	}
 
-	void update(float deltaTime) override {
+	void update() override {
 		elapsedTime += deltaTime;
-		Light::update(deltaTime);
+		Light::update();
 		// flicker once flickerWait time has elapsed
 		if (prevTime + flickerWait < elapsedTime) {
 			on = !on;
