@@ -51,9 +51,9 @@ void PlayerBase::update() {
 	glm::vec3 normalFront = glm::normalize(glm::cross(mainCam->WorldUp, mainCam->Right));
 	bool grounded = canJump();
 	// movement
-	float baseMoveSpeed = walkSpeed, forwardSpeed = 0, strafeSpeed = 0;
+	float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
 	if (mainCam->controllable) {
-		baseMoveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed);
+		baseMoveSpeed = (crouching ? crouchSpeed : (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed));
 		forwardSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
 		strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
 		if (forwardSpeed && strafeSpeed) {

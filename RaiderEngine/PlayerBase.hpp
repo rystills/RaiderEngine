@@ -8,6 +8,7 @@ public:
 	PxControllerManager* manager;
 	PxCapsuleController* controller;
 	float walkSpeed = 300;
+	float crouchSpeed = 180;
 	float runSpeed = 480;
 	float maxMoveSpeedRatio = 1 / 60.f;
 	float height = 1;
