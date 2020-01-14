@@ -5,8 +5,5 @@
 class Compass : public GameObject2D {
 public:
 	Compass(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName) : GameObject2D(position, rotation, scale, color, spriteName) {}
-	void update() override {
-		GameObject2D::update();
-		rotation = glm::radians(mainCam->Yaw);
-	}
+	void update() override;
 };

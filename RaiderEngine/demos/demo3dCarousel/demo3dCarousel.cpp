@@ -6,6 +6,9 @@
 #include "ObjectRegistry.hpp"
 #include "FpsDisplay.hpp"
 #include "Compass.hpp"
+#include "PlayerBase.hpp"
+#include "PlayerSpawn.hpp"
+#include "timing.hpp"
 
 /*
 draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
@@ -69,7 +72,7 @@ int main() {
 	setModelDir("demos/demo3dCarousel/models");
 	setTextureDir("demos/demo3dCarousel/textures");
 	setSoundDir("demos/demo3dCarousel/sounds");
-	setFontDir("demos/demo3dCarousel/fonts");
+	setFontDir("demos/shared/fonts");
 
 	// sound
 	playSound("Julie_Li_-_01_-_resound.ogg");

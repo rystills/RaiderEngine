@@ -96,6 +96,33 @@
     <ClCompile Include="timing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="demos\demoBrickBreaker\Ball.cpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\ObjectRegistry.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\mouseInteraction.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\FoliageGrass.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\FlickerLight.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\Compass.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\Cog.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
     <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp">
       <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClCompile>
@@ -188,11 +215,20 @@
     <ClInclude Include="demos\demo3dCarousel\mouseInteraction.hpp">
       <Filter>Source Files\demos\demo3dCarousel</Filter>
     </ClInclude>
-    <ClInclude Include="demos\demo3dCarousel\MovingPlatform.hpp">
-      <Filter>Source Files\demos\demo3dCarousel</Filter>
-    </ClInclude>
     <ClInclude Include="demos\demo3dCarousel\ObjectRegistry.hpp">
       <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoBrickBreaker\Ball.hpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoBrickBreaker\Brick.hpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoBrickBreaker\GameManager.hpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoBrickBreaker\Paddle.hpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

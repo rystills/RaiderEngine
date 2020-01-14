@@ -146,7 +146,16 @@
     </ClCompile>
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\Cog.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\Compass.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\FlickerLight.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\FoliageGrass.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\mouseInteraction.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\ObjectRegistry.cpp" />
+    <ClCompile Include="demos\demoBrickBreaker\Ball.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp" />
+    <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp" />
+    <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp" />
     <ClCompile Include="FpsDisplay.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameObject2D.cpp" />
@@ -186,8 +195,11 @@
     <ClInclude Include="demos\demo3dCarousel\FlickerLight.hpp" />
     <ClInclude Include="demos\demo3dCarousel\FoliageGrass.hpp" />
     <ClInclude Include="demos\demo3dCarousel\mouseInteraction.hpp" />
-    <ClInclude Include="demos\demo3dCarousel\MovingPlatform.hpp" />
     <ClInclude Include="demos\demo3dCarousel\ObjectRegistry.hpp" />
+    <ClInclude Include="demos\demoBrickBreaker\Ball.hpp" />
+    <ClInclude Include="demos\demoBrickBreaker\Brick.hpp" />
+    <ClInclude Include="demos\demoBrickBreaker\GameManager.hpp" />
+    <ClInclude Include="demos\demoBrickBreaker\Paddle.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GameObject2D.hpp" />
