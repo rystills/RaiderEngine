@@ -6,7 +6,14 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
+Collider2DLine::Collider2DLine(float sx, float sy, float ex, float ey) : sx(sx), sy(sy), ex(ex), ey(ey) {
+	glm::vec2 pts[2] = { glm::vec2(sx,sy),glm::vec2(ex,ey) };
+	calculateBoundingRadius(pts,2);
+}
+
 bool Collider2DLine::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
+	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
+		return false;
 	// Line <=> Rectangle collision
 	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		return collisionLineRectangle(*this, myPos, myRot, *(Collider2DRectangle*)other, otherPos, otherRot);

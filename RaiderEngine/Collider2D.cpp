@@ -201,3 +201,15 @@ void Collider2D::RotatePoint(glm::vec2& thePoint, glm::vec2& theOrigin, float th
 	thePoint.y = (float)(theOrigin.y + (thePoint.y - theOrigin.y) * cos(theRotation) + (thePoint.x - theOrigin.x) * sin(theRotation));
 	thePoint.x = tempX;
 }
+
+void Collider2D::calculateBoundingRadius(glm::vec2 pts[], int numPts) {
+	for (int i = 0; i < numPts; ++i) {
+		float dist = sqrt(pow(pts[i].x, 2) + pow(pts[i].y, 2));
+		if (dist > boundingRadius)
+			boundingRadius = dist;
+	}
+}
+
+bool Collider2D::boundingRadiusCheck(Collider2D a, glm::vec2 aPos, Collider2D b, glm::vec2 bPos) {
+	return pow(a.boundingRadius + b.boundingRadius + boundingRadiusBuffer,2) >= pow(bPos.x - aPos.x, 2) + pow(bPos.y - aPos.y, 2);
+}

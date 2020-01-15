@@ -6,7 +6,15 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
+Collider2DRectangle::Collider2DRectangle(float hwidth, float hheight) : hwidth(hwidth), hheight(hheight) {
+	glm::vec2 pts[4];
+	getCornerPoints(pts, glm::vec2(0));
+	calculateBoundingRadius(pts, 4);
+}
+
 bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
+	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
+		return false;
 	// Rectangle <=> Rectangle collision
 	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		if (myRot == 0 && otherRot == 0)

@@ -6,7 +6,13 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
+Collider2DCircle::Collider2DCircle(float radius) : radius(radius) {
+	boundingRadius = radius;
+}
+
 bool Collider2DCircle::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
+	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
+		return false;
 	// Circle <=> Rectangle collision
 	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		if (otherRot == 0)

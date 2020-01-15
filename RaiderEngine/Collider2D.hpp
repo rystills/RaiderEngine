@@ -11,6 +11,8 @@ extern class Collider2DRectangle;
 // because the player and enemies strictly use circle colliders, collision definitions are mostly limited to those involving a circle
 class Collider2D {
 public:
+	float boundingRadius = 0;
+	const static int boundingRadiusBuffer = 2;
 	/*
 	Collider constructor: define the shape and collider type
 	*/
@@ -169,4 +171,8 @@ public:
 	@returns: the new location of our point after rotating around the specified origin
 	*/
 	static void RotatePoint(glm::vec2& thePoint, glm::vec2& theOrigin, float theRotation);
+
+	void calculateBoundingRadius(glm::vec2 pts[], int numPts);
+
+	static bool boundingRadiusCheck(Collider2D a, glm::vec2 aPos, Collider2D b, glm::vec2 bPos);
 };

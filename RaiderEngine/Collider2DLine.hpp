@@ -16,7 +16,7 @@ public:
 	@param ex: the ending x coordinate of the line
 	@param ey: the ending y coordinate of the line
 	*/
-	Collider2DLine(float sx, float sy, float ex, float ey) : sx(sx), sy(sy), ex(ex), ey(ey) { }
+	Collider2DLine(float sx, float sy, float ex, float ey);
 
 	/*
 	check whether two colliders are overlapping (true) or not (false)

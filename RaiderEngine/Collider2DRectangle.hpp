@@ -14,7 +14,7 @@ public:
 	@param hwidth: the half width of the rectangle
 	@param hheight: the half height of the rectangle
 	*/
-	Collider2DRectangle(float hwidth, float hheight) : hwidth(hwidth), hheight(hheight) {}
+	Collider2DRectangle(float hwidth, float hheight);
 
 	/*
 	check whether two colliders are overlapping (true) or not (false)

@@ -10,9 +10,12 @@ Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints) {
 	//create a deep copy of the input vector2 array so we can modify points locally
 	for (int i = 0; i < inPoints.size(); ++i)
 		points.push_back(glm::vec2(inPoints[i].x, inPoints[i].y));
+	calculateBoundingRadius(&points[0], points.size());
 }
 
 bool Collider2DPolygon::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
+	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
+		return false;
 	// Polygon <=> Rectangle collision
 	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		return collisionRectanglePolygon(*(Collider2DRectangle*)other, otherPos, otherRot, *this, myPos, myRot);
