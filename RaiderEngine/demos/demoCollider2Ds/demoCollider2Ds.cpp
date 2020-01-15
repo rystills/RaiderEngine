@@ -25,15 +25,20 @@ int main() {
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(0, 0, 0), 18));
 	addTextObject(new TextObject("Colliding ? ", 6, 30, glm::vec3(.8f, .2f, .5f), 18));
-	Collider2DRectangle* rectCol = new Collider2DRectangle(100,100);
-	Collider2DCircle* circleCol = new Collider2DCircle(100);
-	Collider2DLine* lineCol = new Collider2DLine(0,-75,0,75);
-	Collider2DPolygon* polyCol = new Collider2DPolygon({ glm::vec2(-75,0), glm::vec2(-40,-50), glm::vec2(40,-50), glm::vec2(75,0), glm::vec2(40, 50), glm::vec2(-40,50) });
-	const int numCols = 4;
-	Collider2D* cols[numCols] = { rectCol,circleCol, lineCol, polyCol };
-	GameObject2D* g1 = addGameObject2D(new GameObject2D(glm::vec2(SCR_WIDTH/2-300, SCR_HEIGHT/2), 0, glm::vec2(1), glm::vec3(1), "", false, 0, rectCol));
-	GameObject2D* g2 = addGameObject2D(new GameObject2D(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2), 0, glm::vec2(1), glm::vec3(1), "", false, 0, circleCol));
-	int g1ColInd = 0, g2ColInd = 1;
+	addTextObject(new TextObject("Press WASD to move, Q+E to rotate, and R+F to cycle through object 1 and 2's colliders", 6, 54, glm::vec3(.5f, .2f, .8f), 18));
+	Collider2DRectangle* rectColS = new Collider2DRectangle(80,80);
+	Collider2DRectangle* rectColL = new Collider2DRectangle(160, 160);
+	Collider2DCircle* circleColS = new Collider2DCircle(60);
+	Collider2DCircle* circleColL = new Collider2DCircle(200);
+	Collider2DLine* lineColS = new Collider2DLine(0,-25,0,25);
+	Collider2DLine* lineColL = new Collider2DLine(0, -120, 0, 120);
+	Collider2DPolygon* polyColS = new Collider2DPolygon({ glm::vec2(-75,0), glm::vec2(-40,-50), glm::vec2(40,-50), glm::vec2(75,0), glm::vec2(40, 50), glm::vec2(-40,50) });
+	Collider2DPolygon* polyColL = new Collider2DPolygon({ glm::vec2(-150,0), glm::vec2(-80,-100), glm::vec2(80,-100), glm::vec2(150,0), glm::vec2(80, 100), glm::vec2(-80,100) });
+	const int numCols = 8;
+	Collider2D* cols[numCols] = { rectColS,rectColL,circleColS,circleColL, lineColS,lineColL, polyColS,polyColL };
+	GameObject2D* g1 = addGameObject2D(new GameObject2D(glm::vec2(SCR_WIDTH/2-300, SCR_HEIGHT/2), 0, glm::vec2(1), glm::vec3(1), "", false, 0, rectColS));
+	GameObject2D* g2 = addGameObject2D(new GameObject2D(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2), 0, glm::vec2(1), glm::vec3(1), "", false, 0, rectColS));
+	int g1ColInd = 0, g2ColInd = 0;
 
 	while (!glfwWindowShouldClose(window)) {
 		// update frame

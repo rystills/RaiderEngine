@@ -26,6 +26,10 @@ public:
 	*/
 	virtual bool collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot);
 
+	static bool linesIntersect(glm::vec2 pt1, glm::vec2 pt2, glm::vec2 pt3, glm::vec2 pt4);
+
+	static bool pointInPoly(glm::vec2 pt, glm::vec2 polyPts[], int numPts);
+
 	virtual void debugDraw(glm::vec2 pos, float rot) {};
 
 	/*
@@ -38,6 +42,10 @@ public:
 	*/
 	static bool collisionRectangleRectangle(Collider2DRectangle a, glm::vec2 aPos, Collider2DRectangle b, glm::vec2 bPos);
 
+	static bool collisionRectangleRotatedRectangle(Collider2DRectangle a, glm::vec2 aPos, float arot, Collider2DRectangle b, glm::vec2 bPos, float brot);
+
+	static bool collisionRectanglePolygon(Collider2DRectangle a, glm::vec2 aPos, float arot, Collider2DPolygon b, glm::vec2 bPos, float brot);
+
 	/*
 	check whether a circle and a rectangle are overlapping (true) or not (false)
 	@param a: the circle
@@ -48,6 +56,10 @@ public:
 	*/
 	static bool collisionCircleRectangle(Collider2DCircle a, glm::vec2 aPos, Collider2DRectangle b, glm::vec2 bPos);
 
+	bool collisionLineRectangle(Collider2DLine a, glm::vec2 aPos, float aRot, Collider2DRectangle b, glm::vec2 bPos, float bRot);
+
+	bool collisionLinePolygon(Collider2DLine a, glm::vec2 aPos, float arot, Collider2DPolygon b, glm::vec2 bPos, float brot);
+
 	/*
 	check whether a circle and a circle are overlapping (true) or not (false)
 	@param a: the first circle
@@ -57,6 +69,10 @@ public:
 	@returns: whether a circle and a circle are overlapping (true) or not (false)
 	*/
 	static bool collisionCircleCircle(Collider2DCircle a, glm::vec2 aPos, Collider2DCircle b, glm::vec2 bPos);
+
+	static bool collisionLineLine(Collider2DLine a, glm::vec2 aPos, float arot, Collider2DLine b, glm::vec2 bPos, float brot);
+
+	static bool collisionCircleRotatedLine(Collider2DCircle a, glm::vec2 aPos, Collider2DLine b, glm::vec2 bPos, float brot);
 
 	/*
 	check whether a circle and a line are overlapping (true) or not (false)
@@ -99,6 +115,8 @@ public:
 	@returns: whether a circle and a RotatedPolygon are overlapping (true) or not (false)
 	*/
 	static bool collisionCircleRotatedPolygon(Collider2DCircle a, glm::vec2 aPos, Collider2DPolygon b, glm::vec2 bPos, float brot);
+
+	static bool collisionPolygonPolygon(Collider2DPolygon a, glm::vec2 aPos, float arot, Collider2DPolygon b, glm::vec2 bPos, float brot);
 
 	/*
 	determine whether or not a circle intersects a polygon (specified by an ordered point list)

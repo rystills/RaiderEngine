@@ -7,31 +7,32 @@
 #include "graphics.hpp"
 
 bool Collider2DCircle::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
-	//Circle <=> Rectangle collision
-	/*if (dynamic_cast<Collider2DRectangle*>(other)) {
+	// Circle <=> Rectangle collision
+	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		if (otherRot == 0)
-			return collisionCircleRectangle(*this, myPos, *dynamic_cast<Collider2DRectangle*>(other), otherPos);
-		return collisionCircleRotatedRectangle(*this, myPos, *dynamic_cast<Collider2DRectangle*>(other), otherPos, otherRot);
+			return collisionCircleRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos);
+		return collisionCircleRotatedRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos, otherRot);
 	}
 
-	//Circle <=> Circle collision
+	// Circle <=> Circle collision
 	if (dynamic_cast<Collider2DCircle*>(other))
-		return collisionCircleCircle(*this, myPos, *dynamic_cast<Collider2DCircle*>(other), otherPos);
+		return collisionCircleCircle(*this, myPos, *(Collider2DCircle*)(other), otherPos);
 
-	//Circle <=> Polygon collision
+	// Circle <=> Polygon collision
 	if (dynamic_cast<Collider2DPolygon*>(other)) {
 		if (otherRot == 0)
-			return collisionCirclePolygon(*this, myPos, *dynamic_cast<Collider2DPolygon*>(other), otherPos);
-		return collisionCircleRotatedPolygon(*this, myPos, *dynamic_cast<Collider2DPolygon*>(other), otherPos, otherRot);
+			return collisionCirclePolygon(*this, myPos, *(Collider2DPolygon*)other, otherPos);
+		return collisionCircleRotatedPolygon(*this, myPos, *(Collider2DPolygon*)other, otherPos, otherRot);
 	}
 
-	//Circle <=> Line collision
-	if (dynamic_cast<Collider2DLine*>(other))
-		return collisionCircleLine(*this, myPos, *dynamic_cast<Collider2DLine*>(other), otherPos);
-
-	//we don't recognize the other collider's type
-	return false;
-	WARNING(puts("Collision check attempted with unknown collider type"))*/
+	// Circle <=> Line collision
+	if (dynamic_cast<Collider2DLine*>(other)) {
+		if (otherRot == 0)
+			return collisionCircleLine(*this, myPos, *(Collider2DLine*)other, otherPos);
+		return collisionCircleRotatedLine(*this, myPos, *(Collider2DLine*)other, otherPos, otherRot);
+	}
+	// we don't recognize the other collider's type
+	WARNING(puts("Collision check attempted with unknown collider type"))
 	return false;
 }
 

@@ -26,6 +26,4 @@
 -reset object to starting position if it falls below the lowest map position - 100
 
 ~Collider2D~
--introduce separating axis to calculate polygon-polygon collisions
--flesh out missing collision pairs
--cleanup structure
+-cleanup code structure

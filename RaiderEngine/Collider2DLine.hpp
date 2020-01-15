@@ -28,5 +28,7 @@ public:
 	*/
 	bool collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot = 0) override;
 
+	void getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot);
+
 	void debugDraw(glm::vec2 pos, float rot) override;
 };

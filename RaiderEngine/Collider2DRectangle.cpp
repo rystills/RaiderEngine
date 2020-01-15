@@ -11,8 +11,7 @@ bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* ot
 	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		if (myRot == 0 && otherRot == 0)
 			return collisionRectangleRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos);
-		WARNING(puts("Rotated Rectangle/Rectangle collision type not yet implemented"))
-		return false;
+		return collisionRectangleRotatedRectangle(*this, myPos, myRot, *(Collider2DRectangle*)other, otherPos, otherRot);
 	}
 
 	// Rectangle <=> Circle collision
@@ -24,17 +23,15 @@ bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* ot
 
 	// Rectangle <=> Line collision
 	if (dynamic_cast<Collider2DLine*>(other)) {
-		WARNING(puts("Rectangle/Line collision type not yet implemented"))
-		return false;
+		return collisionLineRectangle(*(Collider2DLine*)other, otherPos, otherRot, *this, myPos, myRot);
 	}
 	
 	//Rectangle <=> Polygon collision
 	if (dynamic_cast<Collider2DPolygon*>(other)) {
-		WARNING(puts("Rectangle/Polygon collision type not yet implemented"))
-		return false;
+		return collisionRectanglePolygon(*this, myPos, myRot, *(Collider2DPolygon*)other, otherPos, otherRot);
 	}
 	
-	//we don't recognize the other collider's type
+	// we don't recognize the other collider's type
 	WARNING(puts("Collision check attempted with unknown collider type"))
 	return false;
 }
@@ -60,7 +57,6 @@ void Collider2DRectangle::getCornerPoints(glm::vec2 pts[], glm::vec2 pos) {
 }
 
 void Collider2DRectangle::getRotatedCornerPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {
-	getCornerPoints(pts, pos);
 	rotateCornerPoints(pts,pos,rot);
 }
 
