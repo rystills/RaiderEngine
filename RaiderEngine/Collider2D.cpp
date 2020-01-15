@@ -33,9 +33,10 @@ bool Collider2D::collisionCircleLine(Collider2DCircle a, glm::vec2 aPos, Collide
 }
 
 bool Collider2D::collisionCircleRotatedRectangle(Collider2DCircle a, glm::vec2 aPos, Collider2DRectangle b, glm::vec2 bPos, float brot) {
-	return false;
-	//grab the rotated, ordered points of this rectangle in space 
-	//return circleIntersectsPolygon(a, aPos, b.points, 4);
+	//grab the rotated, ordered points of this rectangle in space
+	glm::vec2 points[4];
+	b.getRotatedCornerPoints(points, bPos, brot);
+	return circleIntersectsPolygon(a, aPos, points, 4);
 }
 
 bool Collider2D::collisionCirclePolygon(Collider2DCircle a, glm::vec2 aPos, Collider2DPolygon b, glm::vec2 bPos) {

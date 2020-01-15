@@ -28,3 +28,4 @@
 ~Collider2D~
 -introduce separating axis to calculate polygon-polygon collisions
 -flesh out missing collision pairs
+-cleanup structure

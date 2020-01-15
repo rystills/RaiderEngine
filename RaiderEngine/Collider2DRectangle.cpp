@@ -8,7 +8,7 @@
 
 bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
 	// Rectangle <=> Rectangle collision
-	if (static_cast<Collider2DRectangle*>(other)) {
+	if (dynamic_cast<Collider2DRectangle*>(other)) {
 		if (myRot == 0 && otherRot == 0)
 			return collisionRectangleRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos);
 		WARNING(puts("Rotated Rectangle/Rectangle collision type not yet implemented"))
@@ -16,20 +16,20 @@ bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* ot
 	}
 
 	// Rectangle <=> Circle collision
-	if (static_cast<Collider2DCircle*>(other)) {
+	if (dynamic_cast<Collider2DCircle*>(other)) {
 		if (myRot == 0)
 			return collisionCircleRectangle(*(Collider2DCircle*)other, otherPos, *this, myPos);
 		return collisionCircleRotatedRectangle(*(Collider2DCircle*)other, otherPos, *this, myPos, myRot);
 	}
 
 	// Rectangle <=> Line collision
-	if (static_cast<Collider2DLine*>(other)) {
+	if (dynamic_cast<Collider2DLine*>(other)) {
 		WARNING(puts("Rectangle/Line collision type not yet implemented"))
 		return false;
 	}
 	
 	//Rectangle <=> Polygon collision
-	if (static_cast<Collider2DPolygon*>(other)) {
+	if (dynamic_cast<Collider2DPolygon*>(other)) {
 		WARNING(puts("Rectangle/Polygon collision type not yet implemented"))
 		return false;
 	}
@@ -52,8 +52,21 @@ void Collider2DRectangle::rotateCornerPoints(glm::vec2 pts[], glm::vec2 pos, flo
 	std::swap(pts[2], pts[3]);
 }
 
+void Collider2DRectangle::getCornerPoints(glm::vec2 pts[], glm::vec2 pos) {
+	pts[0] = pos + glm::vec2(-hwidth, -hheight);
+	pts[1] = pos + glm::vec2(-hwidth, hheight);
+	pts[2] = pos + glm::vec2(hwidth, hheight);
+	pts[3] = pos + glm::vec2(hwidth, -hheight);
+}
+
+void Collider2DRectangle::getRotatedCornerPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {
+	getCornerPoints(pts, pos);
+	rotateCornerPoints(pts,pos,rot);
+}
+
 void Collider2DRectangle::debugDraw(glm::vec2 pos, float rot) {
-	glm::vec2 points[4] = { pos+glm::vec2(-hwidth, -hheight), pos + glm::vec2(-hwidth, hheight), pos + glm::vec2(hwidth, hheight), pos + glm::vec2(hwidth, -hheight) };
+	glm::vec2 points[4];
+	getRotatedCornerPoints(points,pos,rot);
 	for (int i = 0; i < 3; ++i)
 		queueDrawLine(glm::vec3(points[i].x,points[i].y,0), glm::vec3(points[i+1].x, points[i + 1].y, 0), glm::vec3(1,.5f,.5f));
 	queueDrawLine(glm::vec3(points[3].x, points[3].y, 0), glm::vec3(points[0].x, points[0].y, 0), glm::vec3(1, .5f, .5f));
