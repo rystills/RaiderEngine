@@ -3,9 +3,9 @@
 #include "model.hpp"
 #include "settings.hpp"
 
-GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter, float depth) : 
-	position(position), rotation(rotation), color(color), scale(scale), depth(depth) {
-	sprite = Model::loadTextureSimple(spriteName);
+GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter, float depth, Collider2D* collider) : 
+	position(position), rotation(rotation), color(color), scale(scale), depth(depth), collider(collider) {
+	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
 	if (posIsCenter) {
 		glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
 		position -= halfExtents;
@@ -56,6 +56,9 @@ glm::vec2 GameObject2D::center() {
 }
 
 void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
+	// don't draw blank sprites
+	if (sprite.id == Model::defaultDiffuseMap.id)
+		return;
 	// Prepare transformations
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(position, depth));

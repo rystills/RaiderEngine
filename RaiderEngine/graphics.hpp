@@ -165,6 +165,8 @@ configure the line shader, and draw physics wireframes (if specified)
 */
 void renderLines();
 
+void renderLines2D();
+
 /*
 draw all 2D elements, including TextObjects and GameObject2Ds
 */

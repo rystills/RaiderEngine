@@ -146,6 +146,11 @@
     </ClCompile>
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="Collider2D.cpp" />
+    <ClCompile Include="Collider2DCircle.cpp" />
+    <ClCompile Include="Collider2DLine.cpp" />
+    <ClCompile Include="Collider2DPolygon.cpp" />
+    <ClCompile Include="Collider2DRectangle.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Cog.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Compass.cpp" />
     <ClCompile Include="demos\demo3dCarousel\FlickerLight.cpp" />
@@ -153,9 +158,9 @@
     <ClCompile Include="demos\demo3dCarousel\mouseInteraction.cpp" />
     <ClCompile Include="demos\demo3dCarousel\ObjectRegistry.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Ball.cpp" />
-    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp" />
+    <ClCompile Include="demos\demoCollider2Ds\demoCollider2Ds.cpp" />
     <ClCompile Include="FpsDisplay.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameObject2D.cpp" />
@@ -190,6 +195,11 @@
     <ClInclude Include="assimpFlags.hpp" />
     <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />
+    <ClInclude Include="Collider2D.hpp" />
+    <ClInclude Include="Collider2DCircle.hpp" />
+    <ClInclude Include="Collider2DLine.hpp" />
+    <ClInclude Include="Collider2DPolygon.hpp" />
+    <ClInclude Include="Collider2DRectangle.hpp" />
     <ClInclude Include="demos\demo3dCarousel\Cog.hpp" />
     <ClInclude Include="demos\demo3dCarousel\Compass.hpp" />
     <ClInclude Include="demos\demo3dCarousel\FlickerLight.hpp" />
@@ -235,6 +245,8 @@
     <None Include="shaders\deferred_shading.vs" />
     <None Include="shaders\g_buffer.fs" />
     <None Include="shaders\g_buffer.vs" />
+    <None Include="shaders\lineShader2D.fs" />
+    <None Include="shaders\lineShader2D.vs" />
     <None Include="shaders\point_shadows_depth.fs" />
     <None Include="shaders\point_shadows_depth.gs" />
     <None Include="shaders\point_shadows_depth.vs" />

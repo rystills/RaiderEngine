@@ -25,6 +25,9 @@
     <Filter Include="Source Files\demos\demoBrickBreaker">
       <UniqueIdentifier>{3d205c56-9c76-4409-98ea-0f1fca2095c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\demos\demoCollider2Ds">
+      <UniqueIdentifier>{160e2920-148e-4b1d-8da7-bd4d60df3504}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -123,8 +126,23 @@
     <ClCompile Include="demos\demo3dCarousel\Cog.cpp">
       <Filter>Source Files\demos\demo3dCarousel</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp">
-      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    <ClCompile Include="Collider2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider2DCircle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider2DLine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider2DPolygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider2DRectangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoCollider2Ds\demoCollider2Ds.cpp">
+      <Filter>Source Files\demos\demoCollider2Ds</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,6 +248,21 @@
     <ClInclude Include="demos\demoBrickBreaker\Paddle.hpp">
       <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClInclude>
+    <ClInclude Include="Collider2D.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider2DCircle.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider2DLine.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider2DPolygon.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider2DRectangle.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -278,6 +311,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\2DShader.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lineShader2D.fs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lineShader2D.vs">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
