@@ -32,6 +32,11 @@ GameObject2D* addGameObject2D(GameObject2D* go) {
 	return go;
 }
 
+Collider2D* addCollider2D(std::string name, Collider2D* go) {
+	colliders.insert(std::make_pair(name,go));
+	return go;
+}
+
 void removeGameObject2D(GameObject2D* go) {
 	std::string spriteName = std::filesystem::path(go->sprite.path).stem().string();
 	gameObject2Ds[spriteName].erase(std::find_if(gameObject2Ds[spriteName].begin(), gameObject2Ds[spriteName].end(), [&](std::unique_ptr<GameObject2D>& i) { return i.get() == go; }));

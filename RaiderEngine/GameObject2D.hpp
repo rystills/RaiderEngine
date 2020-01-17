@@ -53,6 +53,8 @@ public:
 	*/
 	glm::vec2 center();
 
+	bool collidesWith(GameObject2D* other);
+
 	/*
 	draw this GameObject2D's sprite using the specified shader
 	@param shader: the shader to use while drawing the sprite

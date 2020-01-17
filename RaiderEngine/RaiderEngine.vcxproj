@@ -158,9 +158,10 @@
     <ClCompile Include="demos\demo3dCarousel\mouseInteraction.cpp" />
     <ClCompile Include="demos\demo3dCarousel\ObjectRegistry.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Ball.cpp" />
+    <ClCompile Include="demos\demoBrickBreaker\Brick.cpp" />
+    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp" />
-    <ClCompile Include="demos\demoCollider2Ds\demoCollider2Ds.cpp" />
     <ClCompile Include="FpsDisplay.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameObject2D.cpp" />

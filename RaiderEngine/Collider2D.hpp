@@ -8,7 +8,6 @@ extern class Collider2DPolygon;
 extern class Collider2DRectangle;
 
 // class representing a collider used for collision checking between objects
-// because the player and enemies strictly use circle colliders, collision definitions are mostly limited to those involving a circle
 class Collider2D {
 public:
 	float boundingRadius = 0;

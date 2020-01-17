@@ -6,7 +6,7 @@
 class Paddle : public GameObject2D {
 public:
 	float speed = 800;
-	Paddle(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), glm::vec3(1), "paddle.png") {}
+	Paddle(glm::vec2 position);
 
 	void restart();
 

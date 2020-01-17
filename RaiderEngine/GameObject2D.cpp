@@ -55,6 +55,10 @@ glm::vec2 GameObject2D::center() {
 	return position + halfExtents;
 }
 
+bool GameObject2D::collidesWith(GameObject2D* other) {
+	return collider && other->collider ? collider->collision(center(), rotation, other->collider, other->center(), other->rotation) : false;
+}
+
 void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
 	// don't draw blank sprites
 	if (sprite.id == Model::defaultDiffuseMap.id)

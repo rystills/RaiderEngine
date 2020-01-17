@@ -34,6 +34,7 @@ inline std::vector<std::unique_ptr<Light>> lights;
 inline std::unordered_map<std::string, std::unordered_map<int, Character[numFontCharacters]>> fonts;
 inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
+inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
 
 /* methods to add/remove objects from the engine */
 GameObject* addGameObject(GameObject* go);
@@ -43,6 +44,8 @@ void removeGameObject(GameObject* go);
 void removeGameObject(std::string modelName, int ind);
 
 GameObject2D* addGameObject2D(GameObject2D* go);
+
+Collider2D* addCollider2D(std::string name, Collider2D* go);
 
 void removeGameObject2D(GameObject2D* go);
 

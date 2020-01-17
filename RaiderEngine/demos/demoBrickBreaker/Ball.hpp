@@ -5,11 +5,9 @@
 class Ball : public GameObject2D {
 public:
 	float speed = 700;
-	Ball(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), glm::vec3(1), "ball.png") {}
+	Ball(glm::vec2 position);
 
 	void restart();
-
-	bool collision(GameObject2D* o);
 
 	void bounce(bool isVert);
 

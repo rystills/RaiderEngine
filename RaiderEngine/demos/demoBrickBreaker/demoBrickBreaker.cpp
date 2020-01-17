@@ -8,6 +8,7 @@
 #include "Paddle.hpp"
 #include "Ball.hpp"
 #include "GameManager.hpp"
+#include "Collider2DCircle.hpp"
 
 int main() {
 	// directories

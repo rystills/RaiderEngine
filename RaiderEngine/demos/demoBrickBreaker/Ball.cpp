@@ -3,16 +3,15 @@
 #include "GameManager.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
+#include "Collider2DCircle.hpp"
 
 void Ball::restart() {
 	setCenter(glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT / 2 + 200));
 	rotation = -glm::quarter_pi<float>();
 }
 
-bool Ball::collision(GameObject2D* o) {
-	// simple AABB collision check
-	return (position.x + sprite.width > o->position.x&& position.x < o->position.x + o->sprite.width &&
-		position.y + sprite.height > o->position.y&& position.y < o->position.y + o->sprite.height);
+Ball::Ball(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), glm::vec3(1), "ball.png") {
+	collider = colliders.contains("ball") ? colliders["ball"].get() : addCollider2D("ball", new Collider2DCircle(12));
 }
 
 void Ball::bounce(bool isVert) {
@@ -48,7 +47,7 @@ void Ball::update() {
 
 	// bounce off of bricks, breaking them in the process
 	for (int i = 0; i < gameObject2Ds["brick"].size(); ++i) {
-		if (collision(&*gameObject2Ds["brick"][i])) {
+		if (collidesWith(&*gameObject2Ds["brick"][i])) {
 			GameObject2D o = *gameObject2Ds["brick"][i];
 			// if we are moving away from the brick on one axis, the correct bounce must be on the other axis
 			if (center().x > o.center().x&& cos(rotation) > 0 || center().x < o.center().x && cos(rotation) < 0)
@@ -70,7 +69,7 @@ void Ball::update() {
 	}
 
 	// bounce off of the paddle, picking a new direction based off of our horizontal distance from the paddle's center
-	if (collision(paddle)) {
+	if (collidesWith(paddle)) {
 		position.y = paddle->position.y - sprite.height;
 		float xOff = center().x - paddle->center().x;
 		rotation = -glm::half_pi<float>() + (3 * glm::pi<float>() / 8) * (xOff / (sprite.width / 2 + paddle->sprite.width / 2));
