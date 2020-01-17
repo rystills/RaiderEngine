@@ -634,21 +634,21 @@ void debugDrawLightCubes() {
 
 void renderLines() {
 	// render UI
+	glDisable(GL_DEPTH_TEST);
+	shaders["lineShader"]->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(mainCam->projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(mainCam->view));
 	if (debugDraw) {
-		glDisable(GL_DEPTH_TEST);
-		shaders["lineShader"]->use();
-		glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(mainCam->projection));
-		glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(mainCam->view));
 		// draw 3d colliders
 		debugDrawPhysics();
 	}
 }
 
 void renderLines2D() {
+	glDisable(GL_DEPTH_TEST);
+	shaders["lineShader2D"]->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader2D"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
 	if (debugDraw) {
-		glDisable(GL_DEPTH_TEST);
-		shaders["lineShader2D"]->use();
-		glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader2D"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
 			for (int i = 0; i < kv.second.size(); ++i)

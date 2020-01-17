@@ -8,8 +8,9 @@ public:
 	float x, y;
 	glm::vec3 color;
 	bool centered;
+	std::string fontName;
 	int fontSize;
-	TextObject(std::string text, float x, float y, glm::vec3 color, int fontSize, bool centered = false) : text(text), x(x), y(y), color(color), fontSize(fontSize), centered(centered) {};
+	TextObject(std::string text, float x, float y, glm::vec3 color, std::string fontName, int fontSize, bool centered = false) : text(text), x(x), y(y), color(color), fontName(fontName), fontSize(fontSize), centered(centered) {};
 
 	virtual void update() {}
 

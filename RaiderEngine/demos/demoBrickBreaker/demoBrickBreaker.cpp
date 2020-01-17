@@ -27,9 +27,9 @@ int main() {
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));
 	ball = (Ball*)addGameObject2D(new Ball(glm::vec2(0)));
-	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), 18));
-	addTextObject(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), 18));
-	addTextObject(new TextObject("Level: 1", 6, 54, glm::vec3(.6f, .4f, .5f), 18));
+	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	addTextObject(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Level: 1", 6, 54, glm::vec3(.6f, .4f, .5f), "Inter-Regular", 18));
 	restartGame();
 
 	while (!glfwWindowShouldClose(window)) {

@@ -85,11 +85,11 @@ int main() {
 	// add fps indicator
 	freetypeLoadFont("Inter-Regular", 18);
 	freetypeLoadFont("Inter-Regular", 24);
-	addTextObject(new FpsDisplay(6,6,glm::vec3(1,1,1),18));
-	addTextObject(new TextObject("Press f3 to toggle physics wireframes",6,30, glm::vec3(.8f, .2f, .5f), 24));
-	addTextObject(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), 24));
-	addTextObject(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, 90, glm::vec3(.2f, .5f, .8f), 24));
-	addTextObject(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), 24));
+	addTextObject(new FpsDisplay(6,6,glm::vec3(1,1,1), "Inter-Regular", 18));
+	addTextObject(new TextObject("Press f3 to toggle physics wireframes",6,30, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 24));
+	addTextObject(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), "Inter-Regular", 24));
+	addTextObject(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, 90, glm::vec3(.2f, .5f, .8f), "Inter-Regular", 24));
+	addTextObject(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), "Inter-Regular", 24));
 	addGameObject2D(new Compass(glm::vec2(1146,586),0,glm::vec2(1), glm::vec3(1), "UI/compass.png"));
 
 	while (!glfwWindowShouldClose(window)) {
