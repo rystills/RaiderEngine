@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DLine::Collider2DLine(float sx, float sy, float ex, float ey) : sx(sx), sy(sy), ex(ex), ey(ey) {
+Collider2DLine::Collider2DLine(float sx, float sy, float ex, float ey) : sx(sx), sy(sy), ex(ex), ey(ey), Collider2D(line) {
 	glm::vec2 pts[2] = { glm::vec2(sx,sy),glm::vec2(ex,ey) };
 	calculateBoundingRadius(pts,2);
 }
@@ -14,30 +14,21 @@ Collider2DLine::Collider2DLine(float sx, float sy, float ex, float ey) : sx(sx),
 bool Collider2DLine::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
 	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
 		return false;
-	// Line <=> Rectangle collision
-	if (dynamic_cast<Collider2DRectangle*>(other)) {
+	switch (other->type) {
+	case rectangle:
 		return collisionLineRectangle(*this, myPos, myRot, *(Collider2DRectangle*)other, otherPos, otherRot);
-	}
-
-	// Line <=> Circle collision
-	if (dynamic_cast<Collider2DCircle*>(other)) {
+	case circle:
 		if (myRot == 0)
 			return collisionCircleLine(*(Collider2DCircle*)other, otherPos, *this, myPos);
 		return collisionCircleRotatedLine(*(Collider2DCircle*)other, otherPos, *this, myPos, myRot);
-	}		
-
-	// Line <=> Polygon collision
-	if (dynamic_cast<Collider2DPolygon*>(other)) {
+	case polygon:
 		return collisionLinePolygon(*this, myPos, myRot, *(Collider2DPolygon*)other, otherPos, otherRot);
-	}
-
-	//Line <=> Line collision
-	if (dynamic_cast<Collider2DLine*>(other)) {
+	case line:
 		return collisionLineLine(*this, myPos, myRot, *(Collider2DLine*)other, otherPos, otherRot);
+	default:
+		WARNING(puts("Collision check attempted with unknown collider type"))
+		return false;
 	}
-	// we don't recognize the other collider's type
-	WARNING(puts("Collision check attempted with unknown collider type"))
-	return false;
 }
 
 void Collider2DLine::getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {

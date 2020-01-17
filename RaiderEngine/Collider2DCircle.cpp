@@ -6,40 +6,32 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DCircle::Collider2DCircle(float radius) : radius(radius) {
+Collider2DCircle::Collider2DCircle(float radius) : radius(radius), Collider2D(circle) {
 	boundingRadius = radius;
 }
 
 bool Collider2DCircle::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
 	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
 		return false;
-	// Circle <=> Rectangle collision
-	if (dynamic_cast<Collider2DRectangle*>(other)) {
+	switch (other->type) {
+	case rectangle:
 		if (otherRot == 0)
 			return collisionCircleRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos);
 		return collisionCircleRotatedRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos, otherRot);
-	}
-
-	// Circle <=> Circle collision
-	if (dynamic_cast<Collider2DCircle*>(other))
+	case circle:
 		return collisionCircleCircle(*this, myPos, *(Collider2DCircle*)(other), otherPos);
-
-	// Circle <=> Polygon collision
-	if (dynamic_cast<Collider2DPolygon*>(other)) {
+	case polygon:
 		if (otherRot == 0)
 			return collisionCirclePolygon(*this, myPos, *(Collider2DPolygon*)other, otherPos);
 		return collisionCircleRotatedPolygon(*this, myPos, *(Collider2DPolygon*)other, otherPos, otherRot);
-	}
-
-	// Circle <=> Line collision
-	if (dynamic_cast<Collider2DLine*>(other)) {
+	case line:
 		if (otherRot == 0)
 			return collisionCircleLine(*this, myPos, *(Collider2DLine*)other, otherPos);
 		return collisionCircleRotatedLine(*this, myPos, *(Collider2DLine*)other, otherPos, otherRot);
+	default:
+		WARNING(puts("Collision check attempted with unknown collider type"))
+		return false;
 	}
-	// we don't recognize the other collider's type
-	WARNING(puts("Collision check attempted with unknown collider type"))
-	return false;
 }
 
 void Collider2DCircle::debugDraw(glm::vec2 pos, float rot) {

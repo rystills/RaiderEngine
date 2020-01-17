@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints) {
+Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints) : Collider2D(polygon) {
 	//create a deep copy of the input vector2 array so we can modify points locally
 	for (int i = 0; i < inPoints.size(); ++i)
 		points.push_back(glm::vec2(inPoints[i].x, inPoints[i].y));
@@ -16,30 +16,21 @@ Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints) {
 bool Collider2DPolygon::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
 	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
 		return false;
-	// Polygon <=> Rectangle collision
-	if (dynamic_cast<Collider2DRectangle*>(other)) {
+	switch (other->type) {
+	case rectangle:
 		return collisionRectanglePolygon(*(Collider2DRectangle*)other, otherPos, otherRot, *this, myPos, myRot);
-	}
-
-	// Polygon <=> Circle collision
-	if (dynamic_cast<Collider2DCircle*>(other)) {
+	case circle:
 		if (myRot == 0)
 			return collisionCirclePolygon(*(Collider2DCircle*)other, otherPos, *this, myPos);
 		return collisionCircleRotatedPolygon(*(Collider2DCircle*)other, otherPos, *this, myPos, myRot);
-	}
-
-	// Polygon <=> Polygon collision
-	if (dynamic_cast<Collider2DPolygon*>(other)) {
+	case polygon:
 		return collisionPolygonPolygon(*this, myPos, myRot, *(Collider2DPolygon*)other, otherPos, otherRot);
-	}
-
-	// Polygon <=> Line collision
-	if (dynamic_cast<Collider2DLine*>(other)) {
+	case line:
 		return collisionLinePolygon(*(Collider2DLine*)other, otherPos, otherRot, *this, myPos, myRot);
+	default:
+		WARNING(puts("Collision check attempted with unknown collider type"))
+		return false;
 	}
-	// we don't recognize the other collider's type
-	WARNING(puts("Collision check attempted with unknown collider type"))
-	return false;
 }
 
 void Collider2DPolygon::getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {

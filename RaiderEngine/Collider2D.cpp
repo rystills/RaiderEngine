@@ -6,6 +6,8 @@
 #include "Collider2DLine.hpp"
 #include "settings.hpp"
 
+Collider2D::Collider2D(ColliderType type) : type(type) {}
+
 bool Collider2D::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
 	return false;
 }

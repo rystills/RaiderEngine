@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DRectangle::Collider2DRectangle(float hwidth, float hheight) : hwidth(hwidth), hheight(hheight) {
+Collider2DRectangle::Collider2DRectangle(float hwidth, float hheight) : hwidth(hwidth), hheight(hheight), Collider2D(rectangle) {
 	glm::vec2 pts[4];
 	getCornerPoints(pts, glm::vec2(0));
 	calculateBoundingRadius(pts, 4);
@@ -15,33 +15,23 @@ Collider2DRectangle::Collider2DRectangle(float hwidth, float hheight) : hwidth(h
 bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* other, glm::vec2 otherPos, float otherRot) {
 	if (!boundingRadiusCheck(*this, myPos, *other, otherPos))
 		return false;
-	// Rectangle <=> Rectangle collision
-	if (dynamic_cast<Collider2DRectangle*>(other)) {
+	switch (other->type) {
+	case rectangle:
 		if (myRot == 0 && otherRot == 0)
 			return collisionRectangleRectangle(*this, myPos, *(Collider2DRectangle*)other, otherPos);
 		return collisionRectangleRotatedRectangle(*this, myPos, myRot, *(Collider2DRectangle*)other, otherPos, otherRot);
-	}
-
-	// Rectangle <=> Circle collision
-	if (dynamic_cast<Collider2DCircle*>(other)) {
+	case circle:
 		if (myRot == 0)
 			return collisionCircleRectangle(*(Collider2DCircle*)other, otherPos, *this, myPos);
 		return collisionCircleRotatedRectangle(*(Collider2DCircle*)other, otherPos, *this, myPos, myRot);
-	}
-
-	// Rectangle <=> Line collision
-	if (dynamic_cast<Collider2DLine*>(other)) {
+	case line:
 		return collisionLineRectangle(*(Collider2DLine*)other, otherPos, otherRot, *this, myPos, myRot);
-	}
-	
-	//Rectangle <=> Polygon collision
-	if (dynamic_cast<Collider2DPolygon*>(other)) {
+	case polygon:
 		return collisionRectanglePolygon(*this, myPos, myRot, *(Collider2DPolygon*)other, otherPos, otherRot);
+	default:
+		WARNING(puts("Collision check attempted with unknown collider type"))
+		return false;
 	}
-	
-	// we don't recognize the other collider's type
-	WARNING(puts("Collision check attempted with unknown collider type"))
-	return false;
 }
 
 void Collider2DRectangle::rotateCornerPoints(glm::vec2 pts[], glm::vec2 pos, float ang) {

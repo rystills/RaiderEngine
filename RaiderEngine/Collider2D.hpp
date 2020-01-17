@@ -6,16 +6,18 @@ extern class Collider2DCircle;
 extern class Collider2DLine;
 extern class Collider2DPolygon;
 extern class Collider2DRectangle;
+enum ColliderType { circle = 0, line = 1, rectangle = 2, polygon = 3 };
 
 // class representing a collider used for collision checking between objects
 class Collider2D {
 public:
 	float boundingRadius = 0;
+	ColliderType type;
 	const static int boundingRadiusBuffer = 2;
 	/*
 	Collider constructor: define the shape and collider type
 	*/
-	Collider2D() { }
+	Collider2D(ColliderType type);
 
 	/*
 	check whether two colliders are overlapping (true) or not (false)

@@ -141,11 +141,11 @@
     <ClCompile Include="Collider2DRectangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp">
-      <Filter>Source Files\demos\demoBrickBreaker</Filter>
-    </ClCompile>
     <ClCompile Include="demos\demoBrickBreaker\Brick.cpp">
       <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoCollider2Ds\demoCollider2Ds.cpp">
+      <Filter>Source Files\demos\demoCollider2Ds</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
