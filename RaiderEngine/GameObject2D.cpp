@@ -18,13 +18,10 @@ void GameObject2D::initStaticVertexBuffer() {
 	GLuint VBO;
 	GLfloat vertices[] = {
 		// Pos      // Tex
+		0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-
-		0.0f, 1.0f, 0.0f, 1.0f,
 		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 0.0f
 	};
 
 	glGenVertexArrays(1, VAO.get());
@@ -86,5 +83,5 @@ void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, sprite.id);
 	}
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
