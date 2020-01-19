@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 // mouse
 inline float lastX = 0;

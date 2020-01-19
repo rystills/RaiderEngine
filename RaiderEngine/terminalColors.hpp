@@ -1,5 +1,5 @@
-#ifndef terminalColors
-#define terminalColors
+#pragma once
+#include "stdafx.h"
 
 // add support for colored terminal output by enclosing print statements in ERROR, WARNING, or SUCCESS
 #ifdef _WIN32
@@ -19,5 +19,4 @@ inline int originalColor;
 #define WARNING(msg) { printf(ANSI_COLOR_YELLOW); msg; printf(ANSI_COLOR_RESET); }
 #define ERROR(msg) { printf(ANSI_COLOR_RED); msg; printf(ANSI_COLOR_RESET); }
 #define SUCCESS(msg) { printf(ANSI_COLOR_GREEN); msg; printf(ANSI_COLOR_RESET); }
-#endif
 #endif

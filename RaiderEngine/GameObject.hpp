@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include "physics.hpp"
 #include "model.hpp"
 

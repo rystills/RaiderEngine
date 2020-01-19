@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include "shader.hpp"
 
 // this file is responsible for graphics, including debug and text rendering

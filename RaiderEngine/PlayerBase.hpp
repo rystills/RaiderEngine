@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include "physics.hpp"
 
 // see this page for the physx CCT demo: https://github.com/NVIDIAGameWorks/PhysX/blob/4050bbfdc2699dfab7edbf0393df8ff96bbe06c5/physx/samples/samplecctsharedcode/SampleCCTCameraController.cpp

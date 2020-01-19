@@ -1,5 +1,6 @@
 using namespace physx;
 #pragma once
+#include "stdafx.h"
 #define GRAVITY_STRENGTH 9.81f
 inline static PxDefaultErrorCallback gDefaultErrorCallback;
 inline static PxDefaultAllocator gDefaultAllocatorCallback;

@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #pragma once
+#include "stdafx.h"
 // this file houses the assimp flags used for loading different mesh types
 inline unsigned int aiMapProcessFlags =
 aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible

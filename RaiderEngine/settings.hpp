@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include "camera.hpp"
 #include "ObjectRegistryBase.hpp"
 #include "model.hpp"

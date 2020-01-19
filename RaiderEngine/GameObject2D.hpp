@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "Collider2D.hpp"

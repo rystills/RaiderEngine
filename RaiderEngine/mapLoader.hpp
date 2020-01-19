@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 // this file is responsible for loading maps from special FBX files
 
