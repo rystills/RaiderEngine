@@ -62,7 +62,8 @@ void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
 		return;
 	// Prepare transformations
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(position, depth));
+	// round position in an effort to achieve pixel perfect 2D rendering
+	model = glm::translate(model, glm::vec3(round(position.x), round(position.y), depth));
 
 	// multiply scaling factor by sprite dimensions so that a scale of 1,1 = original size
 	glm::vec2 appliedScale(scale.x * sprite.width, scale.y * sprite.height);

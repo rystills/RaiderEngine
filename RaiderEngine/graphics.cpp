@@ -283,6 +283,7 @@ void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 }
 
 void drawPoints() {
+	// todo: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * pointsQueue.size(), &pointsQueue[0], GL_STATIC_DRAW);
@@ -299,6 +300,7 @@ void drawPoints() {
 }
 
 void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) {
+	// todo: offset screen coords by 0.5f to draw lines from pixel centers rather than corners?
 	GLfloat points[18];
 
 	points[0] = from.x;
@@ -653,7 +655,7 @@ void renderLines2D() {
 		for (auto&& kv : gameObject2Ds)
 			for (int i = 0; i < kv.second.size(); ++i)
 				if (kv.second[i]->collider)
-					kv.second[i]->collider->debugDraw(kv.second[i]->position, kv.second[i]->rotation);
+					kv.second[i]->collider->debugDraw(kv.second[i]->center(), kv.second[i]->rotation);
 	}
  }
 
