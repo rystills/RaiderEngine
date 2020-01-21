@@ -53,9 +53,9 @@ void PlayerBase::update() {
 	// movement
 	float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
 	if (mainCam->controllable) {
-		baseMoveSpeed = (crouching ? crouchSpeed : (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? runSpeed : walkSpeed));
-		forwardSpeed = (int(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)) * baseMoveSpeed;
-		strafeSpeed = (int(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) - int(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) * baseMoveSpeed;
+		baseMoveSpeed = (crouching ? crouchSpeed : (keyHeld("run") ? runSpeed : walkSpeed));
+		forwardSpeed = (keyHeld("mvForward") - keyHeld("mvBackward")) * baseMoveSpeed;
+		strafeSpeed = (keyHeld("mvRight") - keyHeld("mvLeft")) * baseMoveSpeed;
 		if (forwardSpeed && strafeSpeed) {
 			// average forward and strafe speeds to prevent diagonal movement from being faster
 			float invMag = baseMoveSpeed / sqrt(forwardSpeed * forwardSpeed + strafeSpeed * strafeSpeed);
@@ -96,7 +96,7 @@ void PlayerBase::update() {
 	}
 	// jump
 	if (mainCam->controllable)
-		if (grounded && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		if (grounded && keyPressed("jump"))
 			// jump velocity is a burst, so deltaTime is ignored
 			velocity.y = jumpStrength;
 	// TODO: set velocity to 0 if the player bumps their head on a ceiling
@@ -105,7 +105,7 @@ void PlayerBase::update() {
 	PxVec3 physVelocity(velocity.x * deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
 	controller->move(physVelocity, 0, deltaTime, NULL);
 	// crouch toggle
-	if (keyStates[GLFW_KEY_LEFT_CONTROL][pressed]) {
+	if (keyPressed("crouch")) {
 		// we can always crouch, but if we're trying to stand back up, make sure we won't hit our head on something
 		if (crouching) {
 			PxSceneReadLock scopedLock(*gScene);

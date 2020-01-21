@@ -28,3 +28,4 @@
 ~Collider2D~
 -cleanup code structure
 -Add optional advanced collision functions which return collision point (deepest one?) and penetration amount
+-add module for building up polygon colliders for images

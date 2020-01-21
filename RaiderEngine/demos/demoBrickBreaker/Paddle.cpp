@@ -17,6 +17,6 @@ void Paddle::restart() {
 void Paddle::update() {
 	if (paused)
 		return;
-	position.x += (keyStates[GLFW_KEY_D][held] - keyStates[GLFW_KEY_A][held]) * speed * deltaTime * levelMultiplier;
+	position.x += (keyHeld("mvRight") - keyHeld("mvLeft")) * speed * deltaTime * levelMultiplier;
 	setCenter(glm::vec2(std::fmax(0, std::fmin(SCR_WIDTH, center().x)), center().y));
 }

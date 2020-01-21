@@ -16,6 +16,11 @@ int main() {
 	setSoundDir("demos/demoBrickBreaker/sounds");
 	setFontDir("demos/shared/fonts");
 
+	// keybindings
+	setKeyBinding("mvLeft", GLFW_KEY_A);
+	setKeyBinding("mvRight", GLFW_KEY_D);
+	setKeyBinding("restart", GLFW_KEY_ENTER);
+
 	// initialization
 	window = initGraphics();
 	initAudio();
@@ -39,7 +44,7 @@ int main() {
 		glfwPollEvents();
 
 		// update objects
-		if (paused && keyStates[GLFW_KEY_ENTER][pressed]) {
+		if (paused && keyPressed("restart")) {
 			paused = false;
 			restartGame();
 		}
@@ -54,7 +59,7 @@ int main() {
 			renderText("Inter-Regular", 48, *shaders["textShader"], "Press Enter to Start", SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (keyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 	}
 	glfwTerminate();

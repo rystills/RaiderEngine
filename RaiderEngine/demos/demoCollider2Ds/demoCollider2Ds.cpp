@@ -14,6 +14,17 @@ int main() {
 	// directories
 	setFontDir("demos/shared/fonts");
 
+	// keybindings
+	setKeyBinding("mvLeft", GLFW_KEY_A);
+	setKeyBinding("mvRight", GLFW_KEY_D);
+	setKeyBinding("mvUp", GLFW_KEY_W);
+	setKeyBinding("mvDown", GLFW_KEY_S);
+	setKeyBinding("rotCCW", GLFW_KEY_Q);
+	setKeyBinding("rotCW", GLFW_KEY_E);
+	setKeyBinding("swap1", GLFW_KEY_R);
+	setKeyBinding("swap2", GLFW_KEY_F);
+
+
 	// initialization
 	window = initGraphics();
 	initAudio();
@@ -48,31 +59,16 @@ int main() {
 
 		updateObjects();
 
-		if (keyStates[GLFW_KEY_A][held])
-			g1->position.x -= 200 * deltaTime;
-		if (keyStates[GLFW_KEY_D][held])
-			g1->position.x += 200 * deltaTime;
-		if (keyStates[GLFW_KEY_W][held])
-			g1->position.y -= 200 * deltaTime;
-		if (keyStates[GLFW_KEY_S][held])
-			g1->position.y += 200 * deltaTime;
-		
-		if (keyStates[GLFW_KEY_Q][held])
-			g1->rotation -= 3 * deltaTime;
-		if (keyStates[GLFW_KEY_E][held])
-			g1->rotation += 3 * deltaTime;
+		// update colliders
+		g1->position.x += (keyHeld("mvRight") - keyHeld("mvLeft")) * 200 * deltaTime;
+		g1->position.y += (keyHeld("mvDown") - keyHeld("mvUp")) * 200 * deltaTime;
+		g1->rotation += (keyHeld("rotCW") - keyHeld("rotCCW")) * 3 * deltaTime;
+		if (keyPressed("swap1"))
+			g1->collider = cols[(g1ColInd+=1) %= numCols];
+		if (keyPressed("swap2"))
+			g2->collider = cols[(g2ColInd+=1) %= numCols];
 
-		if (keyStates[GLFW_KEY_R][pressed]) {
-			g1ColInd = (g1ColInd + 1) % numCols;
-			g1->collider = cols[g1ColInd];
-		}
-		if (keyStates[GLFW_KEY_F][pressed]) {
-			g2ColInd = (g2ColInd + 1) % numCols;
-			g2->collider = cols[g2ColInd];
-		}
-
-		textObjects[1]->text = "Colliding ? " + (g1->collider->collision(g1->position, g1->rotation, g2->collider, g2->position, g2->rotation) ? std::string("true") : std::string("false")) + 
-										" | " + (g2->collider->collision(g2->position, g2->rotation, g1->collider, g1->position, g1->rotation) ? std::string("true") : std::string("false"));
+		textObjects[1]->text = "Colliding ? " + (g1->collidesWith(g2) ? std::string("true") : std::string("false")) + " | " + (g2->collidesWith(g1) ? std::string("true") : std::string("false"));
 
 		// render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -80,7 +76,7 @@ int main() {
 		render2D();
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (keyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 	}
 	glfwTerminate();

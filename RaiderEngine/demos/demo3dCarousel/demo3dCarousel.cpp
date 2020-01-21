@@ -74,6 +74,17 @@ int main() {
 	setSoundDir("demos/demo3dCarousel/sounds");
 	setFontDir("demos/shared/fonts");
 
+	setKeyBinding("loadScene1", GLFW_KEY_1);
+	setKeyBinding("loadScene2", GLFW_KEY_2);
+	setKeyBinding("loadScene3", GLFW_KEY_3);
+	setKeyBinding("run", GLFW_KEY_LEFT_SHIFT);
+	setKeyBinding("jump", GLFW_KEY_SPACE);
+	setKeyBinding("crouch", GLFW_KEY_LEFT_CONTROL);
+	setKeyBinding("mvLeft", GLFW_KEY_A);
+	setKeyBinding("mvRight", GLFW_KEY_D);
+	setKeyBinding("mvForward", GLFW_KEY_W);
+	setKeyBinding("mvBackward", GLFW_KEY_S);
+
 	// sound
 	playSound("Julie_Li_-_01_-_resound.ogg");
 
@@ -94,11 +105,11 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 		// switch scenes on number key press
-		if (keyStates[GLFW_KEY_1][pressed])
+		if (keyPressed("loadScene1"))
 			checkSwitchMap(1);
-		else if (keyStates[GLFW_KEY_2][pressed])
+		else if (keyPressed("loadScene2"))
 			checkSwitchMap(2);
-		else if (keyStates[GLFW_KEY_3][pressed])
+		else if (keyPressed("loadScene3"))
 			checkSwitchMap(3);
 
 		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
@@ -143,7 +154,7 @@ int main() {
 			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (keyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 	}
 	glfwTerminate();

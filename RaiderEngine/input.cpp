@@ -2,6 +2,29 @@
 #include "input.hpp"
 #include "settings.hpp"
 
+void setKeyBinding(std::string action, unsigned int key) {
+	keyBindings[action] = key;
+}
+
+bool keyHeld(int key) {
+	return keyStates[key][held];
+}
+bool keyHeld(std::string action) {
+	return keyStates[keyBindings[action]][held];
+}
+bool keyPressed(int key) {
+	return keyStates[key][pressed];
+}
+bool keyPressed(std::string action) {
+	return keyStates[keyBindings[action]][pressed];
+}
+bool keyReleased(int key) {
+	return keyStates[key][released];
+}
+bool keyReleased(std::string action) {
+	return keyStates[keyBindings[action]][released];
+}
+
 void resetSingleFrameInput() {
 	// reset mouse events
 	mousePressedLeft = false;

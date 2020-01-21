@@ -14,6 +14,16 @@ inline bool mouseReleasedRight = false;  // whether or not the right mouse butto
 inline bool f3Pressed = false;
 enum keyState { pressed = 0, held = 1, released = 2 };
 inline int keyStates[GLFW_KEY_LAST][3] = { 0 };
+inline std::unordered_map<std::string, unsigned int> keyBindings;
+
+void setKeyBinding(std::string action, unsigned int key);
+
+bool keyHeld(int key);
+bool keyHeld(std::string action);
+bool keyPressed(int key);
+bool keyPressed(std::string action);
+bool keyReleased(int key);
+bool keyReleased(std::string action);
 
 /*
 reset all input events that occur for a single frame only
