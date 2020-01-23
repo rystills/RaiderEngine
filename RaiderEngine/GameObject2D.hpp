@@ -7,13 +7,17 @@
 class GameObject2D {
 public:
 	glm::vec2 position;  // topleft position
+	glm::vec2 center;
 	float rotation;  // rotation measured in radians
-	glm::vec2 scale;
+	glm::vec2 scaleVal;
 	glm::vec3 color;
 	Texture sprite;
 	float depth;  // depth in NDC coordinates
 	inline static std::unique_ptr<ALuint, std::function<void(ALuint*)>> VAO;
 	Collider2D* collider;
+	bool isDirty = true;
+	glm::mat4 model;
+	glm::vec2 halfExtents;
 
 	/*
 	GameObject2D constructor: creates a new GameObject2D with the specified transforms and sprite
@@ -37,11 +41,30 @@ public:
 	*/
 	virtual void update() {};
 
+
+	void recalculateHalfExtents();
 	/*
 	set this object's center coordinates
 	@param newCenter: the position to which to set this object's center position
 	*/
 	void setCenter(glm::vec2 newCenter);
+	void setCenter(float newX, float newY);
+
+	void setPos(glm::vec2 newPos);
+	void setPos(float newX, float newY);
+
+	void translate(glm::vec2 posOff);
+	void translate(float xOff, float yOff);
+
+	void setRot(float newRot);
+
+	void rotate(float rotOff);
+
+	void setScale(glm::vec2 newScale);
+	void setScale(float newX, float newY);
+
+	void scale(glm::vec2 scaleOff);
+	void scale(float xOff, float yOff);
 
 	/*
 	check whether or not any part of this sprite is inside of the current screen boundaries
@@ -49,12 +72,9 @@ public:
 	*/
 	bool inScreenBounds();
 
-	/*
-	retrieve this object's center coordinates
-	*/
-	glm::vec2 center();
-
 	bool collidesWith(GameObject2D* other);
+
+	void recalculateModel();
 
 	/*
 	draw this GameObject2D's sprite using the specified shader

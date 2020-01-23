@@ -4,12 +4,15 @@
 #include "settings.hpp"
 
 GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter, float depth, Collider2D* collider) : 
-	position(position), rotation(rotation), color(color), scale(scale), depth(depth), collider(collider) {
+	position(position), rotation(rotation), color(color), scaleVal(scale), depth(depth), collider(collider) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
+	recalculateHalfExtents();
 	if (posIsCenter) {
-		glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
+		center = position;
 		position -= halfExtents;
 	}
+	else
+		center = position + halfExtents;
 }
 
 void GameObject2D::initStaticVertexBuffer() {
@@ -37,36 +40,102 @@ void GameObject2D::initStaticVertexBuffer() {
 	glBindVertexArray(0);
 }
 
+void GameObject2D::recalculateHalfExtents() {
+	halfExtents = { scaleVal.x * sprite.width * .5f, scaleVal.y * sprite.height * .5f };
+}
+
 void GameObject2D::setCenter(glm::vec2 newCenter) {
-	glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
-	position = newCenter - halfExtents;
+	center = newCenter;
+	position = center - halfExtents;
+	isDirty = true;
+}
+void GameObject2D::setCenter(float x, float y) {
+	center.x = x;
+	center.y = y;
+	position = center - halfExtents;
+	isDirty = true;
+}
+
+void GameObject2D::setPos(glm::vec2 newPos) {
+	position = newPos;
+	center = position + halfExtents;
+	isDirty = true;
+}
+
+void GameObject2D::setPos(float newX, float newY) {
+	position.x = newX;
+	position.y = newY;
+	center = position + halfExtents;
+	isDirty = true;
+}
+
+void GameObject2D::translate(glm::vec2 posOff) {
+	position += posOff;
+	center += posOff;
+	isDirty = true;
+}
+
+void GameObject2D::translate(float xOff, float yOff) {
+	position.x += xOff;
+	position.y += yOff;
+	center.x += xOff;
+	center.y += yOff;
+	isDirty = true;
+}
+
+void GameObject2D::setRot(float newRot) {
+	rotation = newRot;
+	isDirty = true;
+}
+
+void GameObject2D::rotate(float rotOff) {
+	rotation += rotOff;
+	isDirty = true;
+}
+
+void GameObject2D::setScale(glm::vec2 newScale) {
+	scaleVal = newScale;
+	recalculateHalfExtents();
+	isDirty = true;
+}
+
+void GameObject2D::setScale(float newX, float newY) {
+	scaleVal.x = newX;
+	scaleVal.y = newY;
+	recalculateHalfExtents();
+	isDirty = true;
+}
+
+void GameObject2D::scale(glm::vec2 scaleOff) {
+	scaleVal += scaleOff;
+	recalculateHalfExtents();
+	isDirty = true;
+}
+
+void GameObject2D::scale(float xOff, float yOff) {
+	scaleVal.x += xOff;
+	scaleVal.y += yOff;
+	recalculateHalfExtents();
+	isDirty = true;
 }
 
 bool GameObject2D::inScreenBounds() {
-	glm::vec2 appliedScale(scale.x * sprite.width, scale.y * sprite.height);
+	glm::vec2 appliedScale(scaleVal.x * sprite.width, scaleVal.y * sprite.height);
 	return ((position.y + appliedScale.y < 0 || position.y >= SCR_HEIGHT) || (position.x + appliedScale.x < 0 || position.x >= SCR_WIDTH));
 }
 
-glm::vec2 GameObject2D::center() {
-	glm::vec2 halfExtents(scale.x * sprite.width * .5f, scale.y * sprite.height * .5f);
-	return position + halfExtents;
-}
-
 bool GameObject2D::collidesWith(GameObject2D* other) {
-	return collider && other->collider ? collider->collision(center(), rotation, other->collider, other->center(), other->rotation) : false;
+	return collider && other->collider ? collider->collision(center, rotation, other->collider, other->center, other->rotation) : false;
 }
 
-void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
-	// don't draw blank sprites
-	if (sprite.id == Model::defaultDiffuseMap.id)
-		return;
+void GameObject2D::recalculateModel() {
 	// Prepare transformations
-	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::mat4(1.0f);
 	// round position in an effort to achieve pixel perfect 2D rendering
 	model = glm::translate(model, glm::vec3(round(position.x), round(position.y), depth));
 
 	// multiply scaling factor by sprite dimensions so that a scale of 1,1 = original size
-	glm::vec2 appliedScale(scale.x * sprite.width, scale.y * sprite.height);
+	glm::vec2 appliedScale(scaleVal.x * sprite.width, scaleVal.y * sprite.height);
 
 	// translate by the half extents to achieve centered rotation
 	if (rotation != 0) {
@@ -76,6 +145,16 @@ void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
 	}
 
 	model = glm::scale(model, glm::vec3(appliedScale, 1.0f));
+
+	isDirty = false;
+}
+
+void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
+	// don't draw blank sprites
+	if (sprite.id == Model::defaultDiffuseMap.id)
+		return;
+	if (isDirty)
+		recalculateModel();
 
 	shader.setMat4("model", model);
 	shader.setVec3("spriteColor", color);

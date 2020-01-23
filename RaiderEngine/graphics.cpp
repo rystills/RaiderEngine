@@ -655,7 +655,7 @@ void renderLines2D() {
 		for (auto&& kv : gameObject2Ds)
 			for (int i = 0; i < kv.second.size(); ++i)
 				if (kv.second[i]->collider)
-					kv.second[i]->collider->debugDraw(kv.second[i]->center(), kv.second[i]->rotation);
+					kv.second[i]->collider->debugDraw(kv.second[i]->center, kv.second[i]->rotation);
 	}
  }
 
