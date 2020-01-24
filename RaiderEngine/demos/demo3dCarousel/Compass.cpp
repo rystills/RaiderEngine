@@ -5,5 +5,5 @@
 
 void Compass::update() {
 	GameObject2D::update();
-	rotation = glm::radians(mainCam->Yaw);
+	setRot(glm::radians(mainCam->Yaw));
 }

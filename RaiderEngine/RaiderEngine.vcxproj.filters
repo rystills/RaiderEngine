@@ -28,6 +28,9 @@
     <Filter Include="Source Files\demos\demoCollider2Ds">
       <UniqueIdentifier>{160e2920-148e-4b1d-8da7-bd4d60df3504}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\demos\demoParticleEmitter2Ds">
+      <UniqueIdentifier>{9993f007-c78b-4734-9f05-8c3544189d50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -144,8 +147,8 @@
     <ClCompile Include="demos\demoBrickBreaker\Brick.cpp">
       <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp">
-      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -96,7 +96,7 @@ void PlayerBase::update() {
 	}
 	// jump
 	if (mainCam->controllable)
-		if (grounded && keyPressed("jump"))
+		if (grounded && keyHeld("jump"))
 			// jump velocity is a burst, so deltaTime is ignored
 			velocity.y = jumpStrength;
 	// TODO: set velocity to 0 if the player bumps their head on a ceiling

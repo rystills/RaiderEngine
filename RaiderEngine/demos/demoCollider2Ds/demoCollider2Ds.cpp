@@ -60,9 +60,8 @@ int main() {
 		updateObjects();
 
 		// update colliders
-		g1->position.x += (keyHeld("mvRight") - keyHeld("mvLeft")) * 200 * deltaTime;
-		g1->position.y += (keyHeld("mvDown") - keyHeld("mvUp")) * 200 * deltaTime;
-		g1->rotation += (keyHeld("rotCW") - keyHeld("rotCCW")) * 3 * deltaTime;
+		g1->translate((keyHeld("mvRight") - keyHeld("mvLeft")) * 200 * deltaTime, (keyHeld("mvDown") - keyHeld("mvUp")) * 200 * deltaTime);
+		g1->rotate((keyHeld("rotCW") - keyHeld("rotCCW")) * 3 * deltaTime);
 		if (keyPressed("swap1"))
 			g1->collider = cols[(g1ColInd+=1) %= numCols];
 		if (keyPressed("swap2"))
