@@ -113,7 +113,6 @@ void setFallbackShaderDir(std::string newDir) {
 update all objects in all object lists
 */
 void updateObjects() {
-	updateDebugToggle(window);
 	for (auto&& kv : gameObjects)
 		for (int i = 0; i < kv.second.size(); ++i)
 			kv.second[i]->update();

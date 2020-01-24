@@ -2,7 +2,7 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 
-void deleteGraphicsBuffer(ALuint* b) {
+void deleteGraphicsBuffer(GLuint* b) {
 	glDeleteBuffers(1, b);
 	delete b;
 }
@@ -55,9 +55,9 @@ void Mesh::draw(Shader shader, bool shouldSendTextures) {
 
 void Mesh::setupMesh() {
 	// create buffers/arrays
-	VAO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
-	VBO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
-	EBO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	VAO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	VBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	EBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
 	glGenVertexArrays(1, VAO.get());
 	glGenBuffers(1, VBO.get());
 	glGenBuffers(1, EBO.get());

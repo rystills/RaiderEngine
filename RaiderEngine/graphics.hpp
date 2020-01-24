@@ -24,6 +24,10 @@ inline unsigned int cubeVBO;
 
 inline glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
 
+// vectors containing model matrices and sprite colors, to be sent to the gpu for instanced rendering; starts at size 1000 and grows as necessary
+inline std::vector<glm::mat4> modelMatrices(1000);
+inline std::vector<glm::vec3> colorVectors(1000);
+
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } inline gBuffer;

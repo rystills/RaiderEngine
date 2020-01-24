@@ -127,6 +127,7 @@ int main() {
 		player.update();
 		// update objects
 		updateObjects();
+		updateDebugToggle(window);
 
 		// picking and object info display
 		if (displayString.size() > 0)

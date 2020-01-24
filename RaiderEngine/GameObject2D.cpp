@@ -16,7 +16,9 @@ GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, 
 }
 
 void GameObject2D::initStaticVertexBuffer() {
-	VAO = std::move(std::unique_ptr < ALuint, std::function<void(ALuint*)>>{ new ALuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	VAO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	instancedModelVBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	instancedColorVBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
 	// Configure VAO and temporary VBO
 	GLuint VBO;
 	GLfloat vertices[] = {
@@ -36,6 +38,34 @@ void GameObject2D::initStaticVertexBuffer() {
 	glBindVertexArray(*VAO);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+	
+	// configure VBO for transform (model) instanced rendering (attribs 1-4 contain the model matrix in the 2D shader)
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glGenBuffers(1, instancedModelVBO.get());
+	glBindBuffer(GL_ARRAY_BUFFER, *instancedModelVBO.get());
+	GLsizei vec4Size = sizeof(glm::vec4);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+	
+	glVertexAttribDivisor(1, 1);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+
+	// configure VBO for color instanced rendering
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glGenBuffers(1, instancedColorVBO.get());
+	glBindBuffer(GL_ARRAY_BUFFER, *instancedColorVBO.get());
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribDivisor(5, 1);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
@@ -147,21 +177,4 @@ void GameObject2D::recalculateModel() {
 	model = glm::scale(model, glm::vec3(appliedScale, 1.0f));
 
 	isDirty = false;
-}
-
-void GameObject2D::draw(Shader shader, bool shouldSendTextures) {
-	// don't draw blank sprites
-	if (sprite.id == Model::defaultDiffuseMap.id)
-		return;
-	if (isDirty)
-		recalculateModel();
-
-	shader.setMat4("model", model);
-	shader.setVec3("spriteColor", color);
-
-	if (shouldSendTextures) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, sprite.id);
-	}
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

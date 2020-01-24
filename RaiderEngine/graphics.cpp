@@ -671,9 +671,27 @@ void render2D() {
 	// TODO: glm::ortho and glm::perspective calls only need to be performed when viewport size changes - not every tick
 	glUniformMatrix4fv(glGetUniformLocation(shaders["2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
 	glBindVertexArray(*GameObject2D::VAO);
-	for (auto&& kv : gameObject2Ds)
-		for (int i = 0; i < kv.second.size(); ++i)
-			kv.second[i]->draw(*shaders["2DShader"], i == 0);
+	glActiveTexture(GL_TEXTURE0);
+	for (auto&& kv : gameObject2Ds) {
+		glBindTexture(GL_TEXTURE_2D, kv.second[0]->sprite.id);
+		// copy GameObject2D model matrices before rendering them all in one go
+		// TODO: consider caching model matrix array for static GameObject2Ds
+		if (kv.second.size() > modelMatrices.size()) {
+			modelMatrices.resize(kv.second.size());
+			colorVectors.resize(kv.second.size());
+		}
+		for (int i = 0; i < kv.second.size(); ++i) {
+			if (kv.second[i]->isDirty)
+				kv.second[i]->recalculateModel();
+			modelMatrices[i] = kv.second[i]->model;
+			colorVectors[i] = kv.second[i]->color;
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedModelVBO);
+		glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedColorVBO);
+		glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::vec3), &colorVectors[0], GL_STATIC_DRAW);
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, kv.second.size());
+	}
 	glBindVertexArray(0);
 	// render text
 	// TODO: text rendering should be orderable too

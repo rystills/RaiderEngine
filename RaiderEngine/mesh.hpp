@@ -26,14 +26,14 @@ struct Texture {
 custom deleter for smart pointers containing opengl graphics buffers; deletes the buffer's contents before deleting the buffer itself
 @param b: the graphics buffer to delete
 */
-void deleteGraphicsBuffer(ALuint* b);
+void deleteGraphicsBuffer(GLuint* b);
 
 class Mesh {
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
-	std::unique_ptr<ALuint, std::function<void(ALuint*)>> VAO;
+	std::unique_ptr<GLuint, std::function<void(GLuint*)>> VAO;
 
 	/*
 	Mesh constructor: creates a new mesh with the provided vertex, index, and texture data
@@ -52,7 +52,7 @@ public:
 	void draw(Shader shader, bool shouldSendTextures = true);
 
 private:
-	std::unique_ptr<ALuint, std::function<void(ALuint*)>> VBO, EBO;
+	std::unique_ptr<GLuint, std::function<void(GLuint*)>> VBO, EBO;
 
     /*
 	initialize all the buffer objects/arrays

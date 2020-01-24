@@ -13,7 +13,7 @@ public:
 	glm::vec3 color;
 	Texture sprite;
 	float depth;  // depth in NDC coordinates
-	inline static std::unique_ptr<ALuint, std::function<void(ALuint*)>> VAO;
+	inline static std::unique_ptr<GLuint, std::function<void(GLuint*)>> VAO, instancedModelVBO, instancedColorVBO;
 	Collider2D* collider;
 	bool isDirty = true;
 	glm::mat4 model;
@@ -75,11 +75,4 @@ public:
 	bool collidesWith(GameObject2D* other);
 
 	void recalculateModel();
-
-	/*
-	draw this GameObject2D's sprite using the specified shader
-	@param shader: the shader to use while drawing the sprite
-	@param shouldSendTextures: whether or not to bind the sprite before rendering
-	*/
-	virtual void draw(Shader shader, bool shouldSendTextures = true);
 };
