@@ -2,9 +2,9 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 
-void deleteGraphicsBuffer(GLuint* b) {
-	glDeleteBuffers(1, b);
-	delete b;
+void deleteVAO(GLuint* v) {
+	glDeleteVertexArrays(1, v);
+	delete v;
 }
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
@@ -54,23 +54,19 @@ void Mesh::draw(Shader shader, bool shouldSendTextures) {
 }
 
 void Mesh::setupMesh() {
+	VAO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteVAO, std::placeholders::_1) });
 	// create buffers/arrays
-	VAO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
-	VBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
-	EBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
+	GLuint VBO, EBO;
 	glGenVertexArrays(1, VAO.get());
-	glGenBuffers(1, VBO.get());
-	glGenBuffers(1, EBO.get());
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(*VAO);
 	// load data into vertex buffers
-	glBindBuffer(GL_ARRAY_BUFFER, *VBO);
-	// A great thing about structs is that their memory layout is sequential for all its items.
-	// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
-	// again translates to 3/2 floats which translates to a byte array.
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
 	// set the vertex attribute pointers
@@ -91,4 +87,6 @@ void Mesh::setupMesh() {
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	glBindVertexArray(0);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 }

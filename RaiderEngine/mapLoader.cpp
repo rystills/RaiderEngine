@@ -100,9 +100,9 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 			//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 			Model* baseModel = new Model();
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-				baseModel->meshes.push_back(baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene));
+				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
-			models.insert({ tempProp.fullName, std::unique_ptr<Model>(baseModel) });
+			models.insert(std::make_pair(tempProp.fullName, baseModel));
 			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false));
 			goto clearTransform;
 		}

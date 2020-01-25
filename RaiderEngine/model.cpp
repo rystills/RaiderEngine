@@ -120,7 +120,7 @@ void Model::draw(Shader shader, bool shouldSendTextures) {
 		meshes[i].draw(shader, shouldSendTextures);
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// data to fill
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -171,7 +171,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// normal: texture_normalN
 
 	// return a mesh object created from the extracted mesh data
-	return Mesh(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"));
+	meshes.emplace_back(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"));
 }
 
 void Model::createDefaultMaterialMaps() {
@@ -243,7 +243,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 	for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		// the node object only contains indices to index the actual objects in the scene. 
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		meshes.push_back(processMesh(scene->mMeshes[node->mMeshes[i]], scene));
+		processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 
 	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)

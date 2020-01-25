@@ -16,9 +16,6 @@ GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, 
 }
 
 void GameObject2D::initStaticVertexBuffer() {
-	VAO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
-	instancedModelVBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
-	instancedColorVBO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteGraphicsBuffer, std::placeholders::_1) });
 	// Configure VAO and temporary VBO
 	GLuint VBO;
 	GLfloat vertices[] = {
@@ -29,20 +26,20 @@ void GameObject2D::initStaticVertexBuffer() {
 		1.0f, 1.0f, 1.0f, 1.0f,
 	};
 
-	glGenVertexArrays(1, VAO.get());
+	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindVertexArray(*VAO);
+	glBindVertexArray(VAO);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 	
 	// configure VBO for transform (model) instanced rendering (attribs 1-4 contain the model matrix in the 2D shader)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glGenBuffers(1, instancedModelVBO.get());
-	glBindBuffer(GL_ARRAY_BUFFER, *instancedModelVBO.get());
+	glGenBuffers(1, &instancedModelVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instancedModelVBO);
 	GLsizei vec4Size = sizeof(glm::vec4);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid*)0);
@@ -60,8 +57,8 @@ void GameObject2D::initStaticVertexBuffer() {
 
 	// configure VBO for color instanced rendering
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glGenBuffers(1, instancedColorVBO.get());
-	glBindBuffer(GL_ARRAY_BUFFER, *instancedColorVBO.get());
+	glGenBuffers(1, &instancedColorVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instancedColorVBO);
 	glEnableVertexAttribArray(5);
 	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glVertexAttribDivisor(5, 1);

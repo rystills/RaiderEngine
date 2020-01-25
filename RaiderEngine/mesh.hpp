@@ -23,10 +23,10 @@ struct Texture {
 };
 
 /*
-custom deleter for smart pointers containing opengl graphics buffers; deletes the buffer's contents before deleting the buffer itself
-@param b: the graphics buffer to delete
+custom deleter for smart pointers containing VAOs; deletes the VAO's contents before deleting the pointer
+@param v: pointer to the VAO to delete
 */
-void deleteGraphicsBuffer(GLuint* b);
+void deleteVAO(GLuint* v);
 
 class Mesh {
 public:
@@ -52,8 +52,6 @@ public:
 	void draw(Shader shader, bool shouldSendTextures = true);
 
 private:
-	std::unique_ptr<GLuint, std::function<void(GLuint*)>> VBO, EBO;
-
     /*
 	initialize all the buffer objects/arrays
 	*/

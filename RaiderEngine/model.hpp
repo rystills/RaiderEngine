@@ -56,12 +56,11 @@ public:
 	void draw(Shader shader, bool shouldSendTextures = true);
 
 	/*
-	process the specified mesh from the scene returned by ASSIMP, producing a mesh instance with the relevant ASSIMP mesh data
+	process the specified mesh from the scene returned by ASSIMP, producing a mesh instance with the relevant ASSIMP mesh data, and adding it to meshes
 	@param mesh: the ASSIMP mesh to process
 	@param scene: the scene of which the specified mesh is a part
-	@returns: a new Mesh instance containing the relevant ASSIMP mesh data
 	*/
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+	void processMesh(aiMesh* mesh, const aiScene* scene);
 
 	/*
 	generate the default material maps, used as fallbacks when the respective map type is not present for a texture

@@ -670,7 +670,7 @@ void render2D() {
 	shaders["2DShader"]->use();
 	// TODO: glm::ortho and glm::perspective calls only need to be performed when viewport size changes - not every tick
 	glUniformMatrix4fv(glGetUniformLocation(shaders["2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
-	glBindVertexArray(*GameObject2D::VAO);
+	glBindVertexArray(GameObject2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	for (auto&& kv : gameObject2Ds) {
 		glBindTexture(GL_TEXTURE_2D, kv.second[0]->sprite.id);
@@ -679,9 +679,9 @@ void render2D() {
 		if (kv.second.size() > modelMatrices.capacity()) {
 			modelMatrices.reserve(kv.second.size());
 			colorVectors.reserve(kv.second.size());
-			glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedModelVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedModelVBO);
 			glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::mat4), NULL, GL_DYNAMIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedColorVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedColorVBO);
 			glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::vec3), NULL, GL_DYNAMIC_DRAW);
 		}
 		for (int i = 0; i < kv.second.size(); ++i) {
@@ -690,9 +690,9 @@ void render2D() {
 			modelMatrices[i] = kv.second[i]->model;
 			colorVectors[i] = kv.second[i]->color;
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedModelVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedModelVBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::mat4), &modelMatrices[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedColorVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedColorVBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::vec3), &colorVectors[0]);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, kv.second.size());
 	}

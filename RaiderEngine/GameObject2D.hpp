@@ -13,7 +13,7 @@ public:
 	glm::vec3 color;
 	Texture sprite;
 	float depth;  // depth in NDC coordinates
-	inline static std::unique_ptr<GLuint, std::function<void(GLuint*)>> VAO, instancedModelVBO, instancedColorVBO;
+	inline static GLuint VAO, instancedModelVBO, instancedColorVBO;
 	Collider2D* collider;
 	bool isDirty = true;
 	glm::mat4 model;
