@@ -676,9 +676,13 @@ void render2D() {
 		glBindTexture(GL_TEXTURE_2D, kv.second[0]->sprite.id);
 		// copy GameObject2D model matrices before rendering them all in one go
 		// TODO: consider caching model matrix array for static GameObject2Ds
-		if (kv.second.size() > modelMatrices.size()) {
-			modelMatrices.resize(kv.second.size());
-			colorVectors.resize(kv.second.size());
+		if (kv.second.size() > modelMatrices.capacity()) {
+			modelMatrices.reserve(kv.second.size());
+			colorVectors.reserve(kv.second.size());
+			glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedModelVBO);
+			glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::mat4), NULL, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedColorVBO);
+			glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::vec3), NULL, GL_DYNAMIC_DRAW);
 		}
 		for (int i = 0; i < kv.second.size(); ++i) {
 			if (kv.second[i]->isDirty)
@@ -687,9 +691,9 @@ void render2D() {
 			colorVectors[i] = kv.second[i]->color;
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedModelVBO);
-		glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::mat4), &modelMatrices[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, *GameObject2D::instancedColorVBO);
-		glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::vec3), &colorVectors[0], GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::vec3), &colorVectors[0]);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, kv.second.size());
 	}
 	glBindVertexArray(0);
