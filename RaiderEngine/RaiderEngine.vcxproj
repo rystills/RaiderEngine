@@ -153,7 +153,6 @@
     <ClCompile Include="Collider2DRectangle.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Cog.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Compass.cpp" />
-    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp" />
     <ClCompile Include="demos\demo3dCarousel\FlickerLight.cpp" />
     <ClCompile Include="demos\demo3dCarousel\FoliageGrass.cpp" />
     <ClCompile Include="demos\demo3dCarousel\mouseInteraction.cpp" />
@@ -162,6 +161,7 @@
     <ClCompile Include="demos\demoBrickBreaker\Brick.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp" />
+    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp" />
     <ClCompile Include="FpsDisplay.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameObject2D.cpp" />
@@ -175,6 +175,7 @@
     <ClCompile Include="mapLoader.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="ParticleEmitter2D.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="PlayerBase.cpp" />
     <ClCompile Include="PlayerSpawn.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
+    <ClInclude Include="ParticleEmitter2D.hpp" />
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="PlayerBase.hpp" />
     <ClInclude Include="PlayerSpawn.hpp" />
@@ -248,6 +250,8 @@
     <None Include="shaders\g_buffer.vs" />
     <None Include="shaders\lineShader2D.fs" />
     <None Include="shaders\lineShader2D.vs" />
+    <None Include="shaders\Particle2DShader.fs" />
+    <None Include="shaders\Particle2DShader.vs" />
     <None Include="shaders\point_shadows_depth.fs" />
     <None Include="shaders\point_shadows_depth.gs" />
     <None Include="shaders\point_shadows_depth.vs" />

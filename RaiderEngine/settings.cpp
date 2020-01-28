@@ -9,6 +9,7 @@
 #include "TextObject.hpp"
 #include "physics.hpp"
 #include "input.hpp"
+#include "ParticleEmitter2D.hpp"
 
 GameObject* addGameObject(GameObject* go) {
 	gameObjects[go->modelName].emplace_back(go);
@@ -32,11 +33,6 @@ GameObject2D* addGameObject2D(GameObject2D* go) {
 	return go;
 }
 
-Collider2D* addCollider2D(std::string name, Collider2D* go) {
-	colliders.insert(std::make_pair(name,go));
-	return go;
-}
-
 void removeGameObject2D(GameObject2D* go) {
 	std::string spriteName = std::filesystem::path(go->sprite.path).stem().string();
 	gameObject2Ds[spriteName].erase(std::find_if(gameObject2Ds[spriteName].begin(), gameObject2Ds[spriteName].end(), [&](std::unique_ptr<GameObject2D>& i) { return i.get() == go; }));
@@ -44,6 +40,17 @@ void removeGameObject2D(GameObject2D* go) {
 
 void removeGameObject2D(std::string spriteName, int ind) {
 	gameObject2Ds[spriteName].erase(gameObject2Ds[spriteName].begin() + ind);
+}
+
+Collider2D* addCollider2D(std::string name, Collider2D* go) {
+	colliders.insert(std::make_pair(name, go));
+	return go;
+}
+
+ParticleEmitter2D* addParticleEmitter2D(ParticleEmitter2D* go) {
+	particleEmitter2Ds.emplace_back(go);
+	return go;
+	// TODO: define remove methods for ParticleEmitter2D and Collider2D
 }
 
 TextObject* addTextObject(TextObject* go) {
@@ -121,6 +128,8 @@ void updateObjects() {
 	for (auto&& kv : gameObject2Ds)
 		for (int i = 0; i < kv.second.size(); ++i)
 			kv.second[i]->update();
+	for (int i = 0; i < particleEmitter2Ds.size(); ++i)
+		particleEmitter2Ds[i]->update();
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->update();
 }

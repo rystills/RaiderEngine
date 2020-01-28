@@ -8,6 +8,7 @@
 #include "Light.hpp"
 #include "TextObject.hpp"
 #include <graphics.hpp>
+#include "ParticleEmitter2D.hpp"
 
 // this file holds global settings and shared engine data
 inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720;
@@ -36,6 +37,7 @@ inline std::unordered_map<std::string, std::unordered_map<int, Character[numFont
 inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
+inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
 
 /* methods to add/remove objects from the engine */
 GameObject* addGameObject(GameObject* go);
@@ -46,11 +48,13 @@ void removeGameObject(std::string modelName, int ind);
 
 GameObject2D* addGameObject2D(GameObject2D* go);
 
-Collider2D* addCollider2D(std::string name, Collider2D* go);
-
 void removeGameObject2D(GameObject2D* go);
 
 void removeGameObject2D(std::string spriteName, int ind);
+
+Collider2D* addCollider2D(std::string name, Collider2D* go);
+
+ParticleEmitter2D* addParticleEmitter2D(ParticleEmitter2D* go);
 
 TextObject* addTextObject(TextObject* go);
 

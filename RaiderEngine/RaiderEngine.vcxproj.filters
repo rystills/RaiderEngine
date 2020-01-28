@@ -147,8 +147,11 @@
     <ClCompile Include="demos\demoBrickBreaker\Brick.cpp">
       <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp">
-      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEmitter2D.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -269,6 +272,9 @@
     <ClInclude Include="Collider2DRectangle.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEmitter2D.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -323,6 +329,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\lineShader2D.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\Particle2DShader.fs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\Particle2DShader.vs">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

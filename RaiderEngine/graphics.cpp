@@ -9,6 +9,7 @@
 #include "graphics.hpp"
 #include "terminalColors.hpp"
 #include "physics.hpp"
+#include "ParticleEmitter2D.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and 
@@ -470,6 +471,7 @@ void loadShaders() {
 	shaders["lineShader2D"] = std::make_unique<Shader>("lineShader2D.vs", "lineShader2D.fs");
 	shaders["textShader"] = std::make_unique<Shader>("textShader.vs", "textShader.fs");
 	shaders["2DShader"] = std::make_unique<Shader>("2DShader.vs", "2DShader.fs");
+	shaders["Particle2DShader"] = std::make_unique<Shader>("Particle2DShader.vs", "Particle2DShader.fs");
 	shaders["pointShadowsDepth"] = std::make_unique<Shader>("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
 
 	// configure shaders
@@ -697,6 +699,26 @@ void render2D() {
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, kv.second.size());
 	}
 	glBindVertexArray(0);
+
+	// render Particle2Ds
+	glClear(GL_DEPTH_BUFFER_BIT);
+	shaders["Particle2DShader"]->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaders["Particle2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
+	glBindVertexArray(ParticleEmitter2D::VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
+	for (auto&& pe : particleEmitter2Ds) {
+		glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
+		glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width,pe->sprite.height);
+		if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
+			ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
+			glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * sizeof(Particle2D), NULL, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * sizeof(Particle2D), &pe->particles[0]);
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
+	}
+	glBindVertexArray(0);
+
 	// render text
 	// TODO: text rendering should be orderable too
 	glDisable(GL_DEPTH_TEST);
@@ -725,6 +747,7 @@ GLFWwindow* initGraphics() {
 	loadShaders();
 	Model::createDefaultMaterialMaps();
 	GameObject2D::initStaticVertexBuffer();
+	ParticleEmitter2D::initVertexObjects();
 
 	return window;
 }
