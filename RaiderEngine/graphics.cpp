@@ -712,9 +712,9 @@ void render2D() {
 		glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width,pe->sprite.height);
 		if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
 			ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
-			glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * sizeof(Particle2D), NULL, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 6 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 		}
-		glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * sizeof(Particle2D), &pe->particles[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * 6 * sizeof(GLfloat), &pe->particles[0]);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
 	}
 	glBindVertexArray(0);

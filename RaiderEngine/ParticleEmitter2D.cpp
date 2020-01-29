@@ -2,13 +2,10 @@
 #include "ParticleEmitter2D.hpp"
 #include "model.hpp"
 #include "settings.hpp"
+#include "timing.hpp"
 
-ParticleEmitter2D::ParticleEmitter2D(std::string spriteName) {
+ParticleEmitter2D::ParticleEmitter2D(glm::vec2 pos, std::string spriteName) : pos(pos) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
-	/*particles.reserve(10);
-	for (int i = 0; i < 10; ++i)
-		particles.emplace_back(glm::vec3(1, .2f, .2f), glm::vec2(100+i*50,100+i*20),1);
-*/
 }
 
 void ParticleEmitter2D::initVertexObjects() {
@@ -37,11 +34,11 @@ void ParticleEmitter2D::initVertexObjects() {
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
 
 	glVertexAttribDivisor(1, 1);
 	glVertexAttribDivisor(2, 1);
@@ -52,8 +49,25 @@ void ParticleEmitter2D::initVertexObjects() {
 }
 
 void ParticleEmitter2D::update() {
-	for (int i = 0; i < 1; ++i)
-		particles.emplace_back(glm::vec3(rand() / static_cast <float> (RAND_MAX), rand() / static_cast <float> (RAND_MAX), rand() / static_cast <float> (RAND_MAX)), 
-			glm::vec2(rand()/ static_cast <float> (RAND_MAX / SCR_WIDTH),rand() / static_cast <float> (RAND_MAX / SCR_HEIGHT)), 
-			rand() / static_cast <float> (RAND_MAX / 8));
+	// tick old particles
+	for (int i = 0; i < particles.size(); ++i) {
+		if ((particleMotions[i].life -= .7f*deltaTime) <= 0) {
+			particles.erase(particles.begin()+i);
+			particleMotions.erase(particleMotions.begin() + i);
+			--i;
+			continue;
+		}
+		particles[i].pos.x += cos(particleMotions[i].ang) * particleMotions[i].speed * deltaTime;
+		particles[i].pos.y += sin(particleMotions[i].ang) * particleMotions[i].speed * deltaTime;
+		particles[i].scale = particleMotions[i].maxScale * particleMotions[i].life;
+	}
+	// create new particles
+	partSpawnTimer -= deltaTime;
+	while (partSpawnTimer <= 0) {
+		particles.emplace_back(glm::vec3(rand() / static_cast <float> (RAND_MAX), rand() / static_cast <float> (RAND_MAX), rand() / static_cast <float> (RAND_MAX)),
+			pos + glm::vec2(rand() / static_cast <float> (RAND_MAX / 10), rand() / static_cast <float> (RAND_MAX / 10)),
+			rand() / static_cast <float> (RAND_MAX / 3));
+		particleMotions.emplace_back(100 + rand() / static_cast <float> (RAND_MAX / 400), rand() / static_cast <float> (RAND_MAX / glm::two_pi<float>()), 1, particles[particles.size()-1].scale);
+		partSpawnTimer += partSpawnMaxTimer;
+	}
 }

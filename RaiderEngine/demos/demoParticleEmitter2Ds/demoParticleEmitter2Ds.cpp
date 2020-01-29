@@ -23,7 +23,7 @@ int main() {
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	TextObject* to = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));
-	ParticleEmitter2D* pe = addParticleEmitter2D(new ParticleEmitter2D("star.png"));
+	ParticleEmitter2D* pe = addParticleEmitter2D(new ParticleEmitter2D(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2), "star.png"));
 
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
