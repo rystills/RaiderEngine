@@ -147,11 +147,17 @@
     <ClCompile Include="demos\demoBrickBreaker\Brick.cpp">
       <Filter>Source Files\demos\demoBrickBreaker</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
-      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
-    </ClCompile>
     <ClCompile Include="ParticleEmitter2D.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\SparkleEmitter.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\FireEmitter.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -274,6 +280,12 @@
     </ClInclude>
     <ClInclude Include="ParticleEmitter2D.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoParticleEmitter2Ds\SparkleEmitter.hpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoParticleEmitter2Ds\FireEmitter.hpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

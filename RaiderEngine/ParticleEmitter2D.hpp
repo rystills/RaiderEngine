@@ -3,16 +3,16 @@
 #include "mesh.hpp"
 
 struct Particle2D {
-	glm::vec3 spriteColor;
+	glm::vec4 spriteColor;
 	glm::vec2 pos;
 	float scale;
 
-	Particle2D(glm::vec3 spriteColor, glm::vec2 pos, float scale) : spriteColor(spriteColor), pos(pos), scale(scale) {}
+	Particle2D(glm::vec4 spriteColor, glm::vec2 pos, float scale) : spriteColor(spriteColor), pos(pos), scale(scale) {}
 };
 
 struct ParticleMotionData2D {
-	float speed, ang, life, maxScale;
-	ParticleMotionData2D(float speed, float ang, float life, float maxScale) : speed(speed), ang(ang), life(life), maxScale(maxScale) {}
+	float speed, ang, life, maxLife, maxScale;
+	ParticleMotionData2D(float speed, float ang, float life, float maxScale) : speed(speed), ang(ang), life(life), maxLife(life), maxScale(maxScale) {}
 };
 
 class ParticleEmitter2D {
@@ -20,14 +20,25 @@ public:
 	Texture sprite;
 	inline static GLuint VAO, VBO;
 	inline static int numParticlesInVBO = 0;
-	float partSpawnTimer = 0.f, partSpawnMaxTimer = .001f;
+	float partSpawnTimer = 0.f, partSpawnMaxTimer = .01f;
 	std::vector<Particle2D> particles;
 	std::vector<ParticleMotionData2D> particleMotions;
 	glm::vec2 pos;
+	float spawnRMin = 0, spawnRMax = 1, spawnGMin = 0, spawnGMax = 1, spawnBMin = 0, spawnBMax = 1;
+	float spawnXOffMin = 0, spawnXOffMax = 0, spawnYOffMin = 0, spawnYOffMax = 0;
+	float spawnScaleMin = 1, spawnScaleMax = 1;
+	float spawnSpeedMin = 20, spawnSpeedMax = 30;
+	float spawnAngleMin = 0, spawnAngleMax = 0;
+	float spawnMinLife = 1, spawnMaxLife = 1;
+	bool shrink = true;
+	bool fade = true;
+	bool circleSpawn = true;
+	bool colorShift = false;
+	glm::vec3 colorShiftRate;
 
 	ParticleEmitter2D(glm::vec2 pos, std::string spriteName = "");
 
 	static void initVertexObjects();
 
-	void update();
+	virtual void update();
 };

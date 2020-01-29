@@ -3,6 +3,8 @@
 #include "model.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
+#include "input.hpp"
+#define randRange(LO, HI) HI==LO ? LO : LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI- LO)))
 
 ParticleEmitter2D::ParticleEmitter2D(glm::vec2 pos, std::string spriteName) : pos(pos) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
@@ -34,11 +36,11 @@ void ParticleEmitter2D::initVertexObjects() {
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (GLvoid*)(4 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 
 	glVertexAttribDivisor(1, 1);
 	glVertexAttribDivisor(2, 1);
@@ -59,15 +61,33 @@ void ParticleEmitter2D::update() {
 		}
 		particles[i].pos.x += cos(particleMotions[i].ang) * particleMotions[i].speed * deltaTime;
 		particles[i].pos.y += sin(particleMotions[i].ang) * particleMotions[i].speed * deltaTime;
-		particles[i].scale = particleMotions[i].maxScale * particleMotions[i].life;
+		if (shrink)
+			particles[i].scale = particleMotions[i].maxScale * (particleMotions[i].life / particleMotions[i].maxLife);
+		if (fade)
+			particles[i].spriteColor.a = particleMotions[i].life / particleMotions[i].maxLife;
+		if (colorShift) {
+			particles[i].spriteColor.r += colorShiftRate.r * deltaTime;
+			particles[i].spriteColor.g += colorShiftRate.g * deltaTime;
+			particles[i].spriteColor.b += colorShiftRate.b * deltaTime;
+		}
 	}
 	// create new particles
 	partSpawnTimer -= deltaTime;
 	while (partSpawnTimer <= 0) {
-		particles.emplace_back(glm::vec3(rand() / static_cast <float> (RAND_MAX), rand() / static_cast <float> (RAND_MAX), rand() / static_cast <float> (RAND_MAX)),
-			pos + glm::vec2(rand() / static_cast <float> (RAND_MAX / 10), rand() / static_cast <float> (RAND_MAX / 10)),
-			rand() / static_cast <float> (RAND_MAX / 3));
-		particleMotions.emplace_back(100 + rand() / static_cast <float> (RAND_MAX / 400), rand() / static_cast <float> (RAND_MAX / glm::two_pi<float>()), 1, particles[particles.size()-1].scale);
+		float sx, sy;
+		if (circleSpawn) {
+			float positionAngle = randRange(0, glm::two_pi<float>());
+			float positionDist = randRange(spawnXOffMin, spawnXOffMax);
+			sx = cos(positionAngle) * positionDist;
+			sy = sin(positionAngle) * positionDist;
+		}
+		else {
+			sx = randRange(spawnXOffMin, spawnXOffMax);
+			sy = randRange(spawnYOffMin, spawnYOffMax);
+		}
+
+		particles.emplace_back(glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), 1.f), pos + glm::vec2(sx,sy), randRange(spawnScaleMin, spawnScaleMax));
+		particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[particles.size()-1].scale);
 		partSpawnTimer += partSpawnMaxTimer;
 	}
 }

@@ -701,7 +701,9 @@ void render2D() {
 	glBindVertexArray(0);
 
 	// render Particle2Ds
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 	shaders["Particle2DShader"]->use();
 	glUniformMatrix4fv(glGetUniformLocation(shaders["Particle2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
 	glBindVertexArray(ParticleEmitter2D::VAO);
@@ -712,17 +714,17 @@ void render2D() {
 		glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width,pe->sprite.height);
 		if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
 			ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
-			glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 6 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 7 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 		}
-		glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * 6 * sizeof(GLfloat), &pe->particles[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * 7 * sizeof(GLfloat), &pe->particles[0]);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
 	}
 	glBindVertexArray(0);
 
 	// render text
 	// TODO: text rendering should be orderable too
-	glDisable(GL_DEPTH_TEST);
 	shaders["textShader"]->use();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);

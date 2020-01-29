@@ -6,6 +6,8 @@
 #include "FpsDisplay.hpp"
 #include "input.hpp"
 #include "ParticleEmitter2D.hpp"
+#include "SparkleEmitter.hpp"
+#include "FireEmitter.hpp"
 
 int main() {
 	// directories
@@ -19,11 +21,12 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 	
 	setVsync(false);
-	clearColor = glm::vec4(.5f, .3f, .6f, 1);
+	clearColor = glm::vec4(0,0,0,1);
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	TextObject* to = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));
-	ParticleEmitter2D* pe = addParticleEmitter2D(new ParticleEmitter2D(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2), "star.png"));
+	ParticleEmitter2D* pes = addParticleEmitter2D(new SparkleEmitter(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2)));
+	ParticleEmitter2D* pef = addParticleEmitter2D(new FireEmitter(glm::vec2(SCR_WIDTH - 300, SCR_HEIGHT - 100)));
 
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
@@ -33,7 +36,7 @@ int main() {
 
 		// update objects
 		updateObjects();
-		to->text = "num particles: " + std::to_string(pe->particles.size());
+		to->text = "num particles: " + std::to_string(pes->particles.size() + pef->particles.size());
 
 		// render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
