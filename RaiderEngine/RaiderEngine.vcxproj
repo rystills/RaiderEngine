@@ -161,8 +161,10 @@
     <ClCompile Include="demos\demoBrickBreaker\Brick.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp" />
+    <ClCompile Include="demos\demoParticleEmitter2Ds\CloudEmitter.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\FireEmitter.cpp" />
+    <ClCompile Include="demos\demoParticleEmitter2Ds\RainEmitter.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\SparkleEmitter.cpp" />
     <ClCompile Include="FpsDisplay.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -214,7 +216,9 @@
     <ClInclude Include="demos\demoBrickBreaker\Brick.hpp" />
     <ClInclude Include="demos\demoBrickBreaker\GameManager.hpp" />
     <ClInclude Include="demos\demoBrickBreaker\Paddle.hpp" />
+    <ClInclude Include="demos\demoParticleEmitter2Ds\CloudEmitter.hpp" />
     <ClInclude Include="demos\demoParticleEmitter2Ds\FireEmitter.hpp" />
+    <ClInclude Include="demos\demoParticleEmitter2Ds\RainEmitter.hpp" />
     <ClInclude Include="demos\demoParticleEmitter2Ds\SparkleEmitter.hpp" />
     <ClInclude Include="FpsDisplay.hpp" />
     <ClInclude Include="GameObject.hpp" />

@@ -159,6 +159,12 @@
     <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClCompile>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\CloudEmitter.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\RainEmitter.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -285,6 +291,12 @@
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClInclude>
     <ClInclude Include="demos\demoParticleEmitter2Ds\FireEmitter.hpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoParticleEmitter2Ds\CloudEmitter.hpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demoParticleEmitter2Ds\RainEmitter.hpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClInclude>
   </ItemGroup>

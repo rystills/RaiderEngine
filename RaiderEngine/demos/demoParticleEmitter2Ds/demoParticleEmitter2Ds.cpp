@@ -8,6 +8,8 @@
 #include "ParticleEmitter2D.hpp"
 #include "SparkleEmitter.hpp"
 #include "FireEmitter.hpp"
+#include "RainEmitter.hpp"
+#include "CloudEmitter.hpp"
 
 int main() {
 	// directories
@@ -27,6 +29,10 @@ int main() {
 	TextObject* to = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	ParticleEmitter2D* pes = addParticleEmitter2D(new SparkleEmitter(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2)));
 	ParticleEmitter2D* pef = addParticleEmitter2D(new FireEmitter(glm::vec2(SCR_WIDTH - 300, SCR_HEIGHT - 100)));
+	ParticleEmitter2D* per = addParticleEmitter2D(new RainEmitter(glm::vec2(230, 130)));
+	ParticleEmitter2D* pecs[5];
+	for (int i = 0; i < 5; ++i)
+		pecs[i] = addParticleEmitter2D(new CloudEmitter(glm::vec2(150 + 40*i, 100)));
 
 	while (!glfwWindowShouldClose(window)) {
 		// update frame
@@ -36,7 +42,9 @@ int main() {
 
 		// update objects
 		updateObjects();
-		to->text = "num particles: " + std::to_string(pes->particles.size() + pef->particles.size());
+		int numPecParts = 0;
+		for (int i = 0; i < 5; numPecParts += pecs[i++]->particles.size());
+		to->text = "num particles: " + std::to_string(pes->particles.size() + pef->particles.size() + numPecParts + per->particles.size());
 
 		// render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

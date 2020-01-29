@@ -31,7 +31,7 @@ void ParticleEmitter2D::initVertexObjects() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 
-	// configure VBO for vec3 spriteColor (attrib 1), vec2 pos (attrib 2), float scale (attrib 3), 
+	// configure VBO for vec4 spriteColor (attrib 1), vec2 pos (attrib 2), float scale (attrib 3), 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -48,6 +48,23 @@ void ParticleEmitter2D::initVertexObjects() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+void ParticleEmitter2D::spawnParticle() {
+	float sx, sy;
+	if (circleSpawn) {
+		float positionAngle = randRange(0, glm::two_pi<float>());
+		float positionDist = randRange(spawnXOffMin, spawnXOffMax);
+		sx = cos(positionAngle) * positionDist;
+		sy = sin(positionAngle) * positionDist;
+	}
+	else {
+		sx = randRange(spawnXOffMin, spawnXOffMax);
+		sy = randRange(spawnYOffMin, spawnYOffMax);
+	}
+
+	particles.emplace_back(glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), 1.f), pos + glm::vec2(sx, sy), randRange(spawnScaleMin, spawnScaleMax));
+	particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[particles.size() - 1].scale);
 }
 
 void ParticleEmitter2D::update() {
@@ -72,22 +89,11 @@ void ParticleEmitter2D::update() {
 		}
 	}
 	// create new particles
-	partSpawnTimer -= deltaTime;
-	while (partSpawnTimer <= 0) {
-		float sx, sy;
-		if (circleSpawn) {
-			float positionAngle = randRange(0, glm::two_pi<float>());
-			float positionDist = randRange(spawnXOffMin, spawnXOffMax);
-			sx = cos(positionAngle) * positionDist;
-			sy = sin(positionAngle) * positionDist;
+	if (!isburst) {
+		partSpawnTimer -= deltaTime;
+		while (partSpawnTimer <= 0) {
+			spawnParticle();
+			partSpawnTimer += partSpawnMaxTimer;
 		}
-		else {
-			sx = randRange(spawnXOffMin, spawnXOffMax);
-			sy = randRange(spawnYOffMin, spawnYOffMax);
-		}
-
-		particles.emplace_back(glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), 1.f), pos + glm::vec2(sx,sy), randRange(spawnScaleMin, spawnScaleMax));
-		particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[particles.size()-1].scale);
-		partSpawnTimer += partSpawnMaxTimer;
 	}
 }

@@ -14,5 +14,5 @@ FireEmitter::FireEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "fire.png") {
 	shrink = true;
 	fade = true;
 	circleSpawn = true;
-	colorShiftRate = glm::vec3(0,-.1f,-1.f);
+	colorShiftRate = glm::vec3(0.f,-.1f,-1.f);
 };

@@ -34,11 +34,14 @@ public:
 	bool fade = true;
 	bool circleSpawn = true;
 	bool colorShift = false;
+	bool isburst = false;
 	glm::vec3 colorShiftRate;
 
 	ParticleEmitter2D(glm::vec2 pos, std::string spriteName = "");
 
 	static void initVertexObjects();
+
+	void spawnParticle();
 
 	virtual void update();
 };
