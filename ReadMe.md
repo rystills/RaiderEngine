@@ -16,5 +16,7 @@ Here is the list of additional dependencies that are already bundled with the en
 - stb_vorbis (audio loading and decoding)
 - stb_image (image loading)  
   
-Preview:  
-<img src="previews\7_11_19.png" width="960" height="540">
+Previews:  
+<img src="previews\7_11_19 (3d carousel).png" width="960" height="540">  
+<img src="previews\1_30_20 (brick breaker).png" width="960" height="540">  
+<img src="previews\1_30_20 (2d particles).png" width="960" height="540">

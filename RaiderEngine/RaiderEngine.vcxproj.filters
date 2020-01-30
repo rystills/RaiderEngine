@@ -156,13 +156,13 @@
     <ClCompile Include="demos\demoParticleEmitter2Ds\FireEmitter.cpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClCompile>
-    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
-      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
-    </ClCompile>
     <ClCompile Include="demos\demoParticleEmitter2Ds\CloudEmitter.cpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClCompile>
     <ClCompile Include="demos\demoParticleEmitter2Ds\RainEmitter.cpp">
+      <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClCompile>
   </ItemGroup>
