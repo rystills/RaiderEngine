@@ -702,22 +702,26 @@ void render2D() {
 
 	// render Particle2Ds
 	glDisable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	shaders["Particle2DShader"]->use();
 	glUniformMatrix4fv(glGetUniformLocation(shaders["Particle2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
 	glBindVertexArray(ParticleEmitter2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
-	for (auto&& pe : particleEmitter2Ds) {
-		glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
-		glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width,pe->sprite.height);
-		if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
-			ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
-			glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 7 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+	for (int i = 0; i < 2; glBlendFunc(GL_ONE, GL_ONE), ++i) {
+		// render particles in two passes; once to darken the area behind them, and once more to cancel out the first pass while additively blending with each other and not with the background
+		// note: particles using partial transparency must premultiply their transparency in order for this effect to work
+		for (auto&& pe : particleEmitter2Ds) {
+			glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
+			glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width, pe->sprite.height);
+			if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
+				ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
+				glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 7 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+			}
+			glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * 7 * sizeof(GLfloat), &pe->particles[0]);
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
 		}
-		glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * 7 * sizeof(GLfloat), &pe->particles[0]);
-		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
 	}
 	glBindVertexArray(0);
 

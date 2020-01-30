@@ -14,5 +14,5 @@ void main() {
     TexCoords = vertex.zw;
 	mixColor = spriteColor;
 	// subtract spriteDims/2 to get centered rendering
-    gl_Position = projection * vec4(pos.xy + spriteDims*vertex.xy * scale - spriteDims/2,0.0,1.0);
+    gl_Position = projection * vec4(pos.xy + spriteDims*vertex.xy * scale - (scale*spriteDims/2),0.0,1.0);
 }

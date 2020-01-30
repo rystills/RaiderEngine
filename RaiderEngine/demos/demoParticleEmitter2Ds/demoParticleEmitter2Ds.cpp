@@ -23,7 +23,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 	
 	setVsync(false);
-	clearColor = glm::vec4(0,0,0,1);
+	clearColor = glm::vec4(.5f,.3f,.6f,1);
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	TextObject* to = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));
