@@ -709,9 +709,9 @@ void render2D() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
 	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
-	for (int i = 0; i < 2; glBlendFunc(GL_ONE, GL_ONE), ++i) {
-		// render particles in two passes; once to darken the area behind them, and once more to cancel out the first pass while additively blending with each other and not with the background
-		// note: particles using partial transparency must premultiply their transparency in order for this effect to work
+	for (int i = 0; i < 2; glBlendFunc(GL_SRC_ALPHA, GL_ONE), ++i) {
+		// render particles in two passes; once in black, and once normally. Results in additive blending between particles, and normal blending with everything else
+		// TODO: there may be a way to optimize this. Consider rendering to a second buffer rather than doing two passes, or possible single-pass solution using premultiplied alpha
 		for (auto&& pe : particleEmitter2Ds) {
 			glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
 			glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width, pe->sprite.height);
