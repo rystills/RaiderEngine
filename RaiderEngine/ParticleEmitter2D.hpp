@@ -11,8 +11,8 @@ struct Particle2D {
 };
 
 struct ParticleMotionData2D {
-	float speed, ang, life, maxLife, maxScale;
-	ParticleMotionData2D(float speed, float ang, float life, float maxScale) : speed(speed), ang(ang), life(life), maxLife(life), maxScale(maxScale) {}
+	float speed, ang, life, maxLife, maxScale, maxAlpha;
+	ParticleMotionData2D(float speed, float ang, float life, float maxScale, float maxAlpha) : speed(speed), ang(ang), life(life), maxLife(life), maxScale(maxScale), maxAlpha(maxAlpha) {}
 };
 
 class ParticleEmitter2D {
@@ -24,7 +24,7 @@ public:
 	std::vector<Particle2D> particles;
 	std::vector<ParticleMotionData2D> particleMotions;
 	glm::vec2 pos;
-	float spawnRMin = 0, spawnRMax = 1, spawnGMin = 0, spawnGMax = 1, spawnBMin = 0, spawnBMax = 1;
+	float spawnRMin = 0, spawnRMax = 1, spawnGMin = 0, spawnGMax = 1, spawnBMin = 0, spawnBMax = 1, spawnAMin = 1, spawnAMax = 1;
 	float spawnXOffMin = 0, spawnXOffMax = 0, spawnYOffMin = 0, spawnYOffMax = 0;
 	float spawnScaleMin = 1, spawnScaleMax = 1;
 	float spawnSpeedMin = 20, spawnSpeedMax = 30;

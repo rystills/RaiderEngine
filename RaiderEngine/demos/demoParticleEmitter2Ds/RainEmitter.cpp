@@ -7,7 +7,7 @@
 
 RainEmitter::RainEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "rain.png") {
 	partSpawnMaxTimer = .001f;
-	spawnRMin = .2f, spawnRMax = .25f, spawnGMin = .2f, spawnGMax = .25f, spawnBMin = .8f, spawnBMax = 1.f;
+	spawnRMin = .2f, spawnRMax = .25f, spawnGMin = .2f, spawnGMax = .25f, spawnBMin = .8f, spawnBMax = 1.f, spawnAMin = .6f, spawnAMax = .6f;
 	spawnXOffMin = -80, spawnXOffMax = 80, spawnYOffMin = -2, spawnYOffMax = 2;
 	spawnScaleMin = .75f, spawnScaleMax = 1;
 	spawnSpeedMin = 480, spawnSpeedMax = 600;

@@ -63,8 +63,8 @@ void ParticleEmitter2D::spawnParticle() {
 		sy = randRange(spawnYOffMin, spawnYOffMax);
 	}
 
-	particles.emplace_back(glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), 1.f), pos + glm::vec2(sx, sy), randRange(spawnScaleMin, spawnScaleMax));
-	particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[particles.size() - 1].scale);
+	particles.emplace_back(glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), randRange(spawnAMin, spawnAMax)), pos + glm::vec2(sx, sy), randRange(spawnScaleMin, spawnScaleMax));
+	particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[particles.size() - 1].scale, particles[particles.size() - 1].spriteColor.a);
 }
 
 void ParticleEmitter2D::update() {
@@ -81,7 +81,7 @@ void ParticleEmitter2D::update() {
 		if (shrink)
 			particles[i].scale = particleMotions[i].maxScale * (particleMotions[i].life / particleMotions[i].maxLife);
 		if (fade)
-			particles[i].spriteColor.a = particleMotions[i].life / particleMotions[i].maxLife;
+			particles[i].spriteColor.a = particleMotions[i].maxAlpha * (particleMotions[i].life / particleMotions[i].maxLife);
 		if (colorShift) {
 			particles[i].spriteColor.r += colorShiftRate.r * deltaTime;
 			particles[i].spriteColor.g += colorShiftRate.g * deltaTime;

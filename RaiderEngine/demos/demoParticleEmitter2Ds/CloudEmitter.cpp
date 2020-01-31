@@ -7,7 +7,7 @@
 #include "timing.hpp"
 
 CloudEmitter::CloudEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "cloud.png") {
-	spawnRMin = .8f, spawnRMax = 1, spawnGMin = .8f, spawnGMax = 1, spawnBMin = .8f, spawnBMax = 1;
+	spawnRMin = .8f, spawnRMax = 1, spawnGMin = .8f, spawnGMax = 1, spawnBMin = .8f, spawnBMax = 1, spawnAMin = .03f, spawnAMax = .03f;
 	spawnXOffMin = -64, spawnXOffMax = 64, spawnYOffMin = -64, spawnYOffMax = 64;
 	spawnScaleMin = .5f, spawnScaleMax = 1.35f;
 	spawnSpeedMin = 10, spawnSpeedMax = 22;
@@ -17,7 +17,7 @@ CloudEmitter::CloudEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "cloud.png") 
 	fade = false;
 	circleSpawn = true;
 	isburst = true;
-	for (int i = 0; i < 80; ++i)
+	for (int i = 0; i < 135; ++i)
 		spawnParticle();
 };
 
