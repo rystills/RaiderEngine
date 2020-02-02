@@ -70,6 +70,12 @@ void removeLight(int ind);
 
 void setVsync(bool shouldUse);
 
+void setScreenDimensions(float width, float height);
+void setScreenDimensions(glm::vec2 res);
+
+void setClearColor(glm::vec4 newColor);
+void setClearColor(float r, float g, float b, float a);
+
 void setMapDir(std::string newDir);
 
 void setModelDir(std::string newDir);

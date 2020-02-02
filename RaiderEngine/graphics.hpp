@@ -28,6 +28,9 @@ inline glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm:
 inline std::vector<glm::mat4> modelMatrices(0);
 inline std::vector<glm::vec3> colorVectors(0);
 
+inline glm::highp_mat4 glmOrthoProjection;
+inline glm::highp_mat4 glmOrthoTextProjection;
+
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } inline gBuffer;
@@ -39,9 +42,8 @@ struct Character {
 	GLuint     Advance;    // Offset to advance to next glyph
 };
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+// callback executed on window resize
+void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
 void glfwErrorCallback(int errorno, const char* errmsg);
 
@@ -116,6 +118,11 @@ void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& 
 draw all of the buffered lines, then clear the line vector
 */
 void drawLines();
+
+/*
+calculate the glm orthographic projection for the current screen resolution - used when rendering
+*/
+void calcOrthoProjection();
 
 /*
 initialize the contents of the g buffer used for deferred rendering

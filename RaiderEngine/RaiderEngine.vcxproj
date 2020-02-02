@@ -153,6 +153,7 @@
     <ClCompile Include="Collider2DRectangle.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Cog.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Compass.cpp" />
+    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp" />
     <ClCompile Include="demos\demo3dCarousel\FlickerLight.cpp" />
     <ClCompile Include="demos\demo3dCarousel\FoliageGrass.cpp" />
     <ClCompile Include="demos\demo3dCarousel\mouseInteraction.cpp" />
@@ -162,7 +163,6 @@
     <ClCompile Include="demos\demoBrickBreaker\GameManager.cpp" />
     <ClCompile Include="demos\demoBrickBreaker\Paddle.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\CloudEmitter.cpp" />
-    <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\FireEmitter.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\RainEmitter.cpp" />
     <ClCompile Include="demos\demoParticleEmitter2Ds\SparkleEmitter.cpp" />

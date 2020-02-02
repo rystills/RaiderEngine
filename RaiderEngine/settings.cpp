@@ -86,6 +86,23 @@ void setVsync(bool shouldUse) {
 	}
 }
 
+void setScreenDimensions(float width, float height) {
+	frameBufferSizeCallback(window, width, height);
+}
+
+void setScreenDimensions(glm::vec2 res) {
+	frameBufferSizeCallback(window, res.x, res.y);
+}
+
+void setClearColor(glm::vec4 newColor) {
+	clearColor = newColor;
+	glClearColor(newColor.r, newColor.g, newColor.b, newColor.a);
+}
+void setClearColor(float r, float g, float b, float a) {
+	clearColor = glm::vec4(r,g,b,a);
+	glClearColor(r,g,b,a);
+}
+
 void setMapDir(std::string newDir) {
 	mapDir = newDir + (newDir.ends_with('/') ? "" : "/");
 }

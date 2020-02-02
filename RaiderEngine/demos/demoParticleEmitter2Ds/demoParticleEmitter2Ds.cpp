@@ -23,8 +23,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 	
 	setVsync(false);
-	clearColor = glm::vec4(0,0,0,1);
-	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+	setClearColor(0, 0, 0, 1);
 	addGameObject2D(new GameObject2D(glm::vec2(0), 0, glm::vec2(1), glm::vec3(1), "background.png"));
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	TextObject* to = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));

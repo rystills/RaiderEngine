@@ -42,22 +42,23 @@ void checkSwitchMap(int mapNum) {
 	scene = mapNum;
 	switch (scene) {
 	case 1:
-		clearColor = glm::vec4(.6f, .3f, .5f, 1);
+		setClearColor(.6f, .3f, .5f, 1);
 		ambientStrength = 0;
 		loadMap("hallway");
 		break;
 	case 2:
-		clearColor = glm::vec4(0, .75f, 1, 1);
+		setClearColor(0, .75f, 1, 1);
 		ambientStrength = 0.4f;
 		loadMap("field");
 		break;
 	case 3:
-		clearColor = glm::vec4(0, 0, .2f, 1);
+		setClearColor(0, 0, .2f, 1);
 		ambientStrength = 0.15f;
 		loadMap("bookshelf");
 		break;
 	}
 }
+
 int main() {
 	// initialization
 	window = initGraphics();

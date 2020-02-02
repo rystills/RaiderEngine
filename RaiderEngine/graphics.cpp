@@ -11,9 +11,15 @@
 #include "physics.hpp"
 #include "ParticleEmitter2D.hpp"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
+	SCR_WIDTH = width;
+	SCR_HEIGHT = height;
+	glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
+	calcOrthoProjection();
+	glDeleteFramebuffers(1, &gBuffer.buffer);
+	initGBuffer();
 	glViewport(0, 0, width, height);
 }
 
@@ -346,6 +352,11 @@ void drawLines() {
 	linesQueue.clear();
 }
 
+void calcOrthoProjection() {
+	glmOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
+	glmOrthoTextProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
+}
+
 void initGBuffer() {
 	glGenFramebuffers(1, &gBuffer.buffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
@@ -437,7 +448,7 @@ GLFWwindow* initWindow() {
 
 	// callback events
 	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -556,12 +567,7 @@ void renderDepthMap() {
 
 void renderGeometryPass() {
 	glDisable(GL_BLEND);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// 1. geometry pass: render scene's geometry/color data into gbuffer
-	// -----------------------------------------------------------------
+	// geometry pass: render scene's geometry/color data into gbuffer
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -576,7 +582,6 @@ void renderGeometryPass() {
 
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderLightingPass"]->use();
 	glActiveTexture(GL_TEXTURE0);
@@ -640,18 +645,17 @@ void renderLines() {
 	// render UI
 	glDisable(GL_DEPTH_TEST);
 	shaders["lineShader"]->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(mainCam->projection));
-	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader"]->ID, "view"), 1, GL_FALSE, glm::value_ptr(mainCam->view));
-	if (debugDraw) {
+	shaders["lineShader"]->setMat4("projection", mainCam->projection);
+	shaders["lineShader"]->setMat4("view", mainCam->view);
+	if (debugDraw)
 		// draw 3d colliders
 		debugDrawPhysics();
-	}
 }
 
 void renderLines2D() {
 	glDisable(GL_DEPTH_TEST);
 	shaders["lineShader2D"]->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaders["lineShader2D"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
+	shaders["lineShader2D"]->setMat4("projection", glmOrthoProjection);
 	if (debugDraw) {
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
@@ -670,8 +674,7 @@ void render2D() {
 
 	// render GameObject2Ds
 	shaders["2DShader"]->use();
-	// TODO: glm::ortho and glm::perspective calls only need to be performed when viewport size changes - not every tick
-	glUniformMatrix4fv(glGetUniformLocation(shaders["2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
+	shaders["2DShader"]->setMat4("projection", glmOrthoProjection);
 	glBindVertexArray(GameObject2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	for (auto&& kv : gameObject2Ds) {
@@ -704,7 +707,7 @@ void render2D() {
 	glDisable(GL_DEPTH_TEST);
 
 	shaders["Particle2DShader"]->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaders["Particle2DShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f)));
+	shaders["Particle2DShader"]->setMat4("projection", glmOrthoProjection);
 	glBindVertexArray(ParticleEmitter2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
@@ -714,7 +717,7 @@ void render2D() {
 		// TODO: there may be a way to optimize this. Consider rendering to a second buffer rather than doing two passes, or possible single-pass solution using premultiplied alpha
 		for (auto&& pe : particleEmitter2Ds) {
 			glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
-			glUniform2f(glGetUniformLocation(shaders["Particle2DShader"]->ID, "spriteDims"), pe->sprite.width, pe->sprite.height);
+			shaders["Particle2DShader"]->setVec2("spriteDims", glm::vec2(pe->sprite.width, pe->sprite.height));
 			if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
 				ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
 				glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 7 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
@@ -729,7 +732,7 @@ void render2D() {
 	// TODO: text rendering should be orderable too
 	shaders["textShader"]->use();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glUniformMatrix4fv(glGetUniformLocation(shaders["textShader"]->ID, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT))));
+	shaders["textShader"]->setMat4("projection", glmOrthoTextProjection);
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);
 }
@@ -743,6 +746,7 @@ GLFWwindow* initGraphics() {
 	GLFWwindow* window = initWindow();
 	initQuad();
 	initCube();
+	calcOrthoProjection();
 	initGBuffer();
 	initDepthMaps();
 	initPhysics();

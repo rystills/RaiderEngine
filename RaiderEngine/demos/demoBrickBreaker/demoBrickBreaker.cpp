@@ -28,8 +28,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 48);
 	
 	setVsync(false);
-	clearColor = glm::vec4(.8f, .8f, 1, 1);
-	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+	setClearColor(.8f, .8f, 1, 1);
 	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));
 	ball = (Ball*)addGameObject2D(new Ball(glm::vec2(0)));
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
