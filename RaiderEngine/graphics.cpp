@@ -139,7 +139,7 @@ void initBuffers() {
 	glGenVertexArrays(1, &primitiveVAO);
 }
 
-void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered) {
+void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered, bool shouldUseShader) {
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
 		return;
@@ -147,8 +147,9 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	if (text.length() == 0)
 		return;
 	// Activate corresponding render state	
-	s.use();
-	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
+	if (shouldUseShader)
+		s.use();
+	s.setVec3("textColor", color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(textVAO);
 
@@ -188,6 +189,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 			{ xpos + w, ypos,       1.0, 1.0 },
 			{ xpos + w, ypos + h,   1.0, 0.0 }
 		};
+		// TODO: pack chars into a single texture; binding a new texture for each glyph is a major performance draw
 		// Render glyph texture over quad
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 		// Update content of VBO memory
@@ -665,10 +667,10 @@ void renderLines2D() {
 	}
  }
 
-void render2D() {
+void render2D(bool clearScreen) {
 	glEnable(GL_DEPTH_TEST);
 	// clear the depth buffer so 2D objects don't compete with 3d objects for visibility
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(clearScreen ? GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT : GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -734,7 +736,7 @@ void render2D() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	shaders["textShader"]->setMat4("projection", glmOrthoTextProjection);
 	for (int i = 0; i < textObjects.size(); ++i)
-		textObjects[i]->draw(*shaders["textShader"]);
+		textObjects[i]->draw(*shaders["textShader"],i==0);
 }
 
 void initMainCamera() {

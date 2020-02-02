@@ -47,8 +47,7 @@ int main() {
 		to->text = "num particles: " + std::to_string(pes->particles.size() + pef->particles.size() + numPecParts + per->particles.size());
 
 		// render
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		render2D();
+		render2D(true);
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))

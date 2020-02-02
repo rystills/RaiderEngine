@@ -69,9 +69,8 @@ int main() {
 		textObjects[1]->text = "Colliding ? " + (g1->collidesWith(g2) ? std::string("true") : std::string("false")) + " | " + (g2->collidesWith(g1) ? std::string("true") : std::string("false"));
 
 		// render
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		render2D(true);
 		renderLines2D();
-		render2D();
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))

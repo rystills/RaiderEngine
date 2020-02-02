@@ -52,10 +52,9 @@ int main() {
 		updateObjects();
 
 		// render
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		render2D();
+		render2D(true);
 		if (paused)
-			renderText("Inter-Regular", 48, *shaders["textShader"], "Press Enter to Start", SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
+			renderText("Inter-Regular", 48, *shaders["textShader"], "Press Enter to Start", SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true, false);
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))

@@ -18,5 +18,5 @@ public:
 	render the text contained in this textObject
 	@param s: the shader to use when rendering
 	*/
-	virtual void draw(Shader s);
+	virtual void draw(Shader s, bool shouldUseShader);
 };
