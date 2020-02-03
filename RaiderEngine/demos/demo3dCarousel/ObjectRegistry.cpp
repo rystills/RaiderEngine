@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_3D_CAROUSEL)
 #include "PlayerSpawn.hpp"
 #include "Cog.hpp"
 #include "FoliageGrass.hpp"
@@ -17,3 +18,4 @@ void ObjectRegistry::instantiateLight(std::string name, glm::vec3 pos, glm::vec3
 	if (name == "point") addLight(new Light(pos, extraArgs.size() > 0 ? std::stof(extraArgs[0]) : 200, extraArgs.size() > 3 ? glm::vec3(std::stof(extraArgs[1]), std::stof(extraArgs[2]), std::stof(extraArgs[3])) : glm::vec3(1, 1, 1)));
 	else if (name == "Flicker") addLight(new FlickerLight(pos, extraArgs.size() > 0 ? std::stof(extraArgs[0]) : 200, extraArgs.size() > 3 ? glm::vec3(std::stof(extraArgs[1]), std::stof(extraArgs[2]), std::stof(extraArgs[3])) : glm::vec3(1, 1, 1)));
 }
+#endif

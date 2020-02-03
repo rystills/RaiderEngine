@@ -165,6 +165,15 @@
     <ClCompile Include="demos\demoParticleEmitter2Ds\demoParticleEmitter2Ds.cpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClCompile>
+    <ClCompile Include="demos\demoCollider2Ds\demoCollider2Ds.cpp">
+      <Filter>Source Files\demos\demoCollider2Ds</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demoBrickBreaker\demoBrickBreaker.cpp">
+      <Filter>Source Files\demos\demoBrickBreaker</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp">
+      <Filter>Source Files\demos\demo3dCarousel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">

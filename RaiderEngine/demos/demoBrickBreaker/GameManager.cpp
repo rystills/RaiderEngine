@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_BRICK_BREAKER)
 #include "GameManager.hpp"
 #include "Brick.hpp"
 #include "settings.hpp"
@@ -25,3 +26,4 @@ void incrementLevel() {
 	++level;
 	restartGame(false);
 }
+#endif

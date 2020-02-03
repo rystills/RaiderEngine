@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_PARTICLE_EMITTER_2DS)
 #include "ParticleEmitter2D.hpp"
 #include "RainEmitter.hpp"
 #include <limits>
@@ -25,3 +26,4 @@ void RainEmitter::update() {
 	}
 	ParticleEmitter2D::update();
 }
+#endif

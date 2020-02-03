@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_BRICK_BREAKER)
 #include "Paddle.hpp"
 #include "input.hpp"
 #include "timing.hpp"
@@ -20,3 +21,4 @@ void Paddle::update() {
 	translate((keyHeld("mvRight") - keyHeld("mvLeft")) * speed * deltaTime * levelMultiplier,0);
 	setCenter(std::fmax(0, std::fmin(SCR_WIDTH, center.x)), center.y);
 }
+#endif

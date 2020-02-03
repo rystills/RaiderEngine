@@ -44,3 +44,10 @@
 #include "AL/al.h"
 #include "AL/alc.h"
 #include "AL/alext.h"
+
+// demo build selection
+#define DEMO_3D_CAROUSEL 1
+#define DEMO_BRICK_BREAKER 2
+#define DEMO_COLLIDER_2DS 3
+#define DEMO_PARTICLE_EMITTER_2DS 4
+#define COMPILE_DEMO DEMO_PARTICLE_EMITTER_2DS

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_3D_CAROUSEL)
 #include "Light.hpp"
 #include "timing.hpp"
 #include "FlickerLight.hpp"
@@ -18,3 +19,4 @@ void FlickerLight::update() {
 		flickerWait = chooseFlickerWait(on ? 3 : .45f);
 	}
 }
+#endif

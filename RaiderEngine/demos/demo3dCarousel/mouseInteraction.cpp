@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_3D_CAROUSEL)
 #include "mouseInteraction.hpp"
 #include "GameObject.hpp"
 #include "physics.hpp"
@@ -83,3 +84,4 @@ void updateHeldBody() {
 		// let go of object
 		ReleaseHelpers();
 }
+#endif

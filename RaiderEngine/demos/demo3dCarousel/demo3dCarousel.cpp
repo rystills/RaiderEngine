@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_3D_CAROUSEL)
 #include "settings.hpp"
 #include "mapLoader.hpp"
 #include "mouseInteraction.hpp"
@@ -166,3 +167,4 @@ int main() {
 	models.clear();
 	sounds.clear();
 }
+#endif

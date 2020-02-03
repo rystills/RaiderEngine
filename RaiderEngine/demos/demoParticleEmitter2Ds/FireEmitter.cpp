@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_PARTICLE_EMITTER_2DS)
 #include "ParticleEmitter2D.hpp"
 #include "FireEmitter.hpp"
 #include "input.hpp"
@@ -16,3 +17,4 @@ FireEmitter::FireEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "fire.png") {
 	circleSpawn = true;
 	colorShiftRate = glm::vec3(0.2f,-.05f,-1.f);
 };
+#endif

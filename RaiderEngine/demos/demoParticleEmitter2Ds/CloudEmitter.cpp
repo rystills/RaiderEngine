@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_PARTICLE_EMITTER_2DS)
 #include "ParticleEmitter2D.hpp"
 #include "CloudEmitter.hpp"
 #include "input.hpp"
@@ -31,3 +32,4 @@ void CloudEmitter::update() {
 		particleMotions[i].ang -= rotDir * .018f * Collider2D::distance(particles[i].pos.x, particles[i].pos.y, pos.x, pos.y) * deltaTime;
 	}	
 }
+#endif

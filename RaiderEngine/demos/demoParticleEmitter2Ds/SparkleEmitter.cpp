@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_PARTICLE_EMITTER_2DS)
 #include "ParticleEmitter2D.hpp"
 #include "SparkleEmitter.hpp"
 #include "input.hpp"
@@ -23,3 +24,4 @@ void SparkleEmitter::update() {
 	}
 	ParticleEmitter2D::update();
 }
+#endif

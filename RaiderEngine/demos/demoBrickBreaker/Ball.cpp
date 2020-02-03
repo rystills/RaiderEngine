@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_BRICK_BREAKER)
 #include "Ball.hpp"
 #include "GameManager.hpp"
 #include "settings.hpp"
@@ -74,3 +75,4 @@ void Ball::update() {
 		setRot(-glm::half_pi<float>() + (3 * glm::pi<float>() / 8) * (xOff / (sprite.width / 2 + paddle->sprite.width / 2)));
 	}
 }
+#endif

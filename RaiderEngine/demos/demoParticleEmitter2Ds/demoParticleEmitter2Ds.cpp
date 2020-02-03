@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_PARTICLE_EMITTER_2DS)
 #include "GameObject2D.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
@@ -57,3 +58,4 @@ int main() {
 	}
 	glfwTerminate();
 }
+#endif

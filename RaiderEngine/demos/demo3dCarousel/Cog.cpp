@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_3D_CAROUSEL)
 #include "GameObject.hpp"
 #include "timing.hpp"
 #include "Cog.hpp"
@@ -14,3 +15,4 @@ void Cog::update() {
 std::string Cog::getDisplayString() {
 	return wallMounted ? "Seems like these cogs are still running...somehow." : "A rusty old cog. Should still be able to function.";
 }
+#endif

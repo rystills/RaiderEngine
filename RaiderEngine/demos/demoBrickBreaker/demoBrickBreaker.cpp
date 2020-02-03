@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_BRICK_BREAKER)
 #include "GameObject2D.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
@@ -62,3 +63,4 @@ int main() {
 	}
 	glfwTerminate();
 }
+#endif

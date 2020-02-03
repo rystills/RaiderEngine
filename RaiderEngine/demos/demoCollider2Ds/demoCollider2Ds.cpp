@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if (COMPILE_DEMO == DEMO_COLLIDER_2DS)
 #include "GameObject2D.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
@@ -78,3 +79,4 @@ int main() {
 	}
 	glfwTerminate();
 }
+#endif
