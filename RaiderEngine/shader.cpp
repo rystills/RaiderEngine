@@ -87,16 +87,20 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		glDeleteShader(geometry);
 
 	// map all uniforms up front
-	GLint count, i, size;
+	GLint count, i, off, size;
 	GLenum type;
 	const GLsizei bufSize = 64;
 	GLchar name[bufSize];
 	GLsizei length;
 
 	glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &count);
-	for (i = 0; i < count; i++) {
+	for (i = 0, off = 0; i < count; ++i, off += size - 1) {
 		glGetActiveUniform(ID, (GLuint)i, bufSize, &length, &size, &type, name);
-		uniformLocations[std::string(name)] = i;
+		uniformLocations[std::string(name)] = i+off;
+		// if the uniform is an array (size > 1), store the location of each index and keep track of the offset so that any remaining uniforms have the correct location
+		if (size > 1)
+			for (int k = 1; k < size; ++k)
+				uniformLocations[std::string(name).erase(std::string(name).find('[')+1) + std::to_string(k) + ']'] = i+off+k;
 	}
 }
 
