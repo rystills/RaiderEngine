@@ -63,17 +63,38 @@ void ParticleEmitter2D::spawnParticle() {
 		sy = randRange(spawnYOffMin, spawnYOffMax);
 	}
 
+	if (recycleParticles && !recycledParticleInds.empty()) {
+		particles[recycledParticleInds.back()] = { glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), randRange(spawnAMin, spawnAMax)), pos + glm::vec2(sx, sy), randRange(spawnScaleMin, spawnScaleMax) };
+		particleMotions[recycledParticleInds.back()] = { randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[recycledParticleInds.back()].scale, particles[recycledParticleInds.back()].spriteColor.a };
+		recycledParticleInds.pop_back();
+		return;
+	}
 	particles.emplace_back(glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), randRange(spawnAMin, spawnAMax)), pos + glm::vec2(sx, sy), randRange(spawnScaleMin, spawnScaleMax));
-	particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles[particles.size() - 1].scale, particles[particles.size() - 1].spriteColor.a);
+	particleMotions.emplace_back(randRange(spawnSpeedMin, spawnSpeedMax), randRange(spawnAngleMin, spawnAngleMax), randRange(spawnMinLife, spawnMaxLife), particles.back().scale, particles.back().spriteColor.a);
+}
+
+bool ParticleEmitter2D::killParticle(int partInd) {
+	if (recycleParticles) {
+		particleMotions[partInd].life = 0;
+		particles[partInd].scale = 0;
+		particles[partInd].spriteColor.a = 0;
+		recycledParticleInds.push_back(partInd);
+		return false;
+	}
+	particles.erase(particles.begin() + partInd);
+	particleMotions.erase(particleMotions.begin() + partInd);
+	return true;
 }
 
 void ParticleEmitter2D::update() {
 	// tick old particles
 	for (int i = 0; i < particles.size(); ++i) {
+		// if the particle is already dead, that can only mean it's awaiting recycling
+		if (particleMotions[i].life <= 0)
+			continue;
+		// the particle died just now
 		if ((particleMotions[i].life -= .7f*deltaTime) <= 0) {
-			particles.erase(particles.begin()+i);
-			particleMotions.erase(particleMotions.begin() + i);
-			--i;
+			i-= killParticle(i);
 			continue;
 		}
 		particles[i].pos.x += cos(particleMotions[i].ang) * particleMotions[i].speed * deltaTime;

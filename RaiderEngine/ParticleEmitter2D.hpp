@@ -23,6 +23,7 @@ public:
 	float partSpawnTimer = 0.f, partSpawnMaxTimer = .01f;
 	std::vector<Particle2D> particles;
 	std::vector<ParticleMotionData2D> particleMotions;
+	std::vector<int> recycledParticleInds;
 	glm::vec2 pos;
 	float spawnRMin = 0, spawnRMax = 1, spawnGMin = 0, spawnGMax = 1, spawnBMin = 0, spawnBMax = 1, spawnAMin = 1, spawnAMax = 1;
 	float spawnXOffMin = 0, spawnXOffMax = 0, spawnYOffMin = 0, spawnYOffMax = 0;
@@ -35,6 +36,7 @@ public:
 	bool circleSpawn = true;
 	bool colorShift = false;
 	bool isburst = false;
+	bool recycleParticles = true;
 	glm::vec3 colorShiftRate;
 
 	ParticleEmitter2D(glm::vec2 pos, std::string spriteName = "");
@@ -42,6 +44,8 @@ public:
 	static void initVertexObjects();
 
 	void spawnParticle();
+
+	bool killParticle(int partInd);
 
 	virtual void update();
 };

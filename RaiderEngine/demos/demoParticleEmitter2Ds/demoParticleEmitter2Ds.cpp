@@ -26,7 +26,8 @@ int main() {
 	setClearColor(0, 0, 0, 1);
 	addGameObject2D(new GameObject2D(glm::vec2(0), 0, glm::vec2(1), glm::vec3(1), "background.png"));
 	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
-	TextObject* to = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	TextObject* to1 = addTextObject(new TextObject("",6, 30, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	TextObject* to2 = addTextObject(new TextObject("", 6, 54, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	ParticleEmitter2D* pes = addParticleEmitter2D(new SparkleEmitter(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2)));
 	ParticleEmitter2D* pef = addParticleEmitter2D(new FireEmitter(glm::vec2(SCR_WIDTH - 300, SCR_HEIGHT - 100)));
 	ParticleEmitter2D* per = addParticleEmitter2D(new RainEmitter(glm::vec2(230, 130)));
@@ -42,9 +43,10 @@ int main() {
 
 		// update objects
 		updateObjects();
-		int numPecParts = 0;
-		for (int i = 0; i < 5; numPecParts += pecs[i++]->particles.size());
-		to->text = "num particles: " + std::to_string(pes->particles.size() + pef->particles.size() + numPecParts + per->particles.size());
+		int numPecParts = 0, numPecRecycled = 0;
+		for (int i = 0; i < 5; numPecParts += pecs[i]->particles.size(), numPecRecycled += pecs[i++]->recycledParticleInds.size());
+		to1->text = "total particle count: " + std::to_string(pes->particles.size() + pef->particles.size() + numPecParts + per->particles.size());
+		to2->text = "num recycled particles: " + std::to_string(pes->recycledParticleInds.size() + pef->recycledParticleInds.size() + numPecRecycled + per->recycledParticleInds.size());
 
 		// render
 		render2D(true);
