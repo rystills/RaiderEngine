@@ -217,16 +217,15 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 		ERROR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl)
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-	// quick and dirty max texture size estimate
-	// TODO: tightly bound tex size
-
+	// calculate texture width
 	int max_dim = (1 + (face->size->metrics.height >> 6))* ceilf(sqrtf(numFontCharacters));
 	int tex_width = 1;
-	while (tex_width < max_dim) tex_width <<= 1;
+	while (tex_width < max_dim) 
+		tex_width <<= 1;
+	// tex_height is initially set to match tex_width; once we're done loading in the glyphs, we'll be able to create the final texture with the exact height
 	int tex_height = tex_width;
 
 	// render glyphs to atlas
-
 	char* pixels = (char*)calloc(tex_width * tex_height, 1);
 	int pen_x = 0, pen_y = 0;
 
@@ -247,8 +246,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 			}
 		}
 
-		// this is stuff you'd need when rendering individual glyphs out of the atlas
-
+		// populate Character struct with info needed for rendering
 		fonts[fontName][fontSize].second[i].x0 = pen_x;
 		fonts[fontName][fontSize].second[i].y0 = pen_y;
 		fonts[fontName][fontSize].second[i].x1 = pen_x + bmp->width;
@@ -264,23 +262,21 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 		pen_x += bmp->width + 1;
 	}
 
-	FT_Done_FreeType(ft);
-
 	// Generate texture
 	glGenTextures(1, &fonts[fontName][fontSize].first.id);
 	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
 	fonts[fontName][fontSize].first.width = tex_width;
-	fonts[fontName][fontSize].first.height = tex_height;
+	fonts[fontName][fontSize].first.height = pen_y + ((face->size->metrics.height >> 6) + 1);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_width, tex_height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, fonts[fontName][fontSize].first.width, fonts[fontName][fontSize].first.height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
 	// Set texture options
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	FT_Done_FreeType(ft);
 	free(pixels);
-
 }
 
 void initFreetype() {
