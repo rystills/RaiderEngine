@@ -140,6 +140,7 @@ void initBuffers() {
 }
 
 void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered, bool shouldUseShader) {
+	// TODO: reintroduce scale with atlas rendering
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
 		return;
@@ -155,43 +156,45 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 
 	std::string::const_iterator c;
 	Character ch;
+	FontTexture ft = fonts[fontName][fontSize].first;
 	// adjust text starting position if rendering centered text
 	if (centered) {
 		// TODO: using the size of a capital 'A' to get the effective height for now; a proper, cross-language solution should be implemented instead
-		y -= fonts[fontName][fontSize]['A'].Size.y * scale / 2;
+		y -= fonts[fontName][fontSize].second['A'].y_size * scale / 2;
 		// subtract half of the advance of each character, except for the last one (since we don't advance from the last character)
 		for (c = text.begin(); c != text.end() - 1; ++c) {
-			ch = fonts[fontName][fontSize][*c];
-			x -= (ch.Advance >> 6)* scale / 2;
+			ch = fonts[fontName][fontSize].second[*c];
+			x -= (ch.advance )* scale / 2;
 		}
-		ch = fonts[fontName][fontSize][*(text.end() - 1)];
+		ch = fonts[fontName][fontSize].second[*(text.end() - 1)];
 		// subtract the bearing and size of the last character instead of its advance, since we want its exact width
 		// note: horizontal text centering may be slightly off; the logic seems correct, but the addition by 1 is a bit suspicious
-		x -= (ch.Bearing.x + ch.Size.x) * scale / 2 + 1;
+		x -= (ch.x_off + ch.x_size) * scale / 2 + 1;
 	}
+
+	// Render glyph texture over quad
+	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
 
 	// Iterate through all characters
 	for (c = text.begin(); c != text.end(); ++c) {
-		ch = fonts[fontName][fontSize][*c];
+		ch = fonts[fontName][fontSize].second[*c];
 
-		GLfloat xpos = x + ch.Bearing.x * scale;
-		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+		GLfloat xpos = x + ch.x_off * scale;
+		GLfloat ypos = y - (ch.y_size - ch.y_off) * scale;
 
-		GLfloat w = ch.Size.x * scale;
-		GLfloat h = ch.Size.y * scale;
+		GLfloat w = ch.x_size * scale;
+		GLfloat h = ch.y_size * scale;
 		// Update VBO for each character
 		GLfloat vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos,     ypos,       0.0, 1.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
+			{ xpos,     ypos + h,   ch.x0 / (float)ft.width, ch.y0 / (float)ft.height },
+			{ xpos,     ypos,       ch.x0 / (float)ft.width, ch.y1 / (float)ft.height },
+			{ xpos + w, ypos,       ch.x1 / (float)ft.width, ch.y1 / (float)ft.height },
 
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
-			{ xpos + w, ypos + h,   1.0, 0.0 }
+			{ xpos,     ypos + h,   ch.x0 / (float)ft.width, ch.y0 / (float)ft.height },
+			{ xpos + w, ypos,       ch.x1 / (float)ft.width, ch.y1 / (float)ft.height },
+			{ xpos + w, ypos + h,   ch.x1 / (float)ft.width, ch.y0 / (float)ft.height }
 		};
-		// TODO: pack chars into a single texture; binding a new texture for each glyph is a major performance draw
-		// Render glyph texture over quad
-		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+		
 		// Update content of VBO memory
 		glBindBuffer(GL_ARRAY_BUFFER, textVBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -199,71 +202,85 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		// Render quad
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.Advance >> 6)* scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+		x += (ch.advance )* scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void freetypeLoadFont(std::string fontName, int fontSize) {
-	// FreeType
 	FT_Library ft;
-	// All functions return a value different than 0 whenever an error occurred
-	if (FT_Init_FreeType(&ft))
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+	FT_Face    face;
 
-	// Load font as face
-	FT_Face face;
+	FT_Init_FreeType(&ft);
 	if (FT_New_Face(ft, (fontDir + fontName + ".ttf").c_str(), 0, &face))
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
-	// Set size to load glyphs as
+		ERROR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl)
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-	// Disable byte-alignment restriction
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	// quick and dirty max texture size estimate
+	// TODO: tightly bound tex size
 
-	// Load first 128 characters of ASCII set
-	for (GLubyte c = 0; c < numFontCharacters; ++c) {
-		// Load character glyph 
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-			continue;
+	int max_dim = (1 + (face->size->metrics.height >> 6))* ceilf(sqrtf(numFontCharacters));
+	int tex_width = 1;
+	while (tex_width < max_dim) tex_width <<= 1;
+	int tex_height = tex_width;
+
+	// render glyphs to atlas
+
+	char* pixels = (char*)calloc(tex_width * tex_height, 1);
+	int pen_x = 0, pen_y = 0;
+
+	for (int i = 0; i < numFontCharacters; ++i) {
+		FT_Load_Char(face, i, FT_LOAD_RENDER);
+		FT_Bitmap* bmp = &face->glyph->bitmap;
+
+		if (pen_x + bmp->width >= tex_width) {
+			pen_x = 0;
+			pen_y += ((face->size->metrics.height >> 6) + 1);
 		}
-		// Generate texture
-		GLuint texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			face->glyph->bitmap.buffer
-		);
-		// Set texture options
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use 
-		fonts[fontName][fontSize][c] = {
-			texture,
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			static_cast<GLuint>(face->glyph->advance.x)
-		};
+
+		for (int row = 0; row < bmp->rows; ++row) {
+			for (int col = 0; col < bmp->width; ++col) {
+				int x = pen_x + col;
+				int y = pen_y + row;
+				pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
+			}
+		}
+
+		// this is stuff you'd need when rendering individual glyphs out of the atlas
+
+		fonts[fontName][fontSize].second[i].x0 = pen_x;
+		fonts[fontName][fontSize].second[i].y0 = pen_y;
+		fonts[fontName][fontSize].second[i].x1 = pen_x + bmp->width;
+		fonts[fontName][fontSize].second[i].y1 = pen_y + bmp->rows;
+
+		fonts[fontName][fontSize].second[i].x_size = bmp->width;
+		fonts[fontName][fontSize].second[i].y_size = bmp->rows;
+
+		fonts[fontName][fontSize].second[i].x_off = face->glyph->bitmap_left;
+		fonts[fontName][fontSize].second[i].y_off = face->glyph->bitmap_top;
+		fonts[fontName][fontSize].second[i].advance = face->glyph->advance.x >> 6;
+
+		pen_x += bmp->width + 1;
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// reset texture alignment
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	// Destroy FreeType once we're finished
-	FT_Done_Face(face);
+
 	FT_Done_FreeType(ft);
+
+	// Generate texture
+	glGenTextures(1, &fonts[fontName][fontSize].first.id);
+	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
+	fonts[fontName][fontSize].first.width = tex_width;
+	fonts[fontName][fontSize].first.height = tex_height;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_width, tex_height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+	// Set texture options
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	free(pixels);
+
 }
 
 void initFreetype() {

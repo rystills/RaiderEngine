@@ -36,10 +36,15 @@ struct GBuffer {
 } inline gBuffer;
 
 struct Character {
-	GLuint     TextureID;  // ID handle of the glyph texture
-	glm::ivec2 Size;       // Size of glyph
-	glm::ivec2 Bearing;    // Offset from baseline to left/top of glyph
-	GLuint     Advance;    // Offset to advance to next glyph
+	int x0, y0, x1, y1;	// coords of glyph in the texture atlas
+	int x_off, y_off;   // left & top bearing when rendering
+	int x_size, y_size;
+	int advance;        // x advance when rendering
+};
+
+struct FontTexture {
+	GLuint id;
+	int width, height;
 };
 
 // callback executed on window resize
