@@ -728,6 +728,9 @@ void render2D(bool clearScreen) {
 	glBindVertexArray(GameObject2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	for (auto&& kv : gameObject2Ds) {
+		// don't render gameObjects using the default (empty) sprite
+		if (kv.second[0]->sprite.id == Model::defaultDiffuseMap.id)
+			continue;
 		glBindTexture(GL_TEXTURE_2D, kv.second[0]->sprite.id);
 		// copy GameObject2D model matrices before rendering them all in one go
 		// TODO: consider caching model matrix array for static GameObject2Ds
