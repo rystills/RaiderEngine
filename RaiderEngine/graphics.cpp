@@ -12,8 +12,10 @@
 #include "ParticleEmitter2D.hpp"
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
-	// make sure the viewport matches the new window dimensions; note that width and 
-	// height will be significantly larger than specified on retina displays.
+	// make sure the viewport matches the new window dimensions; note that width and height will be significantly larger than specified on retina displays.
+	// ignore invalid width/height values generated when minimizing the window
+	if (width == 0 || height == 0 || (width == SCR_WIDTH && height == SCR_HEIGHT))
+		return;
 	SCR_WIDTH = width;
 	SCR_HEIGHT = height;
 	glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
@@ -164,7 +166,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		// subtract half of the advance of each character, except for the last one (since we don't advance from the last character)
 		for (c = text.begin(); c != text.end() - 1; ++c) {
 			ch = fonts[fontName][fontSize].second[*c];
-			x -= (ch.advance )* scale / 2;
+			x -= (ch.advance) * scale / 2;
 		}
 		ch = fonts[fontName][fontSize].second[*(text.end() - 1)];
 		// subtract the bearing and size of the last character instead of its advance, since we want its exact width
@@ -194,7 +196,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 			{ xpos + w, ypos,       ch.x1 / (float)ft.width, ch.y1 / (float)ft.height },
 			{ xpos + w, ypos + h,   ch.x1 / (float)ft.width, ch.y0 / (float)ft.height }
 		};
-		
+
 		// Update content of VBO memory
 		glBindBuffer(GL_ARRAY_BUFFER, textVBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -202,7 +204,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		// Render quad
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.advance )* scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+		x += (ch.advance) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -370,6 +372,16 @@ void drawLines() {
 void calcOrthoProjection() {
 	glmOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 	glmOrthoTextProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
+
+	// apply to all shaders
+	shaders["textShader"]->use();
+	shaders["textShader"]->setMat4("projection", glmOrthoTextProjection);
+	shaders["lineShader2D"]->use();
+	shaders["lineShader2D"]->setMat4("projection", glmOrthoProjection);
+	shaders["2DShader"]->use();
+	shaders["2DShader"]->setMat4("projection", glmOrthoProjection);
+	shaders["Particle2DShader"]->use();
+	shaders["Particle2DShader"]->setMat4("projection", glmOrthoProjection);
 }
 
 void initGBuffer() {
@@ -670,7 +682,6 @@ void renderLines() {
 void renderLines2D() {
 	glDisable(GL_DEPTH_TEST);
 	shaders["lineShader2D"]->use();
-	shaders["lineShader2D"]->setMat4("projection", glmOrthoProjection);
 	if (debugDraw) {
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
@@ -689,7 +700,6 @@ void render2D(bool clearScreen) {
 
 	// render GameObject2Ds
 	shaders["2DShader"]->use();
-	shaders["2DShader"]->setMat4("projection", glmOrthoProjection);
 	glBindVertexArray(GameObject2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	for (auto&& kv : gameObject2Ds) {
@@ -722,7 +732,6 @@ void render2D(bool clearScreen) {
 	glDisable(GL_DEPTH_TEST);
 
 	shaders["Particle2DShader"]->use();
-	shaders["Particle2DShader"]->setMat4("projection", glmOrthoProjection);
 	glBindVertexArray(ParticleEmitter2D::VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
@@ -745,9 +754,7 @@ void render2D(bool clearScreen) {
 
 	// render text
 	// TODO: text rendering should be orderable too
-	shaders["textShader"]->use();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	shaders["textShader"]->setMat4("projection", glmOrthoTextProjection);
 	for (int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"],i==0);
 }
@@ -761,18 +768,17 @@ GLFWwindow* initGraphics() {
 	GLFWwindow* window = initWindow();
 	initQuad();
 	initCube();
-	calcOrthoProjection();
 	initGBuffer();
 	initDepthMaps();
 	initPhysics();
 	initFreetype();
 	initBuffers();
 	initMainCamera();
-
 	loadShaders();
+	calcOrthoProjection();
 	Model::createDefaultMaterialMaps();
 	GameObject2D::initStaticVertexBuffer();
 	ParticleEmitter2D::initVertexObjects();
-
+	
 	return window;
 }
