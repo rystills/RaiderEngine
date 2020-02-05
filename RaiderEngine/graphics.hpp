@@ -36,15 +36,10 @@ struct GBuffer {
 } inline gBuffer;
 
 struct Character {
-	int x0, y0, x1, y1;  // coords of glyph in the texture atlas
+	float x0, y0, x1, y1;  // coords of glyph in the texture atlas, baked in uv-space
 	int x_off, y_off;    // left & top bearing when rendering
 	int x_size, y_size;  // total glyph size, equal to (x1,y1) - (x0,y0)
 	int advance;         // x advance when rendering
-};
-
-struct FontTexture {
-	GLuint id;
-	int width, height;
 };
 
 // callback executed on window resize

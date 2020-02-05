@@ -142,7 +142,6 @@ void initBuffers() {
 }
 
 void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered, bool shouldUseShader) {
-	// TODO: reintroduce scale with atlas rendering
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
@@ -158,7 +157,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(TextObject::VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, TextObject::VBO);
-	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
+	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first);
 
 	if (text.length() > TextObject::numGlpyhsBuffered) {
 		TextObject::numGlpyhsBuffered = text.length();
@@ -166,7 +165,6 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	}
 
 	Character ch;
-	FontTexture ft = fonts[fontName][fontSize].first;
 	// adjust text starting position if rendering centered text
 	if (centered) {
 		// TODO: using the size of a capital 'A' to get the effective height for now; a proper, cross-language solution should be implemented instead
@@ -197,33 +195,33 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		// add character position and uv data to the vertex vector
 		verts[24 * i]    = xpos;
 		verts[24 * i+1]  = ypos + h;
-		verts[24 * i+2]  = ch.x0 / (float)ft.width;
-		verts[24 * i+3]  = ch.y0 / (float)ft.height;
+		verts[24 * i+2]  = ch.x0;
+		verts[24 * i+3]  = ch.y0;
 
 		verts[24 * i+4]  = xpos;
 		verts[24 * i+5]  = ypos;
-		verts[24 * i+6]  = ch.x0 / (float)ft.width;
-		verts[24 * i+7]  = ch.y1 / (float)ft.height;
+		verts[24 * i+6]  = ch.x0;
+		verts[24 * i+7]  = ch.y1;
 		
 		verts[24 * i+8]  = xpos + w;
 		verts[24 * i+9]  = ypos;
-		verts[24 * i+10] = ch.x1 / (float)ft.width;
-		verts[24 * i+11] = ch.y1 / (float)ft.height;
+		verts[24 * i+10] = ch.x1;
+		verts[24 * i+11] = ch.y1;
 		
 		verts[24 * i+12]  = xpos;
 		verts[24 * i+13]  = ypos + h;
-		verts[24 * i+14] = ch.x0 / (float)ft.width;
-		verts[24 * i+15] = ch.y0 / (float)ft.height;
+		verts[24 * i+14] = ch.x0;
+		verts[24 * i+15] = ch.y0;
 		
 		verts[24 * i+16]  = xpos + w;
 		verts[24 * i+17]  = ypos;
-		verts[24 * i+18] = ch.x1 / (float)ft.width;
-		verts[24 * i+19] = ch.y1 / (float)ft.height;
+		verts[24 * i+18] = ch.x1;
+		verts[24 * i+19] = ch.y1;
 		
 		verts[24 * i+20] = xpos + w;
 		verts[24 * i+21] = ypos + h;
-		verts[24 * i+22] = ch.x1 / (float)ft.width;
-		verts[24 * i+23] = ch.y0 / (float)ft.height;
+		verts[24 * i+22] = ch.x1;
+		verts[24 * i+23] = ch.y0;
 
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (ch.advance) * scale;
@@ -292,12 +290,19 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	}
 
 	// Generate texture
-	glGenTextures(1, &fonts[fontName][fontSize].first.id);
-	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
-	fonts[fontName][fontSize].first.width = tex_width;
-	fonts[fontName][fontSize].first.height = pen_y + ((face->size->metrics.height >> 6) + 1);
+	glGenTextures(1, &fonts[fontName][fontSize].first);
+	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first);
+	tex_height = pen_y + ((face->size->metrics.height >> 6) + 1);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, fonts[fontName][fontSize].first.width, fonts[fontName][fontSize].first.height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+	// bake x0,x1,y0,y1 in uv space
+	for (int i = 0; i < numFontCharacters; ++i) {
+		fonts[fontName][fontSize].second[i].x0 /= tex_width;
+		fonts[fontName][fontSize].second[i].x1 /= tex_width;
+		fonts[fontName][fontSize].second[i].y0 /= tex_height;
+		fonts[fontName][fontSize].second[i].y1 /= tex_height;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_width, tex_height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
 	// Set texture options
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
