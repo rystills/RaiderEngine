@@ -4,6 +4,8 @@
 
 class TextObject {
 public:
+	inline static GLuint VAO, VBO;
+	inline static int numGlpyhsBuffered = 0;
 	std::string text;
 	float x, y;
 	glm::vec3 color;
@@ -11,6 +13,8 @@ public:
 	std::string fontName;
 	int fontSize;
 	TextObject(std::string text, float x, float y, glm::vec3 color, std::string fontName, int fontSize, bool centered = false) : text(text), x(x), y(y), color(color), fontName(fontName), fontSize(fontSize), centered(centered) {};
+
+	static void initVertexObjects();
 
 	virtual void update() {}
 

@@ -143,20 +143,28 @@ void initBuffers() {
 
 void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered, bool shouldUseShader) {
 	// TODO: reintroduce scale with atlas rendering
+	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
 		return;
 	}
 	if (text.length() == 0)
 		return;
-	// Activate corresponding render state	
+
+	// activate and prepare the shader
 	if (shouldUseShader)
 		s.use();
 	s.setVec3("textColor", color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(textVAO);
+	glBindVertexArray(TextObject::VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, TextObject::VBO);
+	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
 
-	std::string::const_iterator c;
+	if (text.length() > TextObject::numGlpyhsBuffered) {
+		TextObject::numGlpyhsBuffered = text.length();
+		glBufferData(GL_ARRAY_BUFFER, TextObject::numGlpyhsBuffered * 24 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	}
+
 	Character ch;
 	FontTexture ft = fonts[fontName][fontSize].first;
 	// adjust text starting position if rendering centered text
@@ -164,7 +172,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		// TODO: using the size of a capital 'A' to get the effective height for now; a proper, cross-language solution should be implemented instead
 		y -= fonts[fontName][fontSize].second['A'].y_size * scale / 2;
 		// subtract half of the advance of each character, except for the last one (since we don't advance from the last character)
-		for (c = text.begin(); c != text.end() - 1; ++c) {
+		for (std::string::const_iterator c = text.begin(); c != text.end() - 1; ++c) {
 			ch = fonts[fontName][fontSize].second[*c];
 			x -= (ch.advance) * scale / 2;
 		}
@@ -174,38 +182,57 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		x -= (ch.x_off + ch.x_size) * scale / 2 + 1;
 	}
 
-	// Render glyph texture over quad
-	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first.id);
-
+	std::vector<GLfloat> verts;
+	verts.reserve(24 * text.length());	
 	// Iterate through all characters
-	for (c = text.begin(); c != text.end(); ++c) {
-		ch = fonts[fontName][fontSize].second[*c];
+	for (int i = 0; i < text.length(); ++i) {
+		ch = fonts[fontName][fontSize].second[text[i]];
 
 		GLfloat xpos = x + ch.x_off * scale;
 		GLfloat ypos = y - (ch.y_size - ch.y_off) * scale;
-
 		GLfloat w = ch.x_size * scale;
 		GLfloat h = ch.y_size * scale;
-		// Update VBO for each character
-		GLfloat vertices[6][4] = {
-			{ xpos,     ypos + h,   ch.x0 / (float)ft.width, ch.y0 / (float)ft.height },
-			{ xpos,     ypos,       ch.x0 / (float)ft.width, ch.y1 / (float)ft.height },
-			{ xpos + w, ypos,       ch.x1 / (float)ft.width, ch.y1 / (float)ft.height },
 
-			{ xpos,     ypos + h,   ch.x0 / (float)ft.width, ch.y0 / (float)ft.height },
-			{ xpos + w, ypos,       ch.x1 / (float)ft.width, ch.y1 / (float)ft.height },
-			{ xpos + w, ypos + h,   ch.x1 / (float)ft.width, ch.y0 / (float)ft.height }
-		};
+		// TODO: try instanced rendering + tristrips (see GameObject2D / ParticleEmitter2D) for a minor performance boost
+		// add character position and uv data to the vertex vector
+		verts[24 * i]    = xpos;
+		verts[24 * i+1]  = ypos + h;
+		verts[24 * i+2]  = ch.x0 / (float)ft.width;
+		verts[24 * i+3]  = ch.y0 / (float)ft.height;
 
-		// Update content of VBO memory
-		glBindBuffer(GL_ARRAY_BUFFER, textVBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		// Render quad
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		verts[24 * i+4]  = xpos;
+		verts[24 * i+5]  = ypos;
+		verts[24 * i+6]  = ch.x0 / (float)ft.width;
+		verts[24 * i+7]  = ch.y1 / (float)ft.height;
+		
+		verts[24 * i+8]  = xpos + w;
+		verts[24 * i+9]  = ypos;
+		verts[24 * i+10] = ch.x1 / (float)ft.width;
+		verts[24 * i+11] = ch.y1 / (float)ft.height;
+		
+		verts[24 * i+12]  = xpos;
+		verts[24 * i+13]  = ypos + h;
+		verts[24 * i+14] = ch.x0 / (float)ft.width;
+		verts[24 * i+15] = ch.y0 / (float)ft.height;
+		
+		verts[24 * i+16]  = xpos + w;
+		verts[24 * i+17]  = ypos;
+		verts[24 * i+18] = ch.x1 / (float)ft.width;
+		verts[24 * i+19] = ch.y1 / (float)ft.height;
+		
+		verts[24 * i+20] = xpos + w;
+		verts[24 * i+21] = ypos + h;
+		verts[24 * i+22] = ch.x1 / (float)ft.width;
+		verts[24 * i+23] = ch.y0 / (float)ft.height;
+
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.advance) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+		x += (ch.advance) * scale;
 	}
+
+	// render the full set of glyphs as a single triangle array
+	glBufferSubData(GL_ARRAY_BUFFER, 0, 24 * sizeof(GLfloat) * text.length(), &verts[0]);
+	glDrawArrays(GL_TRIANGLES, 0, text.length()*6);
+	
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -222,7 +249,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	// calculate texture width
 	int max_dim = (1 + (face->size->metrics.height >> 6))* ceilf(sqrtf(numFontCharacters));
 	int tex_width = 1;
-	while (tex_width < max_dim) 
+	while (tex_width < max_dim)
 		tex_width <<= 1;
 	// tex_height is initially set to match tex_width; once we're done loading in the glyphs, we'll be able to create the final texture with the exact height
 	int tex_height = tex_width;
@@ -281,19 +308,6 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 	free(pixels);
 }
 
-void initFreetype() {
-	// Configure VAO/VBO for texture quads
-	glGenVertexArrays(1, &textVAO);
-	glGenBuffers(1, &textVBO);
-	glBindVertexArray(textVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, textVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
 void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 	GLfloat points[6];
 	points[0] = pos.x;
@@ -307,6 +321,7 @@ void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 }
 
 void drawPoints() {
+	// TODO: clean up this method (switch to glBufferSubData, remove needless state changes)
 	// todo: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
@@ -354,6 +369,7 @@ void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& 
 }
 
 void drawLines() {
+	// TODO: clean up this method (switch to glBufferSubData, remove needless state changes)
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0], GL_STATIC_DRAW);
@@ -689,7 +705,7 @@ void renderLines2D() {
 				if (kv.second[i]->collider)
 					kv.second[i]->collider->debugDraw(kv.second[i]->center, kv.second[i]->rotation);
 	}
- }
+}
 
 void render2D(bool clearScreen) {
 	glEnable(GL_DEPTH_TEST);
@@ -771,7 +787,6 @@ GLFWwindow* initGraphics() {
 	initGBuffer();
 	initDepthMaps();
 	initPhysics();
-	initFreetype();
 	initBuffers();
 	initMainCamera();
 	loadShaders();
@@ -779,6 +794,6 @@ GLFWwindow* initGraphics() {
 	Model::createDefaultMaterialMaps();
 	GameObject2D::initStaticVertexBuffer();
 	ParticleEmitter2D::initVertexObjects();
-	
+	TextObject::initVertexObjects();
 	return window;
 }
