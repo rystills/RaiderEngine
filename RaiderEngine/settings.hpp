@@ -34,6 +34,8 @@ inline std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject>>>
 inline std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject2D>>> gameObject2Ds;
 inline std::vector<std::unique_ptr<Light>> lights;
 inline std::unordered_map<std::string, std::unordered_map<int, std::pair< GLuint, Character[numFontCharacters]>>> fonts;
+inline std::pair<std::string, int> lastFontUsed;
+inline glm::vec3 lastFontColor;
 inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;

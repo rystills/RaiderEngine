@@ -141,7 +141,7 @@ void initBuffers() {
 	glGenVertexArrays(1, &primitiveVAO);
 }
 
-void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered, bool shouldUseShader) {
+void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered) {
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
 		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
@@ -151,13 +151,18 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		return;
 
 	// activate and prepare the shader
-	if (shouldUseShader)
-		s.use();
-	s.setVec3("textColor", color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(TextObject::VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, TextObject::VBO);
-	glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first);
+	// only rebind the font atlas if we switched fonts, font sizes, or shaders (texture binding is not tied to the active shader, so other shaders likely wrote over our texture)
+	if (s.use() || lastFontUsed.first != fontName || lastFontUsed.second != fontSize) {
+		lastFontUsed = { fontName, fontSize };
+		glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first);
+	}
+	if (lastFontColor != color) {
+		lastFontColor = color;
+		s.setVec3("textColor", color.x, color.y, color.z);
+	}
 
 	if (text.length() > TextObject::numGlpyhsBuffered) {
 		TextObject::numGlpyhsBuffered = text.length();
@@ -232,7 +237,6 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	glDrawArrays(GL_TRIANGLES, 0, text.length()*6);
 	
 	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void freetypeLoadFont(std::string fontName, int fontSize) {
@@ -777,7 +781,7 @@ void render2D(bool clearScreen) {
 	// TODO: text rendering should be orderable too
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (int i = 0; i < textObjects.size(); ++i)
-		textObjects[i]->draw(*shaders["textShader"],i==0);
+		textObjects[i]->draw(*shaders["textShader"]);
 }
 
 void initMainCamera() {

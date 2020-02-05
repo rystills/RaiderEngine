@@ -104,8 +104,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	}
 }
 
-void Shader::use() {
-	glUseProgram(ID);
+bool Shader::use() {
+	if (activeShader != ID) {
+		activeShader = ID;
+		glUseProgram(ID);
+		return true;
+	}
+	return false;
 }
 
 void Shader::setBool(std::string name, bool value) {

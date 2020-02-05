@@ -80,9 +80,8 @@ render the specified text with the specified (font,size) pair (if loaded) at the
 @param scale: the scale at which to render the text
 @param color: the color to use when rendering the text
 @param centered: whether or not to center the rendered text
-@param shouldUseShader: whether or not we need to use the shader before rendering the text
 */
-void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered = false, bool shouldUseShader = true);
+void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered = false);
 /*
 load the specified font at the desired size using freetype, adding the (fontName,size) pair to the fonts map
 @param fontName: the name of the font to load

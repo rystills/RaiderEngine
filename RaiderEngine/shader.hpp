@@ -4,14 +4,16 @@
 class Shader {
 public:
 	static inline std::string shaderDir = "shaders/", fallbackShaderDir = "";
+	static inline unsigned int activeShader = -1;
     unsigned int ID;
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
 	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
     /*
 	activate the shader
+	@returns: whether or not we ended up switching the active shader
 	*/
-	void use();
+	bool use();
 	/*
 	util functions for setting shader vars
 	*/
