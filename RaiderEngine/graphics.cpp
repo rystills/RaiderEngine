@@ -791,9 +791,99 @@ void initMainCamera() {
 	mainCam = new Camera(glm::vec3(0));
 }
 
+void NVSettingsCheckError(NvAPI_Status status) {
+	if (status == NVAPI_OK)
+		return;
+
+	NvAPI_ShortString szDesc = { 0 };
+	NvAPI_GetErrorMessage(status, szDesc);
+	ERROR(printf("NVAPI error: %s\n", szDesc))
+	exit(-1);
+}
+
+
+void NVSettingsSetString(NvAPI_UnicodeString& nvStr, const wchar_t* wcStr) {
+	for (int i = 0; (nvStr[i] = wcStr[i]) != 0 && i < NVAPI_UNICODE_STRING_MAX; ++i);
+}
+
+
+void checkNvidiaDisableThreadedOptimization() {
+	// TODO: investigate the cause of microstutters while nvidia threaded optimization is enabled. disabling it may not be necessary (and restarting the application is not ideal)
+	if (std::string(reinterpret_cast<char const*>(glGetString(GL_VENDOR))) == std::string("NVIDIA Corporation")) {
+		std::cout << "Nvidia gpu detected; checking threaded optimization status" << std::endl;
+		// profile settings / initialization
+		const wchar_t* profileName = L"RaiderEngine_NoThreadedOptimization";
+		const wchar_t* appName = L"RaiderEngine.exe";
+		const wchar_t* appFriendlyName = L"Raider Engine";
+		NvDRSSessionHandle hSession;
+		NVSettingsCheckError(NvAPI_Initialize());
+		NVSettingsCheckError(NvAPI_DRS_CreateSession(&hSession));
+		NVSettingsCheckError(NvAPI_DRS_LoadSettings(hSession));
+
+		// fill Profile Info
+		NVDRS_PROFILE profileInfo;
+		profileInfo.version = NVDRS_PROFILE_VER;
+		profileInfo.isPredefined = 0;
+		NVSettingsSetString(profileInfo.profileName, profileName);
+
+		// initial setting configuration
+		NVDRS_SETTING setting;
+		setting.version = NVDRS_SETTING_VER;
+		NvDRSProfileHandle hProfile;
+		
+		if (NvAPI_DRS_FindProfileByName(hSession, profileInfo.profileName, &hProfile) == NVAPI_OK) {
+			// profile already exists
+			NVSettingsCheckError(NvAPI_DRS_GetSetting(hSession, hProfile, OGL_THREAD_CONTROL_ID, &setting));
+			if (setting.u32CurrentValue == OGL_THREAD_CONTROL_DISABLE) {
+				// threaded optimization is already disabled
+				std::cout << "profile already exists with threaded optimization disabled; nothing more to do" << std::endl;
+				NvAPI_DRS_DestroySession(hSession);
+				return;
+			}
+			// profile exists with incorrect threading optimization setting
+			std::cout << "profile already exists with incorrect threaded optimization setting; disabling it now" << std::endl;
+			goto configureSetting;
+		}
+
+		// no profile exists; create a new one
+		NVSettingsCheckError(NvAPI_DRS_CreateProfile(hSession, &profileInfo, &hProfile));
+
+		// configure application Info
+		NVDRS_APPLICATION app;
+		app.version = NVDRS_APPLICATION_VER_V1;
+		app.isPredefined = 0;
+		NVSettingsSetString(app.appName, appName);
+		NVSettingsSetString(app.userFriendlyName, appFriendlyName);
+		NVSettingsSetString(app.launcher, L"");
+		NVSettingsSetString(app.fileInFolder, L"");
+
+		// create application
+		NVSettingsCheckError(NvAPI_DRS_CreateApplication(hSession, hProfile, &app));
+
+		// configure setting
+	configureSetting:
+		setting.settingId = OGL_THREAD_CONTROL_ID;
+		setting.settingType = NVDRS_DWORD_TYPE;
+		setting.settingLocation = NVDRS_CURRENT_PROFILE_LOCATION;
+		setting.isCurrentPredefined = 0;
+		setting.isPredefinedValid = 0;
+		setting.u32CurrentValue = OGL_THREAD_CONTROL_DISABLE;
+		setting.u32PredefinedValue = OGL_THREAD_CONTROL_DISABLE;
+
+		// set setting and save it
+		NVSettingsCheckError(NvAPI_DRS_SetSetting(hSession, hProfile, &setting));
+		NVSettingsCheckError(NvAPI_DRS_SaveSettings(hSession));
+
+		NvAPI_DRS_DestroySession(hSession);
+		std::cout << "successfully created or updated nvidia application profile with threaded optimization disabled. Pease restart the application now" << std::endl;
+		exit(EXIT_SUCCESS);
+	}
+}
+
 GLFWwindow* initGraphics() {
 	glfwSetErrorCallback(glfwErrorCallback);
 	GLFWwindow* window = initWindow();
+	checkNvidiaDisableThreadedOptimization();
 	initQuad();
 	initCube();
 	initGBuffer();

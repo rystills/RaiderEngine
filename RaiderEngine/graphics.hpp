@@ -90,11 +90,6 @@ load the specified font at the desired size using freetype, adding the (fontName
 void freetypeLoadFont(std::string fontName, int fontSize);
 
 /*
-initialize freetype, creating a VBO and VAO specifically for text rendering
-*/
-void initFreetype();
-
-/*
 add a single point to the point vector
 @param pos: the point's position
 @param color: the point's rgb color
@@ -188,6 +183,13 @@ void render2D(bool clearScreen = false);
 initialize the main camera
 */
 void initMainCamera();
+
+// special methods for reading/writing nvidia driver profile
+void NVSettingsCheckError(NvAPI_Status status);
+
+void NVSettingsSetString(NvAPI_UnicodeString& nvStr, const wchar_t* wcStr);
+
+void checkNvidiaDisableThreadedOptimization();
 
 /*
 call all of the graphics initialization steps in order

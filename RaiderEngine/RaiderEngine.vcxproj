@@ -81,8 +81,8 @@
     <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\newton\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\freetype\include;$(ProjectDir)\libs\openalsoft\include;$(ProjectDir)\libs\physx\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\openalsoft\lib;$(ProjectDir)\libs\physx\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\glfw\include;$(ProjectDir)\libs\assimp\include;$(ProjectDir)\libs\glm\include;$(ProjectDir)\libs\glad\include;$(ProjectDir)\libs\freetype\include;$(ProjectDir)\libs\openalsoft\include;$(ProjectDir)\libs\physx\include;$(ProjectDir)\libs\nvapi;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\glfw\lib;$(ProjectDir)\libs\assimp\lib;$(ProjectDir)\libs\freetype\lib;$(ProjectDir)\libs\openalsoft\lib;$(ProjectDir)\libs\physx\lib;$(ProjectDir)\libs\nvapi\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,7 +122,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;freetype.lib;ex-common.lib;OpenAL32.lib;LowLevel_static_32.lib;LowLevelAABB_static_32.lib;LowLevelDynamics_static_32.lib;PhysX_32.lib;PhysXCharacterKinematic_static_32.lib;PhysXCommon_32.lib;PhysXCooking_32.lib;PhysXExtensions_static_32.lib;PhysXFoundation_32.lib;PhysXPvdSDK_static_32.lib;PhysXTask_static_32.lib;PhysXVehicle_static_32.lib;SceneQuery_static_32.lib;SimulationController_static_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;msvcrt.lib;msvcmrt.lib;glfw3.lib;freetype.lib;ex-common.lib;OpenAL32.lib;LowLevel_static_32.lib;LowLevelAABB_static_32.lib;LowLevelDynamics_static_32.lib;PhysX_32.lib;PhysXCharacterKinematic_static_32.lib;PhysXCommon_32.lib;PhysXCooking_32.lib;PhysXExtensions_static_32.lib;PhysXFoundation_32.lib;PhysXPvdSDK_static_32.lib;PhysXTask_static_32.lib;PhysXVehicle_static_32.lib;SceneQuery_static_32.lib;SimulationController_static_32.lib;nvapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference />
   </ItemDefinitionGroup>

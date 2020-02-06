@@ -45,6 +45,10 @@
 #include "AL/alc.h"
 #include "AL/alext.h"
 
+// nvapi
+#include "nvapi.h"
+#include "NvApiDriverSettings.h"
+
 // demo build selection
 #define DEMO_3D_CAROUSEL 1
 #define DEMO_BRICK_BREAKER 2
