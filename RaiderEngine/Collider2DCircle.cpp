@@ -29,7 +29,7 @@ bool Collider2DCircle::collision(glm::vec2 myPos, float myRot, Collider2D* other
 			return collisionCircleLine(*this, myPos, *(Collider2DLine*)other, otherPos);
 		return collisionCircleRotatedLine(*this, myPos, *(Collider2DLine*)other, otherPos, otherRot);
 	default:
-		WARNING(puts("Collision check attempted with unknown collider type"))
+		WARNINGCOLOR(puts("Collision check attempted with unknown collider type"))
 		return false;
 	}
 }

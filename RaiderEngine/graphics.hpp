@@ -189,7 +189,7 @@ void NVSettingsCheckError(NvAPI_Status status);
 
 void NVSettingsSetString(NvAPI_UnicodeString& nvStr, const wchar_t* wcStr);
 
-void checkNvidiaDisableThreadedOptimization();
+void checkDisableNvidiaThreadedOptimization();
 
 /*
 call all of the graphics initialization steps in order

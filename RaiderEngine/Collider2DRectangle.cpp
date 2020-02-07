@@ -29,7 +29,7 @@ bool Collider2DRectangle::collision(glm::vec2 myPos, float myRot, Collider2D* ot
 	case polygon:
 		return collisionRectanglePolygon(*this, myPos, myRot, *(Collider2DPolygon*)other, otherPos, otherRot);
 	default:
-		WARNING(puts("Collision check attempted with unknown collider type"))
+		WARNINGCOLOR(puts("Collision check attempted with unknown collider type"))
 		return false;
 	}
 }

@@ -7,7 +7,7 @@
 #include "Collider2DCircle.hpp"
 
 void Ball::restart() {
-	setCenter(SCR_WIDTH / 2, SCR_HEIGHT / 2 + 200);
+	setCenter(SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f + 200);
 	setRot(-glm::quarter_pi<float>());
 }
 
@@ -37,7 +37,7 @@ void Ball::update() {
 	}
 
 	if (center.x > SCR_WIDTH) {
-		setCenter(SCR_WIDTH, center.y);
+		setCenter(static_cast<float>(SCR_WIDTH), center.y);
 		bounce(0);
 	}
 	else if (center.x < 0) {
@@ -46,7 +46,7 @@ void Ball::update() {
 	}
 
 	// bounce off of bricks, breaking them in the process
-	for (int i = 0; i < gameObject2Ds["brick"].size(); ++i) {
+	for (unsigned int i = 0; i < gameObject2Ds["brick"].size(); ++i) {
 		if (collidesWith(&*gameObject2Ds["brick"][i])) {
 			GameObject2D o = *gameObject2Ds["brick"][i];
 			// if we are moving away from the brick on one axis, the correct bounce must be on the other axis

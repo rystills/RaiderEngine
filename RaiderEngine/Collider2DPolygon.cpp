@@ -8,7 +8,7 @@
 
 Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints) : Collider2D(polygon) {
 	//create a deep copy of the input vector2 array so we can modify points locally
-	for (int i = 0; i < inPoints.size(); ++i)
+	for (unsigned int i = 0; i < inPoints.size(); ++i)
 		points.push_back(glm::vec2(inPoints[i].x, inPoints[i].y));
 	calculateBoundingRadius(&points[0], points.size());
 }
@@ -28,13 +28,13 @@ bool Collider2DPolygon::collision(glm::vec2 myPos, float myRot, Collider2D* othe
 	case line:
 		return collisionLinePolygon(*(Collider2DLine*)other, otherPos, otherRot, *this, myPos, myRot);
 	default:
-		WARNING(puts("Collision check attempted with unknown collider type"))
+		WARNINGCOLOR(puts("Collision check attempted with unknown collider type"))
 		return false;
 	}
 }
 
 void Collider2DPolygon::getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {
-	for (int i = 0; i < points.size(); ++i) {
+	for (unsigned int i = 0; i < points.size(); ++i) {
 		pts[i] = glm::vec2(points[i].x,points[i].y);
 		RotatePoint(pts[i], glm::vec2(0), rot);
 		pts[i] += pos;
@@ -45,7 +45,7 @@ void Collider2DPolygon::debugDraw(glm::vec2 pos, float rot) {
 	glm::vec2 pt1(points[points.size()-1].x, points[points.size() - 1].y);
 	RotatePoint(pt1, glm::vec2(0, 0), rot);
 	glm::vec2 pt2;
-	for (int i = 0; i < points.size(); ++i) {
+	for (unsigned int i = 0; i < points.size(); ++i) {
 		pt2 = glm::vec2(points[i].x, points[i].y);
 		RotatePoint(pt2, glm::vec2(0, 0), rot);
 		queueDrawLine(glm::vec3(pos.x + pt1.x, pos.y + pt1.y, 0), glm::vec3(pos.x + pt2.x, pos.y + pt2.y, 0), glm::vec3(1, .5f, .5f));

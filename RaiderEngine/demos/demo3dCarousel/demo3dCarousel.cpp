@@ -33,7 +33,7 @@ void checkSwitchMap(int mapNum) {
 		return;
 	// clear the current scene
 	for (auto&& kv : gameObjects)
-		for (int i = 0; i < kv.second.size(); ++i)
+		for (unsigned int i = 0; i < kv.second.size(); ++i)
 			if (kv.second[i]->usePhysics)
 				gScene->removeActor(*kv.second[i]->body);
 	gameObjects.clear();
@@ -116,7 +116,7 @@ int main() {
 
 		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
 		if (scene == 2) 
-			ambientStrength = .5f*sin(totalTime) + .5f;
+			ambientStrength = .5f*static_cast<float>(sin(totalTime)) + .5f;
 		// update frame
 		updateTime();
 		resetSingleFrameInput();
@@ -154,7 +154,7 @@ int main() {
 			drawCenterIndicator();
 		render2D();
 		if (displayString.size() != 0)
-			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f, glm::vec3(1, 1, 1), true);
+			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f, 1.0f, glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))

@@ -123,18 +123,18 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 
 void loadMap(std::string mapName) {
 	// load the map as a typical model via ASSIMP
-	float sTime = glfwGetTime();
+	double sTime = glfwGetTime();
 	std::string directory = mapDir + '/' + mapName + ".fbx";
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		ERROR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
+		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl)
 		return;
 	}
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
 	tempProp.prevName = "";
 	processMapNode(scene->mRootNode, scene);
-	SUCCESS(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl);
+	SUCCESSCOLOR(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl)
 }

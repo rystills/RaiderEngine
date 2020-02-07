@@ -45,19 +45,15 @@ void updateDebugToggle(GLFWwindow* window) {
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (firstMouse) {
-		lastX = xpos;
-		lastY = ypos;
+	if (firstMouse)
 		firstMouse = false;
+	else {
+		float xoffset = static_cast<float>(xpos) - lastX;
+		float yoffset = lastY - static_cast<float>(ypos); // reversed since y-coordinates go from bottom to top
+		mainCam->ProcessMouseMovement(xoffset, yoffset);
 	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-	lastX = xpos;
-	lastY = ypos;
-
-	mainCam->ProcessMouseMovement(xoffset, yoffset);
+	lastX = static_cast<float>(xpos);
+	lastY = static_cast<float>(ypos);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -95,5 +91,5 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	mainCam->ProcessMouseScroll(yoffset);
+	mainCam->ProcessMouseScroll(static_cast<float>(yoffset));
 }

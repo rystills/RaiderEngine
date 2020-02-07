@@ -2,10 +2,10 @@
 #include "stdafx.h"
 #include <algorithm>
 #include <math.h>
-extern class Collider2DCircle;
-extern class Collider2DLine;
-extern class Collider2DPolygon;
-extern class Collider2DRectangle;
+class Collider2DCircle;
+class Collider2DLine;
+class Collider2DPolygon;
+class Collider2DRectangle;
 enum ColliderType { circle = 0, line = 1, rectangle = 2, polygon = 3 };
 
 // class representing a collider used for collision checking between objects

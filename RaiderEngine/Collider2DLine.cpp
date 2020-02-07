@@ -26,7 +26,7 @@ bool Collider2DLine::collision(glm::vec2 myPos, float myRot, Collider2D* other, 
 	case line:
 		return collisionLineLine(*this, myPos, myRot, *(Collider2DLine*)other, otherPos, otherRot);
 	default:
-		WARNING(puts("Collision check attempted with unknown collider type"))
+		WARNINGCOLOR(puts("Collision check attempted with unknown collider type"))
 		return false;
 	}
 }

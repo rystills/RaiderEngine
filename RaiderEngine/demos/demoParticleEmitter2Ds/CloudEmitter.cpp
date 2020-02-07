@@ -13,7 +13,7 @@ CloudEmitter::CloudEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "cloud.png") 
 	spawnScaleMin = .5f, spawnScaleMax = 1.35f;
 	spawnSpeedMin = 10, spawnSpeedMax = 22;
 	spawnAngleMin = 0, spawnAngleMax = glm::two_pi<float>();
-	spawnMinLife = std::numeric_limits<double>::infinity(), spawnMaxLife = std::numeric_limits<double>::infinity();
+	spawnMinLife = std::numeric_limits<float>::infinity(), spawnMaxLife = std::numeric_limits<float>::infinity();
 	shrink = false;
 	fade = false;
 	circleSpawn = true;
@@ -24,7 +24,7 @@ CloudEmitter::CloudEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "cloud.png") 
 
 void CloudEmitter::update() {
 	ParticleEmitter2D::update();
-	for (int i = 0; i < particles.size(); ++i) {
+	for (unsigned int i = 0; i < particles.size(); ++i) {
 		// rotate each cloud particle towards the emitter's center based on its distance
 		glm::vec2 posDiff = glm::normalize(particles[i].pos - pos);
 		float forceDir = std::atan2(posDiff.y,posDiff.x);

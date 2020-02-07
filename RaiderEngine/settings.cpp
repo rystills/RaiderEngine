@@ -86,12 +86,12 @@ void setVsync(bool shouldUse) {
 	}
 }
 
-void setScreenDimensions(float width, float height) {
+void setScreenDimensions(int width, int height) {
 	frameBufferSizeCallback(window, width, height);
 }
 
 void setScreenDimensions(glm::vec2 res) {
-	frameBufferSizeCallback(window, res.x, res.y);
+	frameBufferSizeCallback(window, static_cast<int>(res.x), static_cast<int>(res.y));
 }
 
 void setClearColor(glm::vec4 newColor) {
@@ -138,15 +138,15 @@ update all objects in all object lists
 */
 void updateObjects() {
 	for (auto&& kv : gameObjects)
-		for (int i = 0; i < kv.second.size(); ++i)
+		for (unsigned int i = 0; i < kv.second.size(); ++i)
 			kv.second[i]->update();
-	for (int i = 0; i < lights.size(); ++i)
+	for (unsigned int i = 0; i < lights.size(); ++i)
 		lights[i]->update();
 	for (auto&& kv : gameObject2Ds)
-		for (int i = 0; i < kv.second.size(); ++i)
+		for (unsigned int i = 0; i < kv.second.size(); ++i)
 			kv.second[i]->update();
-	for (int i = 0; i < particleEmitter2Ds.size(); ++i)
+	for (unsigned int i = 0; i < particleEmitter2Ds.size(); ++i)
 		particleEmitter2Ds[i]->update();
-	for (int i = 0; i < textObjects.size(); ++i)
+	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->update();
 }

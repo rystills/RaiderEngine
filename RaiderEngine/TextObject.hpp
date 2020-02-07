@@ -5,7 +5,7 @@
 class TextObject {
 public:
 	inline static GLuint VAO, VBO;
-	inline static int numGlpyhsBuffered = 0;
+	inline static unsigned int numGlpyhsBuffered = 0;
 	std::string text;
 	float x, y;
 	glm::vec3 color;

@@ -34,10 +34,10 @@ void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {
 
 void PlayerBase::syncCameraPos() {
 	PxExtendedVec3 playerPos = controller->getPosition();
-	mainCam->Position.x = playerPos.x;
+	mainCam->Position.x = static_cast<float>(playerPos.x);
 	// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-	mainCam->Position.y = playerPos.y + (height * (crouching ? crouchScale : 1) / 2 + radius);
-	mainCam->Position.z = playerPos.z;
+	mainCam->Position.y = static_cast<float>(playerPos.y) + (height * (crouching ? crouchScale : 1) / 2 + radius);
+	mainCam->Position.z = static_cast<float>(playerPos.z);
 }
 
 bool PlayerBase::canJump() {

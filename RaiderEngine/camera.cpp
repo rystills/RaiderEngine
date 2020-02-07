@@ -40,7 +40,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction) {
 }
 
 void Camera::setYaw(float inYaw) {
-	Yaw = fmod(inYaw, 360);
+	Yaw = fmodf(inYaw, 360);
 	while (Yaw < 0)
 		Yaw += 360;
 }

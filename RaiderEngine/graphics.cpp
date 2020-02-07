@@ -26,7 +26,7 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void glfwErrorCallback(int errorno, const char* errmsg) {
-	ERROR(std::cout << "GLFW Error #" << errorno << ": " << errmsg << std::endl);
+	ERRORCOLOR(std::cout << "GLFW Error #" << errorno << ": " << errmsg << std::endl)
 }
 
 void initQuad() {
@@ -144,7 +144,7 @@ void initBuffers() {
 void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered) {
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
-		ERROR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
+		ERRORCOLOR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl)
 		return;
 	}
 	if (text.length() == 0)
@@ -188,7 +188,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	std::vector<GLfloat> verts;
 	verts.reserve(24 * text.length());	
 	// Iterate through all characters
-	for (int i = 0; i < text.length(); ++i) {
+	for (unsigned int i = 0; i < text.length(); ++i) {
 		ch = fonts[fontName][fontSize].second[text[i]];
 
 		GLfloat xpos = x + ch.x_off * scale;
@@ -245,16 +245,16 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 
 	FT_Init_FreeType(&ft);
 	if (FT_New_Face(ft, (fontDir + fontName + ".ttf").c_str(), 0, &face))
-		ERROR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl)
+		ERRORCOLOR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl)
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
 	// calculate texture width
-	int max_dim = (1 + (face->size->metrics.height >> 6))* ceilf(sqrtf(numFontCharacters));
-	int tex_width = 1;
+	unsigned int max_dim = static_cast<int>((1 + (face->size->metrics.height >> 6))* ceilf(sqrtf(numFontCharacters)));
+	unsigned int tex_width = 1;
 	while (tex_width < max_dim)
 		tex_width <<= 1;
 	// tex_height is initially set to match tex_width; once we're done loading in the glyphs, we'll be able to create the final texture with the exact height
-	int tex_height = tex_width;
+	unsigned int tex_height = tex_width;
 
 	// render glyphs to atlas
 	char* pixels = (char*)calloc(tex_width * tex_height, 1);
@@ -269,8 +269,8 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 			pen_y += ((face->size->metrics.height >> 6) + 1);
 		}
 
-		for (int row = 0; row < bmp->rows; ++row) {
-			for (int col = 0; col < bmp->width; ++col) {
+		for (unsigned int row = 0; row < bmp->rows; ++row) {
+			for (unsigned int col = 0; col < bmp->width; ++col) {
 				int x = pen_x + col;
 				int y = pen_y + row;
 				pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
@@ -278,10 +278,10 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 		}
 
 		// populate Character struct with info needed for rendering
-		fonts[fontName][fontSize].second[i].x0 = pen_x;
-		fonts[fontName][fontSize].second[i].y0 = pen_y;
-		fonts[fontName][fontSize].second[i].x1 = pen_x + bmp->width;
-		fonts[fontName][fontSize].second[i].y1 = pen_y + bmp->rows;
+		fonts[fontName][fontSize].second[i].x0 = static_cast<float>(pen_x);
+		fonts[fontName][fontSize].second[i].y0 = static_cast<float>(pen_y);
+		fonts[fontName][fontSize].second[i].x1 = static_cast<float>(pen_x + bmp->width);
+		fonts[fontName][fontSize].second[i].y1 = static_cast<float>(pen_y + bmp->rows);
 
 		fonts[fontName][fontSize].second[i].x_size = bmp->width;
 		fonts[fontName][fontSize].second[i].y_size = bmp->rows;
@@ -444,7 +444,7 @@ void initGBuffer() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 	// finally check if framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR(std::cout << "Framebuffer not complete!" << std::endl);
+		ERRORCOLOR(std::cout << "Framebuffer not complete!" << std::endl)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -493,7 +493,7 @@ GLFWwindow* initWindow() {
 	// --------------------
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RaiderEngine", fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 	if (window == NULL) {
-		ERROR(std::cout << "Failed to create GLFW window" << std::endl);
+		ERRORCOLOR(std::cout << "Failed to create GLFW window" << std::endl)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
@@ -512,7 +512,7 @@ GLFWwindow* initWindow() {
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		ERROR(std::cout << "Failed to initialize GLAD" << std::endl);
+		ERRORCOLOR(std::cout << "Failed to initialize GLAD" << std::endl)
 		exit(EXIT_FAILURE);
 	}
 
@@ -572,13 +572,13 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 		}
 		else {
 			// iterate through all submeshes
-			for (int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
+			for (unsigned int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
 				// transfer the textures for the current submesh once initially
 				if (shouldSendTextures)
 					kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
 				// now render the current submesh for all GameObjects
 				// TODO: further optimize this with instanced rendering via glDrawElementsInstanced (will require some alterations to the shader)
-				for (int r = 0; r < kv.second.size(); ++r) {
+				for (unsigned int r = 0; r < kv.second.size(); ++r) {
 					shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[r]->position) * kv.second[r]->rotation, kv.second[r]->scale));
 					kv.second[r]->model->meshes[i].draw(*shaders[shaderName], false);
 				}
@@ -595,7 +595,7 @@ void renderDepthMap() {
 	shaders["pointShadowsDepth"]->use();
 	shaders["pointShadowsDepth"]->setFloat("far_plane", mainCam->far_plane);
 	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, mainCam->near_plane, mainCam->far_plane);
-	for (int k = 0; k < lights.size(); ++k) {
+	for (unsigned int k = 0; k < lights.size(); ++k) {
 		if (lights[k]->on) {
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -710,7 +710,7 @@ void renderLines2D() {
 	if (debugDraw) {
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
-			for (int i = 0; i < kv.second.size(); ++i)
+			for (unsigned int i = 0; i < kv.second.size(); ++i)
 				if (kv.second[i]->collider)
 					kv.second[i]->collider->debugDraw(kv.second[i]->center, kv.second[i]->rotation);
 	}
@@ -742,7 +742,7 @@ void render2D(bool clearScreen) {
 			glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedColorVBO);
 			glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::vec3), NULL, GL_DYNAMIC_DRAW);
 		}
-		for (int i = 0; i < kv.second.size(); ++i) {
+		for (unsigned int i = 0; i < kv.second.size(); ++i) {
 			if (kv.second[i]->isDirty)
 				kv.second[i]->recalculateModel();
 			modelMatrices[i] = kv.second[i]->model;
@@ -783,7 +783,7 @@ void render2D(bool clearScreen) {
 	// render text
 	// TODO: text rendering should be orderable too
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	for (int i = 0; i < textObjects.size(); ++i)
+	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);
 }
 
@@ -797,7 +797,7 @@ void NVSettingsCheckError(NvAPI_Status status) {
 
 	NvAPI_ShortString szDesc = { 0 };
 	NvAPI_GetErrorMessage(status, szDesc);
-	ERROR(printf("NVAPI error: %s\n", szDesc))
+	ERRORCOLOR(printf("NVAPI error: %s\n", szDesc))
 	exit(-1);
 }
 
@@ -807,7 +807,7 @@ void NVSettingsSetString(NvAPI_UnicodeString& nvStr, const wchar_t* wcStr) {
 }
 
 
-void checkNvidiaDisableThreadedOptimization() {
+void checkDisableNvidiaThreadedOptimization() {
 	// TODO: investigate the cause of microstutters while nvidia threaded optimization is enabled. disabling it may not be necessary (and restarting the application is not ideal)
 	if (std::string(reinterpret_cast<char const*>(glGetString(GL_VENDOR))) == std::string("NVIDIA Corporation")) {
 		std::cout << "Nvidia gpu detected; checking threaded optimization status" << std::endl;
@@ -883,7 +883,8 @@ void checkNvidiaDisableThreadedOptimization() {
 GLFWwindow* initGraphics() {
 	glfwSetErrorCallback(glfwErrorCallback);
 	GLFWwindow* window = initWindow();
-	checkNvidiaDisableThreadedOptimization();
+	if (forceDisableNvidiaThreadedOptimization)
+		checkDisableNvidiaThreadedOptimization();
 	initQuad();
 	initCube();
 	initGBuffer();

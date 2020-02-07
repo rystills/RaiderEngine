@@ -55,7 +55,7 @@ int main() {
 		// render
 		render2D(true);
 		if (paused)
-			renderText("Inter-Regular", 48, *shaders["textShader"], "Press Enter to Start", SCR_WIDTH / 2, SCR_HEIGHT / 2, 1.0f + .25f*sin(totalTime), glm::vec3(1, 1, 1), true);
+			renderText("Inter-Regular", 48, *shaders["textShader"], "Press Enter to Start", SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f, 1.0f + .25f*static_cast<float>(sin(totalTime)), glm::vec3(1, 1, 1), true);
 		glfwSwapBuffers(window);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))

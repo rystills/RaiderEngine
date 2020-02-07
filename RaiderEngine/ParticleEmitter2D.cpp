@@ -88,7 +88,7 @@ bool ParticleEmitter2D::killParticle(int partInd) {
 
 void ParticleEmitter2D::update() {
 	// tick old particles
-	for (int i = 0; i < particles.size(); ++i) {
+	for (unsigned int i = 0; i < particles.size(); ++i) {
 		// if the particle is already dead, that can only mean it's awaiting recycling
 		if (particleMotions[i].life <= 0)
 			continue;

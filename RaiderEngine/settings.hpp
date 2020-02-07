@@ -40,6 +40,7 @@ inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
 inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
+inline bool forceDisableNvidiaThreadedOptimization = false;
 
 /* methods to add/remove objects from the engine */
 GameObject* addGameObject(GameObject* go);
@@ -72,7 +73,7 @@ void removeLight(int ind);
 
 void setVsync(bool shouldUse);
 
-void setScreenDimensions(float width, float height);
+void setScreenDimensions(int width, int height);
 void setScreenDimensions(glm::vec2 res);
 
 void setClearColor(glm::vec4 newColor);

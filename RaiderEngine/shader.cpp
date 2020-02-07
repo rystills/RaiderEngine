@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "shader.hpp"
+#include "terminalColors.hpp"
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
 	// 1. retrieve the vertex/fragment source code from filePath
@@ -21,9 +22,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 			fShaderFile.open(shaderDir + fragmentPath);
 		}
 		else {
-#ifdef WARNING
-			WARNING(std::cout << "unable to locate shader at path '" << shaderDir + vertexPath << "'; searching fallback directory instead" << std::endl);
-#endif
+			WARNINGCOLOR(std::cout << "unable to locate shader at path '" << shaderDir + vertexPath << "'; searching fallback directory instead" << std::endl)
 			vShaderFile.open(fallbackShaderDir + vertexPath);
 			fShaderFile.open(fallbackShaderDir + fragmentPath);
 		}
@@ -47,7 +46,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		}
 	}
 	catch (std::ifstream::failure e) {
-		ERROR(std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl);
+		ERRORCOLOR(std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl)
 	}
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
@@ -167,14 +166,14 @@ void Shader::checkCompileErrors(GLuint shader, std::string type) {
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		if (!success) {
 			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-			ERROR(std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl);
+			ERRORCOLOR(std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl)
 		}
 	}
 	else {
 		glGetProgramiv(shader, GL_LINK_STATUS, &success);
 		if (!success) {
 			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-			ERROR(std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl);
+			ERRORCOLOR(std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl)
 		}
 	}
 }
