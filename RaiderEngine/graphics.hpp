@@ -47,6 +47,8 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
 void glfwErrorCallback(int errorno, const char* errmsg);
 
+bool beginFrame(bool tickPhysics = true);
+
 void initQuad();
 
 /*
@@ -175,9 +177,14 @@ void renderLines();
 void renderLines2D();
 
 /*
-draw all 2D elements, including TextObjects and GameObject2Ds
+draw all 2D elements, including GameObject2Ds, ParticleEmitter2Ds, and TextObjects
 */
 void render2D(bool clearScreen = false);
+
+/*
+render the game, calling all individual render methods in order as necessary
+*/
+void render(bool only2D = false);
 
 /*
 initialize the main camera
@@ -193,6 +200,7 @@ void checkDisableNvidiaThreadedOptimization();
 
 /*
 call all of the graphics initialization steps in order
-@returns the newly created GLFWwindow pointer
 */
-GLFWwindow* initGraphics();
+void initGraphics();
+
+void closeGraphics();

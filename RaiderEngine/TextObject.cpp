@@ -20,5 +20,5 @@ void TextObject::initVertexObjects() {
 }
 
 void TextObject::draw(Shader s) {
-	renderText(fontName, fontSize, s, text, x, y, 1.0f, color, centered);
+	renderText(fontName, fontSize, s, text, x, y, scale, color, centered);
 }

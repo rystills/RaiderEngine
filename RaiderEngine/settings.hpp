@@ -100,3 +100,7 @@ void setFallbackShaderDir(std::string newDir);
 update all objects in all object lists
 */
 void updateObjects();
+
+void initEngine();
+
+void closeEngine();

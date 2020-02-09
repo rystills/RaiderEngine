@@ -5,24 +5,30 @@
 #include "physics.hpp"
 #include "input.hpp"
 
-void displayObjectInfo(GameObject* go) {
+bool displayObjectInfo(GameObject* go) {
 	displayString = go->getDisplayString();
-	mainCam->controllable = displayString.length() == 0;
+	if (displayString.length() == 0)
+		return false;
+	mainCam->controllable = false;
+	return true;
 }
 
-void updateDisplayString() {
+bool updateDisplayString() {
 	if (mousePressedRight) {
 		displayString.clear();
 		mainCam->controllable = true;
+		return true;
 	}
+	return false;
 }
 
-void checkDisplayObject() {
+bool checkDisplayObject() {
 	if (mousePressedRight) {
 		PxRaycastBuffer hit = raycast(mainCam->Position, mainCam->Front, 1000);
 		if (hit.hasBlock)
-			displayObjectInfo((GameObject*)hit.block.actor->userData);
+			return displayObjectInfo((GameObject*)hit.block.actor->userData);
 	}
+	return false;
 }
 
 void ReleaseHelpers() {

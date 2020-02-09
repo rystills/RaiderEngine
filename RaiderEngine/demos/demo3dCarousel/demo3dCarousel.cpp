@@ -12,14 +12,13 @@
 #include "timing.hpp"
 
 /*
-draw a dot in the center of the screen, allowing the player to easily see which object is currently being moused over
+queue a dot in the center of the screen to be rendered, allowing the player to easily see which object is currently being moused over
 */
-void drawCenterIndicator() {
+void queueCenterIndicator() {
 	// convert center position into camera coordinates
 	glm::mat4 M = glm::inverse(mainCam->projection*mainCam->view);
 	glm::vec4 lRayStart_world = M * glm::vec4(0, 0, 0, 1); lRayStart_world /= lRayStart_world.w;
 	queueDrawPoint(glm::vec3(lRayStart_world.x, lRayStart_world.y, lRayStart_world.z), glm::vec3(255, 255, 255));
-	drawPoints();
 }
 
 int scene = 0;
@@ -62,8 +61,7 @@ void checkSwitchMap(int mapNum) {
 
 int main() {
 	// initialization
-	window = initGraphics();
-	initAudio();
+	initEngine();
 	PlayerBase player;
 	player.init();
 	PlayerSpawn::player = &player;
@@ -103,9 +101,11 @@ int main() {
 	addTextObject(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, 60, glm::vec3(.5f, .8f, .2f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, 90, glm::vec3(.2f, .5f, .8f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Press 1-3 to switch between the demo scenes", 6, 120, glm::vec3(1, 1, 0), "Inter-Regular", 24));
+	TextObject* displayStringIndicator = addTextObject(new TextObject("", SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f,glm::vec3(1.f),"Inter-Regular",24,true));
 	addGameObject2D(new Compass(glm::vec2(1146,586),0,glm::vec2(1), glm::vec3(1), "UI/compass.png"));
 
-	while (!glfwWindowShouldClose(window)) {
+	while (beginFrame()) {
+		updateDebugToggle(window);
 		// switch scenes on number key press
 		if (keyPressed("loadScene1"))
 			checkSwitchMap(1);
@@ -117,54 +117,35 @@ int main() {
 		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
 		if (scene == 2) 
 			ambientStrength = .5f*static_cast<float>(sin(totalTime)) + .5f;
-		// update frame
-		updateTime();
-		resetSingleFrameInput();
-		glfwPollEvents();
-
-		// update physics
-		updatePhysics();
 
 		// update player
 		player.update();
 		// update objects
 		updateObjects();
-		updateDebugToggle(window);
 
 		// picking and object info display
-		if (displayString.size() > 0)
+		if (displayString.size() > 0) {
 			// we're currently observing something; nothing to do until the user right clicks again
-			updateDisplayString();
+			if (updateDisplayString())
+				displayStringIndicator->text = "";
+		}
 		else {
-			if (!gMouseJoint)
-				// there's nothing held at the moment, so check if the user is trying to observe something
-				checkDisplayObject();
+			// check if there's nothing held at the moment and the user is trying to observe something
+			if (!gMouseJoint && checkDisplayObject())
+				displayStringIndicator->text = displayString;
 			if (displayString.size() == 0)
 				// the user didn't try to observe something, so check if the user is holding or trying to grab something
 				updateHeldBody();
 		}
 		
 		// render
-		renderDepthMap();
-		renderGeometryPass();
-		renderLightingPass();
-		debugDrawLightCubes();
-		renderLines();
 		if (displayString.size() == 0)
-			drawCenterIndicator();
-		render2D();
-		if (displayString.size() != 0)
-			renderText("Inter-Regular", 24, *shaders["textShader"], displayString, SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f, 1.0f, glm::vec3(1, 1, 1), true);
-		glfwSwapBuffers(window);
+			queueCenterIndicator();
+		render();
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 	}
-	glfwTerminate();
-	// cleanup all of our data manually (unnecessary here, but good practice nonetheless)
-	cleanupPhysics();
-	gameObjects.clear();
-	models.clear();
-	sounds.clear();
+	closeEngine();
 }
 #endif

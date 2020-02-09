@@ -13,14 +13,13 @@
 #include "CloudEmitter.hpp"
 
 int main() {
+	initEngine();
 	// directories
 	setTextureDir("demos/demoParticleEmitter2Ds/images");
 	setSoundDir("demos/demoParticleEmitter2Ds/sounds");
 	setFontDir("demos/shared/fonts");
 
-	// initialization
-	window = initGraphics();
-	initAudio();
+	// fonts
 	freetypeLoadFont("Inter-Regular", 18);
 	
 	setVsync(false);
@@ -36,26 +35,17 @@ int main() {
 	for (int i = 0; i < 5; ++i)
 		pecs[i] = addParticleEmitter2D(new CloudEmitter(glm::vec2(150 + 40*i, 100)));
 
-	while (!glfwWindowShouldClose(window)) {
-		// update frame
-		updateTime();
-		resetSingleFrameInput();
-		glfwPollEvents();
-
-		// update objects
+	while (beginFrame(false)) {
 		updateObjects();
 		int numPecParts = 0, numPecRecycled = 0;
 		for (int i = 0; i < 5; numPecParts += pecs[i]->particles.size(), numPecRecycled += pecs[i++]->recycledParticleInds.size());
 		to1->text = "total particle count: " + std::to_string(pes->particles.size() + pef->particles.size() + numPecParts + per->particles.size());
 		to2->text = "num recycled particles: " + std::to_string(pes->recycledParticleInds.size() + pef->recycledParticleInds.size() + numPecRecycled + per->recycledParticleInds.size());
-
-		// render
-		render2D(true);
-		glfwSwapBuffers(window);
+		render(true);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 	}
-	glfwTerminate();
+	closeEngine();
 }
 #endif

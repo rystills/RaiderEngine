@@ -10,6 +10,7 @@
 #include "physics.hpp"
 #include "input.hpp"
 #include "ParticleEmitter2D.hpp"
+#include "audio.hpp"
 
 GameObject* addGameObject(GameObject* go) {
 	gameObjects[go->modelName].emplace_back(go);
@@ -149,4 +150,30 @@ void updateObjects() {
 		particleEmitter2Ds[i]->update();
 	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->update();
+}
+
+void initEngine() {
+	initGraphics();
+	initAudio();
+}
+
+void closeEngine() {
+	closeGraphics();
+	closeAudio();
+	// clear the physics scene
+	for (auto&& kv : gameObjects)
+		for (unsigned int i = 0; i < kv.second.size(); ++i)
+			if (kv.second[i]->usePhysics)
+				gScene->removeActor(*kv.second[i]->body);
+	cleanupPhysics();
+	gameObjects.clear();
+	gameObject2Ds.clear();
+	lights.clear();
+	fonts.clear();
+	particleEmitter2Ds.clear();
+	shaders.clear();
+	colliders.clear();
+	textObjects.clear();
+	models.clear();
+	sounds.clear();
 }

@@ -12,7 +12,8 @@ public:
 	bool centered;
 	std::string fontName;
 	int fontSize;
-	TextObject(std::string text, float x, float y, glm::vec3 color, std::string fontName, int fontSize, bool centered = false) : text(text), x(x), y(y), color(color), fontName(fontName), fontSize(fontSize), centered(centered) {};
+	float scale;
+	TextObject(std::string text, float x, float y, glm::vec3 color, std::string fontName, int fontSize, bool centered = false, float scale = 1.f) : text(text), x(x), y(y), color(color), fontName(fontName), fontSize(fontSize), centered(centered), scale(scale) {};
 
 	static void initVertexObjects();
 

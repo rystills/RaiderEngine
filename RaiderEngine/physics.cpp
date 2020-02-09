@@ -59,7 +59,8 @@ void cleanupPhysics() {
 	PX_RELEASE(gPhysics);
 	if (gPvd) {
 		PxPvdTransport* transport = gPvd->getTransport();
-		gPvd->release();	gPvd = NULL;
+		gPvd->release();
+		gPvd = NULL;
 		PX_RELEASE(transport);
 	}
 	PX_RELEASE(gFoundation);

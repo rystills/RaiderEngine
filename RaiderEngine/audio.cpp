@@ -13,6 +13,10 @@ void initAudio() {
 	InitAL(NULL, NULL);
 }
 
+void closeAudio() {
+	CloseAL();
+}
+
 void deleteAudioBuffer(ALuint* b) {
 	alDeleteBuffers(1, b);
 	delete b;

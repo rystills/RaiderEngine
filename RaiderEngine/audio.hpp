@@ -6,6 +6,8 @@ initialize audio via OpenAL-Soft
 */
 void initAudio();
 
+void closeAudio();
+
 /*
 custom deleter for smart pointers containing openal-soft audio buffers; deletes the buffer's contents before deleting the buffer itself
 @param b: the audio buffer to delete

@@ -15,18 +15,21 @@ inline PxRigidActor* hitBody;
 /*
 display an information box detailing the specified object
 @param go: the GameObject about which we wish to show information
+@returns: whether or not go produced a non-empty display string
 */
-void displayObjectInfo(GameObject* go);
+bool displayObjectInfo(GameObject* go);
 
 /*
 update the current display string, clearing it and reenabling camera control if the right mouse button is pressed
+@returns: whether or not we just cleared the display string
 */
-void updateDisplayString();
+bool updateDisplayString();
 
 /*
 if the user right clicked on an object, attempt to update the display string
+@returns: whether or not we just set the display string
 */
-void checkDisplayObject();
+bool checkDisplayObject();
 
 /*
 clear the mouse joint and sphere upon releasing the held object

@@ -10,6 +10,7 @@
 #include "terminalColors.hpp"
 #include "physics.hpp"
 #include "ParticleEmitter2D.hpp"
+#include "timing.hpp"
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and height will be significantly larger than specified on retina displays.
@@ -27,6 +28,18 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 
 void glfwErrorCallback(int errorno, const char* errmsg) {
 	ERRORCOLOR(std::cout << "GLFW Error #" << errorno << ": " << errmsg << std::endl)
+}
+
+bool beginFrame(bool tickPhysics) {
+	// update frame
+	updateTime();
+	resetSingleFrameInput();
+	glfwPollEvents();
+	if (glfwWindowShouldClose(window))
+		return false;
+	if (tickPhysics)
+		updatePhysics();
+	return true;
 }
 
 void initQuad() {
@@ -330,6 +343,8 @@ void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 }
 
 void drawPoints() {
+	if (pointsQueue.empty())
+		return;
 	// TODO: clean up this method (switch to glBufferSubData, remove needless state changes)
 	// todo: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
 	glBindVertexArray(primitiveVAO);
@@ -378,6 +393,8 @@ void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& 
 }
 
 void drawLines() {
+	if (linesQueue.empty())
+		return;
 	// TODO: clean up this method (switch to glBufferSubData, remove needless state changes)
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
@@ -694,20 +711,30 @@ void debugDrawLightCubes() {
 }
 
 void renderLines() {
-	// render UI
-	glDisable(GL_DEPTH_TEST);
-	shaders["lineShader"]->use();
-	shaders["lineShader"]->setMat4("projection", mainCam->projection);
-	shaders["lineShader"]->setMat4("view", mainCam->view);
-	if (debugDraw)
+	// TODO: distinguish between queuing 3d lines and points to be rendered, and 2d lines and points to be rendered
+	if (debugDraw || !pointsQueue.empty() || !linesQueue.empty()) {
+		// setup
+		if (shaders["lineShader"]->use()) {
+			glDisable(GL_DEPTH_TEST);
+			shaders["lineShader"]->setMat4("projection", mainCam->projection);
+			shaders["lineShader"]->setMat4("view", mainCam->view);
+		}
+		// draw user defined points and lines
+		drawPoints();
+		drawLines();
+
 		// draw 3d colliders
-		debugDrawPhysics();
+		if (debugDraw)
+			debugDrawPhysics();
+	}
 }
 
 void renderLines2D() {
-	glDisable(GL_DEPTH_TEST);
-	shaders["lineShader2D"]->use();
 	if (debugDraw) {
+		// setup
+		if (shaders["lineShader2D"]->use())
+			glDisable(GL_DEPTH_TEST);
+
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
 			for (unsigned int i = 0; i < kv.second.size(); ++i)
@@ -785,6 +812,20 @@ void render2D(bool clearScreen) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);
+}
+
+void render(bool only2D) {
+	if (!only2D) {
+		renderDepthMap();
+		renderGeometryPass();
+		renderLightingPass();
+		debugDrawLightCubes();
+		renderLines();
+	}
+	
+	render2D(only2D);
+	renderLines2D();
+	glfwSwapBuffers(window);
 }
 
 void initMainCamera() {
@@ -880,9 +921,9 @@ void checkDisableNvidiaThreadedOptimization() {
 	}
 }
 
-GLFWwindow* initGraphics() {
+void initGraphics() {
 	glfwSetErrorCallback(glfwErrorCallback);
-	GLFWwindow* window = initWindow();
+	window = initWindow();
 	if (forceDisableNvidiaThreadedOptimization)
 		checkDisableNvidiaThreadedOptimization();
 	initQuad();
@@ -898,5 +939,8 @@ GLFWwindow* initGraphics() {
 	GameObject2D::initStaticVertexBuffer();
 	ParticleEmitter2D::initVertexObjects();
 	TextObject::initVertexObjects();
-	return window;
+}
+
+void closeGraphics() {
+	glfwTerminate();
 }

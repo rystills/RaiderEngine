@@ -12,6 +12,7 @@
 #include "Collider2DPolygon.hpp"
 
 int main() {
+	initEngine();
 	// directories
 	setFontDir("demos/shared/fonts");
 
@@ -26,9 +27,7 @@ int main() {
 	setKeyBinding("swap2", GLFW_KEY_F);
 
 
-	// initialization
-	window = initGraphics();
-	initAudio();
+	// fonts
 	freetypeLoadFont("Inter-Regular", 18);
 
 	setVsync(false);
@@ -51,14 +50,8 @@ int main() {
 	GameObject2D* g2 = addGameObject2D(new GameObject2D(glm::vec2(SCR_WIDTH/2, SCR_HEIGHT/2), 0, glm::vec2(1), glm::vec3(1), "", false, 0, rectColS));
 	int g1ColInd = 0, g2ColInd = 0;
 
-	while (!glfwWindowShouldClose(window)) {
-		// update frame
-		updateTime();
-		resetSingleFrameInput();
-		glfwPollEvents();
-
+	while (beginFrame(false)) {
 		updateObjects();
-
 		// update colliders
 		g1->translate((keyHeld("mvRight") - keyHeld("mvLeft")) * 200 * deltaTime, (keyHeld("mvDown") - keyHeld("mvUp")) * 200 * deltaTime);
 		g1->rotate((keyHeld("rotCW") - keyHeld("rotCCW")) * 3 * deltaTime);
@@ -66,17 +59,12 @@ int main() {
 			g1->collider = cols[(g1ColInd+=1) %= numCols];
 		if (keyPressed("swap2"))
 			g2->collider = cols[(g2ColInd+=1) %= numCols];
-
 		textObjects[1]->text = "Colliding ? " + (g1->collidesWith(g2) ? std::string("true") : std::string("false")) + " | " + (g2->collidesWith(g1) ? std::string("true") : std::string("false"));
-
-		// render
-		render2D(true);
-		renderLines2D();
-		glfwSwapBuffers(window);
+		render(true);
 		// set the close flag if the player presses the escape key
 		if (keyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 	}
-	glfwTerminate();
+	closeEngine();
 }
 #endif
