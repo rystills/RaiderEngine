@@ -9,6 +9,7 @@
 #include "TextObject.hpp"
 #include <graphics.hpp>
 #include "ParticleEmitter2D.hpp"
+#include "Tilemap.hpp"
 
 // this file holds global settings and shared engine data
 inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720;
@@ -40,6 +41,7 @@ inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
 inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
+inline std::vector<std::unique_ptr<Tilemap>> tilemaps;
 inline bool forceDisableNvidiaThreadedOptimization = false;
 
 /* methods to add/remove objects from the engine */
@@ -48,6 +50,8 @@ GameObject* addGameObject(GameObject* go);
 void removeGameObject(GameObject* go);
 
 void removeGameObject(std::string modelName, int ind);
+
+Tilemap* addTilemap(Tilemap* go);
 
 GameObject2D* addGameObject2D(GameObject2D* go);
 

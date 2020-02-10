@@ -29,6 +29,11 @@ void removeGameObject(std::string modelName, int ind) {
 	gameObjects[modelName].erase(gameObjects[modelName].begin() + ind);
 }
 
+Tilemap* addTilemap(Tilemap* go) {
+	tilemaps.emplace_back(go);
+	return go;
+}
+
 GameObject2D* addGameObject2D(GameObject2D* go) {
 	gameObject2Ds[std::filesystem::path(go->sprite.path).stem().string()].emplace_back(go);
 	return go;
@@ -51,7 +56,7 @@ Collider2D* addCollider2D(std::string name, Collider2D* go) {
 ParticleEmitter2D* addParticleEmitter2D(ParticleEmitter2D* go) {
 	particleEmitter2Ds.emplace_back(go);
 	return go;
-	// TODO: define remove methods for ParticleEmitter2D and Collider2D
+	// TODO: define remove methods for ParticleEmitter2D, Collider2D, and Tilemap 
 }
 
 TextObject* addTextObject(TextObject* go) {
@@ -138,6 +143,8 @@ void setFallbackShaderDir(std::string newDir) {
 update all objects in all object lists
 */
 void updateObjects() {
+	for (int i = 0; i < tilemaps.size(); ++i)
+		tilemaps[i]->update();
 	for (auto&& kv : gameObjects)
 		for (unsigned int i = 0; i < kv.second.size(); ++i)
 			kv.second[i]->update();

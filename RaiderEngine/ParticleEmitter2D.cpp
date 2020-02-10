@@ -4,6 +4,7 @@
 #include "settings.hpp"
 #include "timing.hpp"
 #include "input.hpp"
+// TODO: define this as a proper function in settings, and overload with ints as well
 #define randRange(LO, HI) HI==LO ? LO : LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI- LO)))
 
 ParticleEmitter2D::ParticleEmitter2D(glm::vec2 pos, std::string spriteName) : pos(pos) {

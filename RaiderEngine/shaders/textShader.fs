@@ -6,7 +6,8 @@ uniform sampler2D text;
 uniform vec3 textColor;
 
 void main() {
-    if( texture(text, TexCoords).a < .001)
+    // check red channel for alpha, since text rendering uses a GL_RED formatted texture
+    if( texture(text, TexCoords).r < .001)
         discard;
     vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
     color = vec4(textColor, 1.0) * sampled;

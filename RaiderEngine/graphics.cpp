@@ -10,6 +10,7 @@
 #include "terminalColors.hpp"
 #include "physics.hpp"
 #include "ParticleEmitter2D.hpp"
+#include "Tilemap.hpp"
 #include "timing.hpp"
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -155,6 +156,7 @@ void initBuffers() {
 }
 
 void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered) {
+	// TODO: precalculate individual VBOs in TextObjects for faster rendering
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
 		ERRORCOLOR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl)
@@ -418,6 +420,8 @@ void calcOrthoProjection() {
 	// apply to all shaders
 	shaders["textShader"]->use();
 	shaders["textShader"]->setMat4("projection", glmOrthoTextProjection);
+	shaders["tilemapShader"]->use();
+	shaders["tilemapShader"]->setMat4("projection", glmOrthoTextProjection);	
 	shaders["lineShader2D"]->use();
 	shaders["lineShader2D"]->setMat4("projection", glmOrthoProjection);
 	shaders["2DShader"]->use();
@@ -550,6 +554,7 @@ void loadShaders() {
 	shaders["lineShader"] = std::make_unique<Shader>("lineShader.vs", "lineShader.fs");
 	shaders["lineShader2D"] = std::make_unique<Shader>("lineShader2D.vs", "lineShader2D.fs");
 	shaders["textShader"] = std::make_unique<Shader>("textShader.vs", "textShader.fs");
+	shaders["tilemapShader"] = std::make_unique<Shader>("tilemapShader.vs", "tilemapShader.fs");
 	shaders["2DShader"] = std::make_unique<Shader>("2DShader.vs", "2DShader.fs");
 	shaders["Particle2DShader"] = std::make_unique<Shader>("Particle2DShader.vs", "Particle2DShader.fs");
 	shaders["pointShadowsDepth"] = std::make_unique<Shader>("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
@@ -750,10 +755,20 @@ void render2D(bool clearScreen) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// render Tilemaps
+	glActiveTexture(GL_TEXTURE0);
+	shaders["tilemapShader"]->use();
+	for (unsigned int i = 0; i < tilemaps.size(); ++i) {
+		glBindVertexArray(tilemaps[i]->VAO);
+		shaders["tilemapShader"]->setVec2("pos", tilemaps[i]->pos);
+		glBindBuffer(GL_ARRAY_BUFFER, tilemaps[i]->VBO);
+		glBindTexture(GL_TEXTURE_2D, tilemaps[i]->sprite.id);
+		glDrawArrays(GL_TRIANGLES, 0, tilemaps[i]->mapSize.x * tilemaps[i]->mapSize.y * 6);
+	}
+
 	// render GameObject2Ds
 	shaders["2DShader"]->use();
 	glBindVertexArray(GameObject2D::VAO);
-	glActiveTexture(GL_TEXTURE0);
 	for (auto&& kv : gameObject2Ds) {
 		// don't render gameObjects using the default (empty) sprite
 		if (kv.second[0]->sprite.id == Model::defaultDiffuseMap.id)

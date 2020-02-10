@@ -31,6 +31,9 @@
     <Filter Include="Source Files\demos\demoParticleEmitter2Ds">
       <UniqueIdentifier>{9993f007-c78b-4734-9f05-8c3544189d50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\demos\demoTilemap">
+      <UniqueIdentifier>{c3ab4ef9-074f-4306-bae9-a3aa0b448c9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -174,6 +177,12 @@
     <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp">
       <Filter>Source Files\demos\demo3dCarousel</Filter>
     </ClCompile>
+    <ClCompile Include="demos\demoTilemap\demoTilemap.cpp">
+      <Filter>Source Files\demos\demoTilemap</Filter>
+    </ClCompile>
+    <ClCompile Include="Tilemap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -308,6 +317,9 @@
     <ClInclude Include="demos\demoParticleEmitter2Ds\RainEmitter.hpp">
       <Filter>Source Files\demos\demoParticleEmitter2Ds</Filter>
     </ClInclude>
+    <ClInclude Include="Tilemap.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -368,6 +380,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\Particle2DShader.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\tilemapShader.fs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\tilemapShader.vs">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
