@@ -92,6 +92,13 @@ void setVsync(bool shouldUse) {
 	}
 }
 
+void setEnableCursor(bool shouldEnable) {
+	if (enableCursor != shouldEnable) {
+		enableCursor = shouldEnable;
+		glfwSetInputMode(window, GLFW_CURSOR, enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	}
+}
+
 void setScreenDimensions(int width, int height) {
 	frameBufferSizeCallback(window, width, height);
 }
@@ -143,7 +150,7 @@ void setFallbackShaderDir(std::string newDir) {
 update all objects in all object lists
 */
 void updateObjects() {
-	for (int i = 0; i < tilemaps.size(); ++i)
+	for (unsigned int i = 0; i < tilemaps.size(); ++i)
 		tilemaps[i]->update();
 	for (auto&& kv : gameObjects)
 		for (unsigned int i = 0; i < kv.second.size(); ++i)

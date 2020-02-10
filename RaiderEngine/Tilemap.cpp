@@ -4,7 +4,51 @@
 #include "settings.hpp"
 #include "timing.hpp"
 
-Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth) : gridSize(gridSize), mapSize(mapSize), pos(pos), depth(depth) {
+void Tilemap::setTileData(GLfloat start[], int x, int y) {
+	// TODO: simplify usage
+	// code modified from graphics.cpp >> renderText
+	GLfloat xpos = static_cast<GLfloat>(x * gridSize);
+	GLfloat ypos = static_cast<GLfloat>(y * gridSize);
+	GLfloat x0 = map[x][y] % (sprite.width / gridSize) / static_cast<float>((sprite.width / gridSize));
+	GLfloat y0 = map[x][y] / (sprite.width / gridSize) / static_cast<float>((sprite.height / gridSize));
+
+	GLfloat x1 = x0 + gridSize / static_cast<float>(sprite.width);
+	GLfloat y1 = y0 + gridSize / static_cast<float>(sprite.height);
+
+	// TODO: try tristrips (see GameObject2D / ParticleEmitter2D) for a minor performance boost
+	// add image position and uv data to the vertex vector
+	start[0] = xpos;
+	start[1] = ypos;
+	start[2] = x0;
+	start[3] = y0;
+	
+	start[4] = xpos;
+	start[5] = ypos + gridSize;
+	start[6] = x0;
+	start[7] = y1;
+	
+	start[8] = xpos + gridSize;
+	start[9] = ypos + gridSize;
+	start[10] = x1;
+	start[11] = y1;
+	
+	start[12] = xpos;
+	start[13] = ypos;
+	start[14] = x0;
+	start[15] = y0;
+	
+	start[16] = xpos + gridSize;
+	start[17] = ypos + gridSize;
+	start[18] = x1;
+	start[19] = y1;
+	
+	start[20] = xpos + gridSize;
+	start[21] = ypos;
+	start[22] = x1;
+	start[23] = y0;
+}
+
+Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, int numTileTypes, float depth) : gridSize(gridSize), mapSize(mapSize), pos(pos), numTileTypes(numTileTypes), depth(depth) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
 	// TODO: consider instanced rendering visible tiles rather than storing and rendering entire tilemap every frame
 	// init VAO/VBO
@@ -16,63 +60,18 @@ Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::v
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 
-	// randomize map  // TODO: placeholder
-	map.resize(mapSize.x);
-	for (unsigned int i = 0; i < mapSize.x; ++i) {
-		map[i].reserve(mapSize.y);
-		for (unsigned int r = 0; r < mapSize.y; ++r)
-			map[i][r] = rand() % 4;
-	}
-	// code modified from graphics.cpp >> renderText
+	map.resize(static_cast<unsigned int>(mapSize.x));
+	for (unsigned int i = 0; i < mapSize.x; ++i)
+		map[i].resize(static_cast<unsigned int>(mapSize.y));
 	std::vector<GLfloat> verts;
-	verts.reserve(24 * mapSize.x * mapSize.y);
-	// Iterate through all characters
-	for (unsigned int i = 0; i < mapSize.x; ++i) {
-		for (unsigned int r = 0; r < mapSize.y; ++r) {
-			GLfloat xpos = i*gridSize;
-			GLfloat ypos = r*gridSize;
-			GLfloat x0 = map[i][r] % (sprite.width / gridSize) / static_cast<float>((sprite.width / gridSize));
-			GLfloat y0 = map[i][r] / (sprite.width / gridSize) / static_cast<float>((sprite.height / gridSize));
-
-			GLfloat x1 = x0 + gridSize / static_cast<float>(sprite.width);
-			GLfloat y1 = y0 + gridSize / static_cast<float>(sprite.height);
-
-			// TODO: try tristrips (see GameObject2D / ParticleEmitter2D) for a minor performance boost
-			// add image position and uv data to the vertex vector
-			verts[24 * (i*mapSize.y+r)] = xpos;
-			verts[24 * (i*mapSize.y+r) + 1] = ypos;
-			verts[24 * (i*mapSize.y+r) + 2] = x0;
-			verts[24 * (i*mapSize.y+r) + 3] = y0;
-
-			verts[24 * (i*mapSize.y+r) + 4] = xpos;
-			verts[24 * (i*mapSize.y+r) + 5] = ypos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 6] = x0;
-			verts[24 * (i*mapSize.y+r) + 7] = y1;
-
-			verts[24 * (i*mapSize.y+r) + 8] = xpos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 9] = ypos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 10] = x1;
-			verts[24 * (i*mapSize.y+r) + 11] = y1;
-
-			verts[24 * (i*mapSize.y+r) + 12] = xpos;
-			verts[24 * (i*mapSize.y+r) + 13] = ypos;
-			verts[24 * (i*mapSize.y+r) + 14] = x0;
-			verts[24 * (i*mapSize.y+r) + 15] = y0;
-
-			verts[24 * (i*mapSize.y+r) + 16] = xpos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 17] = ypos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 18] = x1;
-			verts[24 * (i*mapSize.y+r) + 19] = y1;
-
-			verts[24 * (i*mapSize.y+r) + 20] = xpos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 21] = ypos;
-			verts[24 * (i*mapSize.y+r) + 22] = x1;
-			verts[24 * (i*mapSize.y+r) + 23] = y0;
-		}
-	}
+	verts.reserve(static_cast<unsigned int>(24 * mapSize.x * mapSize.y));
+	// set each tile
+	for (unsigned int i = 0; i < mapSize.x; ++i)
+		for (unsigned int r = 0; r < mapSize.y; ++r)
+			setTileData(&verts[0] + static_cast<int>(24*(i * mapSize.y + r)),i,r);
 
 	// buffer the full set of tiles as a single triangle array for rendering
-	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat) * mapSize.x * mapSize.y, &verts[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(24 * sizeof(GLfloat) * mapSize.x * mapSize.y), &verts[0], GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

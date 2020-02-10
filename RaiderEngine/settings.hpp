@@ -14,6 +14,7 @@
 // this file holds global settings and shared engine data
 inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720;
 inline bool useVsync = false;
+inline bool enableCursor = false;
 inline bool fullScreen = false;
 inline const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 inline bool debugDraw = false;
@@ -76,6 +77,8 @@ void removeLight(Light* go);
 void removeLight(int ind);
 
 void setVsync(bool shouldUse);
+
+void setEnableCursor(bool shouldEnable);
 
 void setScreenDimensions(int width, int height);
 void setScreenDimensions(glm::vec2 res);

@@ -527,7 +527,7 @@ GLFWwindow* initWindow() {
 	glfwSetKeyCallback(window, key_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -762,7 +762,7 @@ void render2D(bool clearScreen) {
 		shaders["tilemapShader"]->setVec2("pos", tilemaps[i]->pos);
 		glBindBuffer(GL_ARRAY_BUFFER, tilemaps[i]->VBO);
 		glBindTexture(GL_TEXTURE_2D, tilemaps[i]->sprite.id);
-		glDrawArrays(GL_TRIANGLES, 0, tilemaps[i]->mapSize.x * tilemaps[i]->mapSize.y * 6);
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(tilemaps[i]->mapSize.x * tilemaps[i]->mapSize.y * 6));
 	}
 
 	// render GameObject2Ds
