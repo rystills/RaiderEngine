@@ -207,39 +207,39 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		ch = fonts[fontName][fontSize].second[text[i]];
 
 		GLfloat xpos = x + ch.x_off * scale;
-		GLfloat ypos = y - (ch.y_size - ch.y_off) * scale;
+		GLfloat ypos = y + (fonts[fontName][fontSize].second['A'].y_size - ch.y_off) * scale;
 		GLfloat w = ch.x_size * scale;
 		GLfloat h = ch.y_size * scale;
 
 		// TODO: try instanced rendering + tristrips (see GameObject2D / ParticleEmitter2D) for a minor performance boost
 		// add character position and uv data to the vertex vector
 		verts[24 * i]    = xpos;
-		verts[24 * i+1]  = ypos + h;
+		verts[24 * i+1]  = ypos;
 		verts[24 * i+2]  = ch.x0;
 		verts[24 * i+3]  = ch.y0;
 
 		verts[24 * i+4]  = xpos;
-		verts[24 * i+5]  = ypos;
+		verts[24 * i+5]  = ypos + h;
 		verts[24 * i+6]  = ch.x0;
 		verts[24 * i+7]  = ch.y1;
 		
 		verts[24 * i+8]  = xpos + w;
-		verts[24 * i+9]  = ypos;
+		verts[24 * i+9]  = ypos + h;
 		verts[24 * i+10] = ch.x1;
 		verts[24 * i+11] = ch.y1;
 		
 		verts[24 * i+12]  = xpos;
-		verts[24 * i+13]  = ypos + h;
+		verts[24 * i+13]  = ypos;
 		verts[24 * i+14] = ch.x0;
 		verts[24 * i+15] = ch.y0;
 		
 		verts[24 * i+16]  = xpos + w;
-		verts[24 * i+17]  = ypos;
+		verts[24 * i+17]  = ypos + h;
 		verts[24 * i+18] = ch.x1;
 		verts[24 * i+19] = ch.y1;
 		
 		verts[24 * i+20] = xpos + w;
-		verts[24 * i+21] = ypos + h;
+		verts[24 * i+21] = ypos;
 		verts[24 * i+22] = ch.x1;
 		verts[24 * i+23] = ch.y0;
 
@@ -415,13 +415,12 @@ void drawLines() {
 
 void calcOrthoProjection() {
 	glmOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
-	glmOrthoTextProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
 
 	// apply to all shaders
 	shaders["textShader"]->use();
-	shaders["textShader"]->setMat4("projection", glmOrthoTextProjection);
+	shaders["textShader"]->setMat4("projection", glmOrthoProjection);
 	shaders["tilemapShader"]->use();
-	shaders["tilemapShader"]->setMat4("projection", glmOrthoTextProjection);	
+	shaders["tilemapShader"]->setMat4("projection", glmOrthoProjection);
 	shaders["lineShader2D"]->use();
 	shaders["lineShader2D"]->setMat4("projection", glmOrthoProjection);
 	shaders["2DShader"]->use();

@@ -10,9 +10,9 @@
 GameManager::GameManager(std::string fontName, int fontSize) : TextObject("Press Enter to Start", SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f, glm::vec3(1, 1, 1), fontName, fontSize, true) {
 	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));
 	ball = (Ball*)addGameObject2D(new Ball(glm::vec2(0)));
-	addTextObject(new FpsDisplay(6, 6, glm::vec3(1, 1, 1), "Inter-Regular", 18));
-	addTextObject(new TextObject("Score: 0", 6, 30, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Level: 1", 6, 54, glm::vec3(.6f, .4f, .5f), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, SCR_HEIGHT - 20, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	addTextObject(new TextObject("Score: 0", 6, SCR_HEIGHT - 44, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Level: 1", 6, SCR_HEIGHT - 68, glm::vec3(.6f, .4f, .5f), "Inter-Regular", 18));
 	restartGame();
 }
 

@@ -21,7 +21,7 @@ int main() {
 
 	setVsync(false);
 	setClearColor(.85f, .85f, 1.f, 1.f);
-	addTextObject(new FpsDisplay(6, 6, glm::vec3(1.f), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, SCR_HEIGHT - 20, glm::vec3(1.f), "Inter-Regular", 18));
 
 	while (beginFrame(false)) {
 		updateObjects();

@@ -29,7 +29,6 @@ inline std::vector<glm::mat4> modelMatrices(0);
 inline std::vector<glm::vec3> colorVectors(0);
 
 inline glm::highp_mat4 glmOrthoProjection;
-inline glm::highp_mat4 glmOrthoTextProjection;
 
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;

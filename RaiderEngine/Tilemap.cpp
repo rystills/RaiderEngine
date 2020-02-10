@@ -40,32 +40,32 @@ Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::v
 			// TODO: try tristrips (see GameObject2D / ParticleEmitter2D) for a minor performance boost
 			// add image position and uv data to the vertex vector
 			verts[24 * (i*mapSize.y+r)] = xpos;
-			verts[24 * (i*mapSize.y+r) + 1] = ypos + gridSize;
+			verts[24 * (i*mapSize.y+r) + 1] = ypos;
 			verts[24 * (i*mapSize.y+r) + 2] = x0;
 			verts[24 * (i*mapSize.y+r) + 3] = y0;
 
 			verts[24 * (i*mapSize.y+r) + 4] = xpos;
-			verts[24 * (i*mapSize.y+r) + 5] = ypos;
+			verts[24 * (i*mapSize.y+r) + 5] = ypos + gridSize;
 			verts[24 * (i*mapSize.y+r) + 6] = x0;
 			verts[24 * (i*mapSize.y+r) + 7] = y1;
 
 			verts[24 * (i*mapSize.y+r) + 8] = xpos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 9] = ypos;
+			verts[24 * (i*mapSize.y+r) + 9] = ypos + gridSize;
 			verts[24 * (i*mapSize.y+r) + 10] = x1;
 			verts[24 * (i*mapSize.y+r) + 11] = y1;
 
 			verts[24 * (i*mapSize.y+r) + 12] = xpos;
-			verts[24 * (i*mapSize.y+r) + 13] = ypos + gridSize;
+			verts[24 * (i*mapSize.y+r) + 13] = ypos;
 			verts[24 * (i*mapSize.y+r) + 14] = x0;
 			verts[24 * (i*mapSize.y+r) + 15] = y0;
 
 			verts[24 * (i*mapSize.y+r) + 16] = xpos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 17] = ypos;
+			verts[24 * (i*mapSize.y+r) + 17] = ypos + gridSize;
 			verts[24 * (i*mapSize.y+r) + 18] = x1;
 			verts[24 * (i*mapSize.y+r) + 19] = y1;
 
 			verts[24 * (i*mapSize.y+r) + 20] = xpos + gridSize;
-			verts[24 * (i*mapSize.y+r) + 21] = ypos + gridSize;
+			verts[24 * (i*mapSize.y+r) + 21] = ypos;
 			verts[24 * (i*mapSize.y+r) + 22] = x1;
 			verts[24 * (i*mapSize.y+r) + 23] = y0;
 		}
