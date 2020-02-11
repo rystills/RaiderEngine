@@ -12,11 +12,14 @@ public:
 	std::vector<std::vector<unsigned int>> map;
 	float depth;  // depth in NDC coordinates
 	glm::vec2 pos;
-	int numTileTypes;
 
-	Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, int numTileTypes, float depth = 0.99f);
+	Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth = 0.99f);
+	Tilemap(std::string spriteName, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth = 0.99f);
 
 	void setTileData(GLfloat start[], int x, int y);
 
 	virtual void update();
+
+private:
+	void init(std::string spriteName);
 };

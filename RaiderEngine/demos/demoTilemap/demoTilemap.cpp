@@ -10,34 +10,36 @@
 #include "input.hpp"
 
 Tilemap* t;
+const int numTileTypes = 3;
 
 void saveMap() {
 	std::fstream mapFile;
 	mapFile.open("demos/demoTilemap/map.txt", std::fstream::out | std::fstream::trunc);
+	mapFile << static_cast<int>(t->mapSize.x) << ' ' << static_cast<int>(t->mapSize.y) << ' ';
 	for (int i = 0; i < t->mapSize.x; ++i)
 		for (int r = 0; r < t->mapSize.y; ++r)
 			mapFile << t->map[i][r] << ' ';
 	mapFile.close();
 }
 
-void loadMap() {
+void reloadMap() {
 	std::fstream mapFile;
 	mapFile.open("demos/demoTilemap/map.txt", std::fstream::in);
 	if (mapFile.is_open()) {
+		glBindVertexArray(t->VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, t->VBO);
+		std::vector<GLfloat> verts;
+		verts.reserve(static_cast<unsigned int>(24 * t->mapSize.x * t->mapSize.y));
+		// ignore map width and height, since we already have them stored in the Tilemap
+		mapFile.ignore(std::numeric_limits<std::streamsize>::max(),' ').ignore(std::numeric_limits<std::streamsize>::max(), ' ');
 		for (int i = 0; i < t->mapSize.x; ++i) {
 			for (int r = 0; r < t->mapSize.y; ++r) {
-				// TODO: quick and dirty saving / loading
 				mapFile >> t->map[i][r];
-
-				GLfloat verts[24];
-				t->setTileData(&verts[0], i, r);
-
-				glBindVertexArray(t->VAO);
-				glBindBuffer(GL_ARRAY_BUFFER, t->VBO);
-				glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(24 * sizeof(GLfloat) * (i * t->mapSize.y + r)), 24 * sizeof(GLfloat), verts);
+				t->setTileData(&verts[0] + static_cast<int>(24 * (i * t->mapSize.y + r)), i, r);
 			}
 		}
 		mapFile.close();
+		glBufferSubData(GL_ARRAY_BUFFER, 0, static_cast<GLintptr>(24 * sizeof(GLfloat) * t->mapSize.x * t->mapSize.y), &verts[0]);
 	}
 }
 
@@ -55,15 +57,28 @@ int main() {
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);
 
-	// TODO: pass map data directly into tilemap constructor
-	t = addTilemap(new Tilemap("tilemap.png",64,glm::vec2(16,10),glm::vec2(0),3));
-	loadMap();
+	// attempt to load in the saved map data and pass it directly into the tilemap constructor
+	std::fstream mapFile;
+	mapFile.open("demos/demoTilemap/map.txt", std::fstream::in);
+	if (mapFile.is_open()) {
+		int mapWidth, mapHeight;
+		mapFile >> mapWidth >> mapHeight;
+		std::vector<std::vector<unsigned int>> mapData(mapWidth, std::vector<unsigned int>(mapHeight));
+		for (int i = 0; i < mapWidth; ++i)
+			for (int r = 0; r < mapHeight; ++r)
+				mapFile >> mapData[i][r];
+		mapFile.close();
+		t = addTilemap(new Tilemap("tilemap.png", 64, mapData, glm::vec2(0)));
+	}
+	else
+		// no map data found; create an empty tilemap with the desired dimensions
+		t = addTilemap(new Tilemap("tilemap.png", 64, glm::vec2(16, 10), glm::vec2(0)));
 
 	setVsync(false);
 	setClearColor(.85f, .85f, 1.f, 1.f);
 	addTextObject(new FpsDisplay(6, static_cast<float>(SCR_HEIGHT - 20), glm::vec3(0.f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, SCR_HEIGHT - 44, glm::vec3(0.f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, SCR_HEIGHT - 68, glm::vec3(0.f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(SCR_HEIGHT - 44), glm::vec3(0.f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(SCR_HEIGHT - 68), glm::vec3(0.f), "Inter-Regular", 18));
 
 	while (beginFrame(false)) {
 		updateObjects();
@@ -72,7 +87,7 @@ int main() {
 			int gridx = static_cast<int>((lastX - t->pos.x) / t->gridSize);
 			int gridy = static_cast<int>((lastY - t->pos.y) / t->gridSize);
 			if (!(gridx < 0 || gridy < 0 || gridx >= t->mapSize.x || gridy >= t->mapSize.y)) {
-				(++t->map[gridx][gridy]) %= t->numTileTypes;
+				(++t->map[gridx][gridy]) %= numTileTypes;
 
 				GLfloat verts[24];
 				t->setTileData(&verts[0], gridx, gridy);
@@ -89,7 +104,7 @@ int main() {
 
 		// load on 'L' key press
 		if (keyPressed("loadMap"))
-			loadMap();
+			reloadMap();
 
 		render(true);
 		// set the close flag if the player presses the escape key

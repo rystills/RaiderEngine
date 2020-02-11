@@ -48,7 +48,7 @@ void Tilemap::setTileData(GLfloat start[], int x, int y) {
 	start[23] = y0;
 }
 
-Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, int numTileTypes, float depth) : gridSize(gridSize), mapSize(mapSize), pos(pos), numTileTypes(numTileTypes), depth(depth) {
+void Tilemap::init(std::string spriteName) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
 	// TODO: consider instanced rendering visible tiles rather than storing and rendering entire tilemap every frame
 	// init VAO/VBO
@@ -60,21 +60,32 @@ Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::v
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 
-	map.resize(static_cast<unsigned int>(mapSize.x));
-	for (unsigned int i = 0; i < mapSize.x; ++i)
-		map[i].resize(static_cast<unsigned int>(mapSize.y));
 	std::vector<GLfloat> verts;
 	verts.reserve(static_cast<unsigned int>(24 * mapSize.x * mapSize.y));
 	// set each tile
 	for (unsigned int i = 0; i < mapSize.x; ++i)
 		for (unsigned int r = 0; r < mapSize.y; ++r)
-			setTileData(&verts[0] + static_cast<int>(24*(i * mapSize.y + r)),i,r);
+			setTileData(&verts[0] + static_cast<int>(24 * (i * mapSize.y + r)), i, r);
 
-	// buffer the full set of tiles as a single triangle array for rendering
-	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(24 * sizeof(GLfloat) * mapSize.x * mapSize.y), &verts[0], GL_DYNAMIC_DRAW);
+	// buffer the full set of tiles as a single triangle array for rendering (use GL_STATIC_DRAW as Tilemaps are not expected to change frequently)
+	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(24 * sizeof(GLfloat) * mapSize.x * mapSize.y), &verts[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth) : gridSize(gridSize), mapSize(mapSize), pos(pos), depth(depth) {
+	// init empty map, since none was provided
+	map.resize(static_cast<unsigned int>(mapSize.x));
+	for (unsigned int i = 0; i < mapSize.x; ++i)
+		map[i].resize(static_cast<unsigned int>(mapSize.y));
+	init(spriteName);
+}
+
+Tilemap::Tilemap(std::string spriteName, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth) : gridSize(gridSize), map(map), pos(pos), depth(depth) {
+	// infer mapSize from provided map
+	mapSize = glm::vec2(map.size(), map.size() > 0 ? map[0].size() : 0);
+	init(spriteName);
 }
 
 void Tilemap::update() {
