@@ -202,6 +202,9 @@ void Model::createDefaultMaterialMaps() {
 	}
 }
 
+/*
+simple texture load meant for 2D sprites, with min and mag filters set to GL_NEAREST for sharp pixels even at non-target resolutions
+*/
 Texture Model::loadTextureSimple(std::string texFullName) {
 	// check if the current texture has already been loaded
 	std::string texName = texFullName.substr(texFullName.find_last_of('/') + 1);
@@ -213,7 +216,8 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 	// texture does not exist yet; try to load it 
 	if (std::filesystem::exists(textureDir + texFullName)) {
 		Texture loadedTex;
-		textureFromFile(textureDir + texFullName, loadedTex);
+		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, GL_LINEAR/GL_LINEAR_MIPMAP_LINEAR may be preferable 
+		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
 		loadedTex.type = "texture_diffuse";
 		texturesLoaded[texName] = loadedTex;
 		SUCCESSCOLOR(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl)

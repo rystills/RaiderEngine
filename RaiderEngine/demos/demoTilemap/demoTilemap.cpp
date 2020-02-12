@@ -44,7 +44,6 @@ void reloadMap() {
 }
 
 int main() {
-	// TODO: visible tilemap seams when fullscreen
 	initEngine();
 	setEnableCursor(true);
 	// directories
