@@ -12,13 +12,13 @@ Paddle::Paddle(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), glm
 }
 
 void Paddle::restart() {
-	setCenter(SCR_WIDTH / 2.f, SCR_HEIGHT - 80.f);
+	setCenter(TARGET_WIDTH / 2.f, TARGET_HEIGHT - 80.f);
 }
 
 void Paddle::update() {
 	if (paused)
 		return;
 	translate((keyHeld("mvRight") - keyHeld("mvLeft")) * speed * deltaTime * levelMultiplier,0);
-	setCenter(std::fmaxf(0, std::fminf(static_cast<float>(SCR_WIDTH), center.x)), center.y);
+	setCenter(std::fmaxf(0, std::fminf(static_cast<float>(TARGET_WIDTH), center.x)), center.y);
 }
 #endif

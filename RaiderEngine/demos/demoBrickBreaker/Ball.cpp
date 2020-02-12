@@ -7,7 +7,7 @@
 #include "Collider2DCircle.hpp"
 
 void Ball::restart() {
-	setCenter(SCR_WIDTH / 2.f, SCR_HEIGHT / 2.f + 200);
+	setCenter(TARGET_WIDTH / 2.f, TARGET_HEIGHT / 2.f + 200);
 	setRot(-glm::quarter_pi<float>());
 }
 
@@ -27,7 +27,7 @@ void Ball::update() {
 	translate(cos(rotation) * speed * deltaTime * levelMultiplier, sin(rotation) * speed * deltaTime * levelMultiplier);
 
 	// bounce off of screen borders, restarting the game on contact with the bottom of the screen
-	if (center.y > SCR_HEIGHT) {
+	if (center.y > TARGET_HEIGHT) {
 		paused = true;
 		return;
 	}
@@ -36,8 +36,8 @@ void Ball::update() {
 		bounce(1);
 	}
 
-	if (center.x > SCR_WIDTH) {
-		setCenter(static_cast<float>(SCR_WIDTH), center.y);
+	if (center.x > TARGET_WIDTH) {
+		setCenter(static_cast<float>(TARGET_WIDTH), center.y);
 		bounce(0);
 	}
 	else if (center.x < 0) {

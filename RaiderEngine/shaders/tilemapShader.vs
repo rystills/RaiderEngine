@@ -4,8 +4,9 @@ out vec2 TexCoords;
 
 uniform mat4 projection;
 uniform vec2 pos;
+uniform float depth;
 
 void main() {
-    gl_Position = projection * vec4(pos + vertex.xy, 0.0, 1.0);
+    gl_Position = projection * vec4(pos + vertex.xy, depth, 1.0);
     TexCoords = vertex.zw;
 }  

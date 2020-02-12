@@ -25,6 +25,7 @@ int main() {
 	addTextObject(new GameManager("Inter-Regular", 48));
 
 	while (beginFrame(false)) {
+		checkDemoToggles();
 		updateObjects();
 		render(true);
 		// set the close flag if the player presses the escape key

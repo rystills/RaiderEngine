@@ -135,6 +135,12 @@ initialize our game window, creating the window itself and setting input callbac
 */
 GLFWwindow* initWindow();
 
+
+/*
+load opengl functions and configure state
+*/
+void initGL();
+
 /*
 load all engine default shaders and populate them as necessary
 */

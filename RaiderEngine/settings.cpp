@@ -92,6 +92,13 @@ void setVsync(bool shouldUse) {
 	}
 }
 
+void setWindowMode(int newWidth, int newHeight, bool newFullScreen) {
+	fullScreen = newFullScreen;
+	setScreenDimensions(newWidth, newHeight);
+	glfwSetWindowMonitor(window, fullScreen ? glfwGetPrimaryMonitor() : nullptr, fullScreen ? 0 : (MONITOR_WIDTH - SCR_WIDTH) / 2, 
+		fullScreen ? 0 : (MONITOR_HEIGHT - SCR_HEIGHT) / 2, SCR_WIDTH,SCR_HEIGHT, MONITOR_REFRESH_RATE);
+}
+
 void setEnableCursor(bool shouldEnable) {
 	if (enableCursor != shouldEnable) {
 		enableCursor = shouldEnable;

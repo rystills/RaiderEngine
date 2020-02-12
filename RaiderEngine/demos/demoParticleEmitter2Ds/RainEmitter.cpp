@@ -21,7 +21,7 @@ RainEmitter::RainEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "rain.png") {
 
 void RainEmitter::update() {
 	for (unsigned int i = 0; i < particles.size(); ++i) {
-		if (particles[i].pos.y > SCR_HEIGHT + sprite.height / 2 && particleMotions[i].life > 0)
+		if (particles[i].pos.y > TARGET_HEIGHT + sprite.height / 2 && particleMotions[i].life > 0)
 			i-= killParticle(i);
 	}
 	ParticleEmitter2D::update();

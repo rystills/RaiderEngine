@@ -1,7 +1,7 @@
 Welcome to the Raider Engine! To get started, go ahead and clone this repo. Then, open the solution in Visual Studio 2019, and set the build target to Release x86.  
 Before you can run the engine, you'll need to set up all of the dependencies. Please download the dependencies that I built and organized here: https://drive.google.com/file/d/1StlyWMz9VLqMng-m0tq16PJksK3BDG81/view?usp=sharing  
 Place the libs folder directly in ".\RaiderEngine\RaiderEngine" and place all of the files from the dlls folder in ".\RaiderEngine\Release" (you will need to create the Release folder if you haven't built yet).  
-If you're not on Windows, You'll need to build the dependencies yourself. Please take a look at the libs folder from the download above to see how to structure the build. This build process will be automated in the future.  
+If you're not on Windows, you'll need to build the dependencies yourself. Please take a look at the libs folder from the download above to see how to structure the build. This build process will be automated in the future.  
   
 Here is the list of dependencies you'll need to build:
 - assimp (model loading)  

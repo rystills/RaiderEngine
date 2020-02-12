@@ -14,7 +14,7 @@ public:
 	glm::vec2 pos;
 
 	Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth = 0.99f);
-	Tilemap(std::string spriteName, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth = 0.99f);
+	Tilemap(std::string spriteName, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth = 1.f);
 
 	void setTileData(GLfloat start[], int x, int y);
 

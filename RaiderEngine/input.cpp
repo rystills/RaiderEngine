@@ -38,8 +38,12 @@ void resetSingleFrameInput() {
 	}
 }
 
-void updateDebugToggle(GLFWwindow* window) {
-	// debug key update
+void checkDemoToggles() {
+	// fullscreen toggle
+	if (keyPressed(GLFW_KEY_F11))
+		setWindowMode(fullScreen ? TARGET_WIDTH : MONITOR_WIDTH, fullScreen ? TARGET_HEIGHT : MONITOR_HEIGHT, !fullScreen);
+
+	// debug toggle
 	if (keyStates[GLFW_KEY_F3][pressed])
 		debugDraw = !debugDraw;
 }

@@ -21,7 +21,6 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 	SCR_WIDTH = width;
 	SCR_HEIGHT = height;
 	glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
-	calcOrthoProjection();
 	glDeleteFramebuffers(1, &gBuffer.buffer);
 	initGBuffer();
 	glViewport(0, 0, width, height);
@@ -414,9 +413,9 @@ void drawLines() {
 }
 
 void calcOrthoProjection() {
-	glmOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
-
-	// apply to all shaders
+	// apply 2D projection matching target resolution to all 2d shaders
+	// TODO: pillbox/letterbox different aspect ratios to fit 16:9
+	glmOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(TARGET_WIDTH), static_cast<GLfloat>(TARGET_HEIGHT), 0.0f, -1.0f, 1.0f);
 	shaders["textShader"]->use();
 	shaders["textShader"]->setMat4("projection", glmOrthoProjection);
 	shaders["tilemapShader"]->use();
@@ -491,12 +490,17 @@ void initDepthMaps() {
 }
 
 GLFWwindow* initWindow() {
-	// glfw: initialize and configure
-	// ------------------------------
+	// init glfw
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// get monitor dimensions
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	MONITOR_WIDTH = mode->width;
+	MONITOR_HEIGHT = mode->height;
+	MONITOR_REFRESH_RATE = mode->refreshRate;
 
 	// setup windows console colors here since the original console color doesn't appear to be accessible prior to main
 #ifdef _WIN32
@@ -509,14 +513,15 @@ GLFWwindow* initWindow() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-	// glfw window creation
-	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RaiderEngine", fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+	// create the game window
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RaiderEngine", NULL, NULL);
 	if (window == NULL) {
 		ERRORCOLOR(std::cout << "Failed to create GLFW window" << std::endl)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+	if (fullScreen)
+		setWindowMode(SCR_WIDTH, SCR_HEIGHT, true);
 
 	// callback events
 	glfwMakeContextCurrent(window);
@@ -529,20 +534,21 @@ GLFWwindow* initWindow() {
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
-	// glad: load all OpenGL function pointers
-	// ---------------------------------------
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		ERRORCOLOR(std::cout << "Failed to initialize GLAD" << std::endl)
-		exit(EXIT_FAILURE);
-	}
-
 	glfwSwapInterval(useVsync);
 
-	// required capabilities
+	return window;
+}
+
+void initGL() {
+	// load opengl function pointers
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		ERRORCOLOR(std::cout << "Failed to initialize GLAD" << std::endl)
+			exit(EXIT_FAILURE);
+	}
+
+	// enable line/point rendering
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glEnable(GL_PROGRAM_POINT_SIZE);
-
-	return window;
 }
 
 void loadShaders() {
@@ -760,6 +766,7 @@ void render2D(bool clearScreen) {
 	for (unsigned int i = 0; i < tilemaps.size(); ++i) {
 		glBindVertexArray(tilemaps[i]->VAO);
 		shaders["tilemapShader"]->setVec2("pos", tilemaps[i]->pos);
+		shaders["tilemapShader"]->setFloat("depth", tilemaps[i]->depth);
 		glBindBuffer(GL_ARRAY_BUFFER, tilemaps[i]->VBO);
 		glBindTexture(GL_TEXTURE_2D, tilemaps[i]->sprite.id);
 		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(tilemaps[i]->mapSize.x * tilemaps[i]->mapSize.y * 6));
@@ -940,6 +947,7 @@ void initGraphics() {
 	window = initWindow();
 	if (forceDisableNvidiaThreadedOptimization)
 		checkDisableNvidiaThreadedOptimization();
+	initGL();
 	initQuad();
 	initCube();
 	initGBuffer();

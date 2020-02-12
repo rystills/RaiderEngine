@@ -148,7 +148,7 @@ void GameObject2D::scale(float xOff, float yOff) {
 
 bool GameObject2D::inScreenBounds() {
 	glm::vec2 appliedScale(scaleVal.x * sprite.width, scaleVal.y * sprite.height);
-	return ((position.y + appliedScale.y < 0 || position.y >= SCR_HEIGHT) || (position.x + appliedScale.x < 0 || position.x >= SCR_WIDTH));
+	return ((position.y + appliedScale.y < 0 || position.y >= TARGET_HEIGHT) || (position.x + appliedScale.x < 0 || position.x >= TARGET_WIDTH));
 }
 
 bool GameObject2D::collidesWith(GameObject2D* other) {

@@ -31,9 +31,9 @@ reset all input events that occur for a single frame only
 void resetSingleFrameInput();
 
 /*
-toggle debugDraw on f3 press
+toggle fullscreen on f11 press or debugDraw on f3 press
 */
-void updateDebugToggle(GLFWwindow* window);
+void checkDemoToggles();
 
 /*
 callback for mouse movement
