@@ -415,17 +415,18 @@ void drawLines() {
 void calcOrthoProjection() {
 	// apply 2D projection matching target resolution to all 2d shaders
 	// TODO: pillbox/letterbox different aspect ratios to fit 16:9
-	glmOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(TARGET_WIDTH), static_cast<GLfloat>(TARGET_HEIGHT), 0.0f, -1.0f, 1.0f);
+	OrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(TARGET_WIDTH), static_cast<GLfloat>(TARGET_HEIGHT), 0.0f, -1.0f, 1.0f);
+	UIOrthoProjection = glm::ortho(0.0f, static_cast<GLfloat>(UI_TARGET_WIDTH), static_cast<GLfloat>(UI_TARGET_HEIGHT), 0.0f, -1.0f, 1.0f);
 	shaders["textShader"]->use();
-	shaders["textShader"]->setMat4("projection", glmOrthoProjection);
+	shaders["textShader"]->setMat4("projection", UIOrthoProjection);
 	shaders["tilemapShader"]->use();
-	shaders["tilemapShader"]->setMat4("projection", glmOrthoProjection);
+	shaders["tilemapShader"]->setMat4("projection", OrthoProjection);
 	shaders["lineShader2D"]->use();
-	shaders["lineShader2D"]->setMat4("projection", glmOrthoProjection);
+	shaders["lineShader2D"]->setMat4("projection", OrthoProjection);
 	shaders["2DShader"]->use();
-	shaders["2DShader"]->setMat4("projection", glmOrthoProjection);
+	shaders["2DShader"]->setMat4("projection", OrthoProjection);
 	shaders["Particle2DShader"]->use();
-	shaders["Particle2DShader"]->setMat4("projection", glmOrthoProjection);
+	shaders["Particle2DShader"]->setMat4("projection", OrthoProjection);
 }
 
 void initGBuffer() {

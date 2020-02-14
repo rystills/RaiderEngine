@@ -25,9 +25,9 @@ int main() {
 	setVsync(false);
 	setClearColor(0, 0, 0, 1);
 	addGameObject2D(new GameObject2D(glm::vec2(0), 0, glm::vec2(1), glm::vec3(1), "background.png"));
-	addTextObject(new FpsDisplay(6, TARGET_HEIGHT - 20.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
-	TextObject* to1 = addTextObject(new TextObject("",6, TARGET_HEIGHT - 44.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
-	TextObject* to2 = addTextObject(new TextObject("", 6, TARGET_HEIGHT - 68.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	TextObject* to1 = addTextObject(new TextObject("",6, UI_TARGET_HEIGHT - 44.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	TextObject* to2 = addTextObject(new TextObject("", 6, UI_TARGET_HEIGHT - 68.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
 	ParticleEmitter2D* pes = addParticleEmitter2D(new SparkleEmitter(glm::vec2(TARGET_WIDTH/2, TARGET_HEIGHT/2)));
 	ParticleEmitter2D* pef = addParticleEmitter2D(new FireEmitter(glm::vec2(TARGET_WIDTH - 300, TARGET_HEIGHT - 100)));
 	ParticleEmitter2D* per = addParticleEmitter2D(new RainEmitter(glm::vec2(230, 130)));

@@ -12,7 +12,7 @@
 #include "Tilemap.hpp"
 
 // this file holds global settings and shared engine data
-inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720, TARGET_WIDTH = 1280, TARGET_HEIGHT = 720, MONITOR_WIDTH = 0, MONITOR_HEIGHT = 0, MONITOR_REFRESH_RATE = 0;
+inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720, TARGET_WIDTH = 1280, TARGET_HEIGHT = 720, UI_TARGET_WIDTH = 1280, UI_TARGET_HEIGHT = 720, MONITOR_WIDTH = 0, MONITOR_HEIGHT = 0, MONITOR_REFRESH_RATE = 0;
 inline bool useVsync = false;
 inline bool enableCursor = false;
 inline bool fullScreen = false;

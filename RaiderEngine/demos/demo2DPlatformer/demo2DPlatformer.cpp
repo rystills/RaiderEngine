@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#if (COMPILE_DEMO == DEMO_TILEMAP)
+#if (COMPILE_DEMO == DEMO_2D_PLATFORMER)
 #include "GameObject2D.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
@@ -8,13 +8,14 @@
 #include "input.hpp"
 #include "Tilemap.hpp"
 #include "input.hpp"
+#include "Player.hpp"
 
 Tilemap* t;
 const int numTileTypes = 3;
 
 void saveMap() {
 	std::fstream mapFile;
-	mapFile.open("demos/demoTilemap/map.txt", std::fstream::out | std::fstream::trunc);
+	mapFile.open("demos/demo2DPlatformer/map.txt", std::fstream::out | std::fstream::trunc);
 	mapFile << static_cast<int>(t->mapSize.x) << ' ' << static_cast<int>(t->mapSize.y) << ' ';
 	for (int i = 0; i < t->mapSize.x; ++i)
 		for (int r = 0; r < t->mapSize.y; ++r)
@@ -24,7 +25,7 @@ void saveMap() {
 
 void reloadMap() {
 	std::fstream mapFile;
-	mapFile.open("demos/demoTilemap/map.txt", std::fstream::in);
+	mapFile.open("demos/demo2DPlatformer/map.txt", std::fstream::in);
 	if (mapFile.is_open()) {
 		glBindVertexArray(t->VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, t->VBO);
@@ -44,11 +45,13 @@ void reloadMap() {
 }
 
 int main() {
+	TARGET_WIDTH = 320;
+	TARGET_HEIGHT  = 180;
 	initEngine();
 	setEnableCursor(true);
 	// directories
 	setFontDir("demos/shared/fonts");
-	setTextureDir("demos/demoTilemap/images");
+	setTextureDir("demos/demo2DPlatformer/images");
 
 	// keybindings
 	setKeyBinding("saveMap", GLFW_KEY_S);
@@ -59,7 +62,7 @@ int main() {
 
 	// attempt to load in the saved map data and pass it directly into the tilemap constructor
 	std::fstream mapFile;
-	mapFile.open("demos/demoTilemap/map.txt", std::fstream::in);
+	mapFile.open("demos/demo2DPlatformer/map.txt", std::fstream::in);
 	if (mapFile.is_open()) {
 		int mapWidth, mapHeight;
 		mapFile >> mapWidth >> mapHeight;
@@ -68,17 +71,18 @@ int main() {
 			for (int r = 0; r < mapHeight; ++r)
 				mapFile >> mapData[i][r];
 		mapFile.close();
-		t = addTilemap(new Tilemap("tilemap.png", 64, mapData, glm::vec2(0)));
+		t = addTilemap(new Tilemap("tilemap.png", 8, mapData, glm::vec2(0,-2)));
 	}
 	else
 		// no map data found; create an empty tilemap with the desired dimensions
-		t = addTilemap(new Tilemap("tilemap.png", 64, glm::vec2(16, 10), glm::vec2(0)));
+		t = addTilemap(new Tilemap("tilemap.png", 8, glm::vec2(40, 23), glm::vec2(0,-2)));
 
 	setVsync(false);
 	setClearColor(.85f, .85f, 1.f, 1.f);
-	addTextObject(new FpsDisplay(6, static_cast<float>(TARGET_HEIGHT - 20), glm::vec3(0.f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(TARGET_HEIGHT - 44), glm::vec3(0.f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(TARGET_HEIGHT - 68), glm::vec3(0.f), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, static_cast<float>(UI_TARGET_HEIGHT - 20), glm::vec3(.93f,.36f,.72f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(UI_TARGET_HEIGHT - 44), glm::vec3(.93f, .36f, .72f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(UI_TARGET_HEIGHT - 68), glm::vec3(.93f, .36f, .72f), "Inter-Regular", 18));
+	Player* player = (Player*)addGameObject2D(new Player(glm::vec2(8.f,TARGET_HEIGHT-14.f)));
 
 	int lastGridx = 0, lastGridy = 0;
 	while (beginFrame(false)) {

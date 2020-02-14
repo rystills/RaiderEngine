@@ -28,7 +28,7 @@ inline glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm:
 inline std::vector<glm::mat4> modelMatrices(0);
 inline std::vector<glm::vec3> colorVectors(0);
 
-inline glm::highp_mat4 glmOrthoProjection;
+inline glm::highp_mat4 OrthoProjection, UIOrthoProjection;
 
 struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;

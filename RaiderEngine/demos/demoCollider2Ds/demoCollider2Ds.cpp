@@ -33,9 +33,9 @@ int main() {
 	setVsync(false);
 	debugDraw = true;
 	setClearColor(.6f, 1.f, .4f, 1);
-	addTextObject(new FpsDisplay(6, TARGET_HEIGHT - 20, glm::vec3(0, 0, 0), "Inter-Regular", 18));
-	addTextObject(new TextObject("Colliding ? ", 6, TARGET_HEIGHT - 44, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Press WASD to move, Q+E to rotate, and R+F to cycle through object 1 and 2's colliders", 6, TARGET_HEIGHT - 68, glm::vec3(.5f, .2f, .8f), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20, glm::vec3(0, 0, 0), "Inter-Regular", 18));
+	addTextObject(new TextObject("Colliding ? ", 6, UI_TARGET_HEIGHT - 44, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
+	addTextObject(new TextObject("Press WASD to move, Q+E to rotate, and R+F to cycle through object 1 and 2's colliders", 6, UI_TARGET_HEIGHT - 68, glm::vec3(.5f, .2f, .8f), "Inter-Regular", 18));
 	// create a number of colliders for collision testing
 	Collider2DRectangle* rectColS = new Collider2DRectangle(80,80);
 	Collider2DRectangle* rectColL = new Collider2DRectangle(160, 160);

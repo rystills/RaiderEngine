@@ -151,6 +151,8 @@
     <ClCompile Include="Collider2DLine.cpp" />
     <ClCompile Include="Collider2DPolygon.cpp" />
     <ClCompile Include="Collider2DRectangle.cpp" />
+    <ClCompile Include="demos\demo2DPlatformer\demo2DPlatformer.cpp" />
+    <ClCompile Include="demos\demo2DPlatformer\Player.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Cog.cpp" />
     <ClCompile Include="demos\demo3dCarousel\Compass.cpp" />
     <ClCompile Include="demos\demo3dCarousel\demo3dCarousel.cpp" />
@@ -211,6 +213,7 @@
     <ClInclude Include="Collider2DLine.hpp" />
     <ClInclude Include="Collider2DPolygon.hpp" />
     <ClInclude Include="Collider2DRectangle.hpp" />
+    <ClInclude Include="demos\demo2DPlatformer\Player.hpp" />
     <ClInclude Include="demos\demo3dCarousel\Cog.hpp" />
     <ClInclude Include="demos\demo3dCarousel\Compass.hpp" />
     <ClInclude Include="demos\demo3dCarousel\FlickerLight.hpp" />

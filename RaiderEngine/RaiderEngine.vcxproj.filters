@@ -34,6 +34,9 @@
     <Filter Include="Source Files\demos\demoTilemap">
       <UniqueIdentifier>{c3ab4ef9-074f-4306-bae9-a3aa0b448c9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\demos\demo2DPlatformer">
+      <UniqueIdentifier>{1b2fe62b-c430-467f-9492-b26823943018}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -183,6 +186,12 @@
     <ClCompile Include="Tilemap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="demos\demo2DPlatformer\demo2DPlatformer.cpp">
+      <Filter>Source Files\demos\demo2DPlatformer</Filter>
+    </ClCompile>
+    <ClCompile Include="demos\demo2DPlatformer\Player.cpp">
+      <Filter>Source Files\demos\demo2DPlatformer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -319,6 +328,9 @@
     </ClInclude>
     <ClInclude Include="Tilemap.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="demos\demo2DPlatformer\Player.hpp">
+      <Filter>Source Files\demos\demo2DPlatformer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
