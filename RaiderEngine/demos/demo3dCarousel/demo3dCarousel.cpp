@@ -96,12 +96,12 @@ int main() {
 	// add fps indicator
 	freetypeLoadFont("Inter-Regular", 18);
 	freetypeLoadFont("Inter-Regular", 24);
-	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20,glm::vec3(1,1,1), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20,Color::white, "Inter-Regular", 18));
 	addTextObject(new TextObject("Press f3 to toggle physics wireframes",6, UI_TARGET_HEIGHT - 50, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, UI_TARGET_HEIGHT - 80, glm::vec3(.5f, .8f, .2f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, UI_TARGET_HEIGHT - 110, glm::vec3(.2f, .5f, .8f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Press 1-3 to switch between the demo scenes", 6, UI_TARGET_HEIGHT - 140, glm::vec3(1, 1, 0), "Inter-Regular", 24));
-	TextObject* displayStringIndicator = addTextObject(new TextObject("", UI_TARGET_WIDTH / 2.f, UI_TARGET_HEIGHT / 2.f,glm::vec3(1.f),"Inter-Regular",24,true));
+	TextObject* displayStringIndicator = addTextObject(new TextObject("", UI_TARGET_WIDTH / 2.f, UI_TARGET_HEIGHT / 2.f,Color::white,"Inter-Regular",24,true));
 	addGameObject2D(new Compass(glm::vec2(1146,586),0,glm::vec2(1), glm::vec3(1), "UI/compass.png"));
 
 	while (beginFrame()) {

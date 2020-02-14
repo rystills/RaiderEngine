@@ -79,9 +79,9 @@ int main() {
 
 	setVsync(false);
 	setClearColor(.85f, .85f, 1.f, 1.f);
-	addTextObject(new FpsDisplay(6, static_cast<float>(UI_TARGET_HEIGHT - 20), glm::vec3(.93f,.36f,.72f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(UI_TARGET_HEIGHT - 44), glm::vec3(.93f, .36f, .72f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(UI_TARGET_HEIGHT - 68), glm::vec3(.93f, .36f, .72f), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, static_cast<float>(UI_TARGET_HEIGHT - 20), Color::magenta, "Inter-Regular", 18));
+	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(UI_TARGET_HEIGHT - 44), Color::magenta, "Inter-Regular", 18));
+	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(UI_TARGET_HEIGHT - 68), Color::magenta, "Inter-Regular", 18));
 	Player* player = (Player*)addGameObject2D(new Player(glm::vec2(8.f,TARGET_HEIGHT-14.f)));
 
 	int lastGridx = 0, lastGridy = 0;

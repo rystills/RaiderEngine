@@ -76,9 +76,9 @@ int main() {
 
 	setVsync(false);
 	setClearColor(.85f, .85f, 1.f, 1.f);
-	addTextObject(new FpsDisplay(6, static_cast<float>(TARGET_HEIGHT - 20), glm::vec3(0.f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(TARGET_HEIGHT - 44), glm::vec3(0.f), "Inter-Regular", 18));
-	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(TARGET_HEIGHT - 68), glm::vec3(0.f), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, static_cast<float>(TARGET_HEIGHT - 20), Color::black, "Inter-Regular", 18));
+	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(TARGET_HEIGHT - 44), Color::black, "Inter-Regular", 18));
+	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(TARGET_HEIGHT - 68), Color::black, "Inter-Regular", 18));
 
 	int lastGridx = 0, lastGridy = 0;
 	while (beginFrame(false)) {

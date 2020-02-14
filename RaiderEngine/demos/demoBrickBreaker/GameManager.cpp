@@ -7,10 +7,10 @@
 #include "input.hpp"
 #include "timing.hpp"
 
-GameManager::GameManager(std::string fontName, int fontSize) : TextObject("Press Enter to Start", UI_TARGET_WIDTH / 2.f, UI_TARGET_HEIGHT / 2.f, glm::vec3(1, 1, 1), fontName, fontSize, true) {
+GameManager::GameManager(std::string fontName, int fontSize) : TextObject("Press Enter to Start", UI_TARGET_WIDTH / 2.f, UI_TARGET_HEIGHT / 2.f, Color::white, fontName, fontSize, true) {
 	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));
 	ball = (Ball*)addGameObject2D(new Ball(glm::vec2(0)));
-	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20.f, glm::vec3(1, 1, 1), "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20.f, Color::white, "Inter-Regular", 18));
 	addTextObject(new TextObject("Score: 0", 6, UI_TARGET_HEIGHT - 44.f, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
 	addTextObject(new TextObject("Level: 1", 6, UI_TARGET_HEIGHT - 68.f, glm::vec3(.6f, .4f, .5f), "Inter-Regular", 18));
 	restartGame();
