@@ -159,7 +159,9 @@ void GameObject2D::recalculateModel() {
 	// Prepare transformations
 	model = glm::mat4(1.0f);
 	// round position in an effort to achieve pixel perfect 2D rendering
-	model = glm::translate(model, glm::vec3(round(position.x), round(position.y), depth));
+	// offset by sprite width/height so that scaling occurs from the center rather than from the topleft
+	// NOTE: rounding of x and y has been removed to allow smooth subpixel movement in low target resolution games. Consider re-introducing rounding if pixel grid movement is desired
+	model = glm::translate(model, glm::vec3(position.x + (1 - .5f*scaleVal.x) * sprite.width, position.y + (1 - .5f * scaleVal.y) * sprite.height, depth));
 
 	// multiply scaling factor by sprite dimensions so that a scale of 1,1 = original size
 	glm::vec2 appliedScale(scaleVal.x * sprite.width, scaleVal.y * sprite.height);
