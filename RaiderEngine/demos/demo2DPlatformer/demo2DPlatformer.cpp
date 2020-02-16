@@ -9,6 +9,7 @@
 #include "Tilemap.hpp"
 #include "input.hpp"
 #include "Player.hpp"
+#include "Collider2DRectangle.hpp"
 
 Tilemap* t;
 const int numTileTypes = 3;
@@ -47,6 +48,8 @@ void reloadMap() {
 int main() {
 	TARGET_WIDTH = 320;
 	TARGET_HEIGHT  = 180;
+	SCR_WIDTH = 1280;
+	SCR_HEIGHT = 720;
 	initEngine();
 	setEnableCursor(true);
 	// directories
@@ -54,6 +57,9 @@ int main() {
 	setTextureDir("demos/demo2DPlatformer/images");
 
 	// keybindings
+	setKeyBinding("mvLeft", GLFW_KEY_A);
+	setKeyBinding("mvRight", GLFW_KEY_D);
+	setKeyBinding("jump", GLFW_KEY_B);
 	setKeyBinding("saveMap", GLFW_KEY_S);
 	setKeyBinding("loadMap", GLFW_KEY_L);
 
@@ -71,18 +77,23 @@ int main() {
 			for (int r = 0; r < mapHeight; ++r)
 				mapFile >> mapData[i][r];
 		mapFile.close();
-		t = addTilemap(new Tilemap("tilemap.png", 8, mapData, glm::vec2(0,-2)));
+		t = addTilemap(new Tilemap("tilemap.png", 4, 8, mapData, glm::vec2(0,-2)));
 	}
 	else
 		// no map data found; create an empty tilemap with the desired dimensions
-		t = addTilemap(new Tilemap("tilemap.png", 8, glm::vec2(40, 23), glm::vec2(0,-2)));
+		t = addTilemap(new Tilemap("tilemap.png", 4, 8, glm::vec2(40, 23), glm::vec2(0,-2)));
 
-	setVsync(false);
-	setClearColor(.85f, .85f, 1.f, 1.f);
+	// add colliders to tilemap
+	Collider2D* tileCol = addCollider2D("8x8TileCollider", new Collider2DRectangle(4, 4));
+	t->tileColliders[1] = tileCol;
+	t->tileColliders[2] = tileCol;
+
+	setVsync(true);
+	setClearColor(0,0,0, 1.f);
 	addTextObject(new FpsDisplay(6, static_cast<float>(UI_TARGET_HEIGHT - 20), Color::magenta, "Inter-Regular", 18));
 	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(UI_TARGET_HEIGHT - 44), Color::magenta, "Inter-Regular", 18));
 	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(UI_TARGET_HEIGHT - 68), Color::magenta, "Inter-Regular", 18));
-	Player* player = (Player*)addGameObject2D(new Player(glm::vec2(8.f,TARGET_HEIGHT-14.f)));
+	Player* player = (Player*)addGameObject2D(new Player(glm::vec2(8.f,TARGET_HEIGHT-22.f)));
 
 	int lastGridx = 0, lastGridy = 0;
 	while (beginFrame(false)) {

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "shader.hpp"
 #include "mesh.hpp"
+#include "Collider2D.hpp"
 
 class Tilemap {
 public:
@@ -12,9 +13,11 @@ public:
 	std::vector<std::vector<unsigned int>> map;
 	float depth;  // depth in NDC coordinates
 	glm::vec2 pos;
+	int numTileTypes;
+	std::vector<Collider2D*> tileColliders;
 
-	Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth = 0.99f);
-	Tilemap(std::string spriteName, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth = -.95f);
+	Tilemap(std::string spriteName, int numTileTypes, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth = 0.99f);
+	Tilemap(std::string spriteName, int numTileTypes, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth = -.95f);
 
 	void setTileData(GLfloat start[], int x, int y);
 

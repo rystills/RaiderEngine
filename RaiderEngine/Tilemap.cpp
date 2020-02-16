@@ -72,9 +72,14 @@ void Tilemap::init(std::string spriteName) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	// fill the Tilemap with NULL colliders initially  
+	// TODO: pass colliders into tilemap constructor
+	tileColliders.resize(numTileTypes, NULL);
+
 }
 
-Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth) : gridSize(gridSize), mapSize(mapSize), pos(pos), depth(depth) {
+Tilemap::Tilemap(std::string spriteName, int numTileTypes, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth) : numTileTypes(numTileTypes), gridSize(gridSize), mapSize(mapSize), pos(pos), depth(depth) {
 	// init empty map, since none was provided
 	map.resize(static_cast<unsigned int>(mapSize.x));
 	for (unsigned int i = 0; i < mapSize.x; ++i)
@@ -82,7 +87,7 @@ Tilemap::Tilemap(std::string spriteName, int gridSize, glm::vec2 mapSize, glm::v
 	init(spriteName);
 }
 
-Tilemap::Tilemap(std::string spriteName, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth) : gridSize(gridSize), map(map), pos(pos), depth(depth) {
+Tilemap::Tilemap(std::string spriteName, int numTileTypes, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth) : numTileTypes(numTileTypes), gridSize(gridSize), map(map), pos(pos), depth(depth) {
 	// infer mapSize from provided map
 	mapSize = glm::vec2(map.size(), map.size() > 0 ? map[0].size() : 0);
 	init(spriteName);
