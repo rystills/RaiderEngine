@@ -192,6 +192,11 @@ render the game, calling all individual render methods in order as necessary
 void render(bool only2D = false);
 
 /*
+configure the opengl viewport, letterboxing/pillboxing as necessary to maintain the target aspect ratio
+*/
+void setGlViewport();
+
+/*
 initialize the main camera
 */
 void initMainCamera();

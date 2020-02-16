@@ -646,9 +646,9 @@ void renderDepthMap() {
 }
 
 void renderGeometryPass() {
+	setGlViewport();
 	glDisable(GL_BLEND);
 	// geometry pass: render scene's geometry/color data into gbuffer
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderGeometryPass"]->use();
@@ -754,10 +754,22 @@ void renderLines2D() {
 	}
 }
 
+void setGlViewport() {
+	float ratx = SCR_WIDTH / static_cast<float>(TARGET_WIDTH), raty = SCR_HEIGHT / static_cast<float>(TARGET_HEIGHT);
+	if (ratx == raty)
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	else if (ratx > raty)
+		glViewport(.5f * (SCR_WIDTH - SCR_WIDTH * (raty / ratx)), 0, SCR_WIDTH * (raty / ratx), SCR_HEIGHT);
+	else
+		glViewport(0, .5f * (SCR_HEIGHT - SCR_HEIGHT * (ratx / raty)), SCR_WIDTH, SCR_HEIGHT * (ratx / raty));
+}
+
 void render2D(bool clearScreen) {
+	// TODO: store opengl state and check before attempting redundant state changes (minor performance increase)
+	setGlViewport();
 	glEnable(GL_DEPTH_TEST);
 	// clear the depth buffer so 2D objects don't compete with 3d objects for visibility
-	glClear(clearScreen ? GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT : GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | (clearScreen ? GL_COLOR_BUFFER_BIT : 0));
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

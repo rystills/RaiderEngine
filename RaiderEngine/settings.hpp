@@ -115,7 +115,7 @@ void initEngine();
 void closeEngine();
 
 // NOTE: colors derived from wikipedia's list of common color names
-static const struct Color {
+struct Color {
 	static const inline glm::vec3
 		black = glm::vec3(0),
 		white = glm::vec3(1),

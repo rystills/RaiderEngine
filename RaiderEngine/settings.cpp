@@ -95,8 +95,12 @@ void setVsync(bool shouldUse) {
 void setWindowMode(int newWidth, int newHeight, bool newFullScreen) {
 	fullScreen = newFullScreen;
 	setScreenDimensions(newWidth, newHeight);
+	// TODO: force 60 hz on higher refresh rate monitors?
 	glfwSetWindowMonitor(window, fullScreen ? glfwGetPrimaryMonitor() : nullptr, fullScreen ? 0 : (MONITOR_WIDTH - SCR_WIDTH) / 2, 
 		fullScreen ? 0 : (MONITOR_HEIGHT - SCR_HEIGHT) / 2, SCR_WIDTH,SCR_HEIGHT, MONITOR_REFRESH_RATE);
+	// when entering fullscreen mode, vsync must be reenabled
+	if (fullScreen && useVsync)
+		glfwSwapInterval(1);
 }
 
 void setEnableCursor(bool shouldEnable) {
