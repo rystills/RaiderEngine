@@ -68,7 +68,7 @@ void GameObject2D::initStaticVertexBuffer() {
 }
 
 void GameObject2D::recalculateHalfExtents() {
-	halfExtents = { scaleVal.x * sprite.width * .5f, scaleVal.y * sprite.height * .5f };
+	halfExtents = { abs(scaleVal.x) * sprite.width * .5f, abs(scaleVal.y) * sprite.height * .5f };
 }
 
 void GameObject2D::setCenter(glm::vec2 newCenter) {
@@ -161,7 +161,7 @@ void GameObject2D::recalculateModel() {
 	// round position in an effort to achieve pixel perfect 2D rendering
 	// offset by sprite width/height so that scaling occurs from the center rather than from the topleft
 	// NOTE: rounding of x and y has been removed to allow smooth subpixel movement in low target resolution games. Consider re-introducing rounding if pixel grid movement is desired
-	model = glm::translate(model, glm::vec3(position.x + (1 - .5f*scaleVal.x) * sprite.width, position.y + (1 - .5f * scaleVal.y) * sprite.height, depth));
+	model = glm::translate(model, glm::vec3(position.x + (.5f - .5f*scaleVal.x) * sprite.width, position.y + (.5f - .5f * scaleVal.y) * sprite.height, depth));
 
 	// multiply scaling factor by sprite dimensions so that a scale of 1,1 = original size
 	glm::vec2 appliedScale(scaleVal.x * sprite.width, scaleVal.y * sprite.height);

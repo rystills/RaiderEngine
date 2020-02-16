@@ -759,9 +759,9 @@ void setGlViewport() {
 	if (ratx == raty)
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	else if (ratx > raty)
-		glViewport(.5f * (SCR_WIDTH - SCR_WIDTH * (raty / ratx)), 0, SCR_WIDTH * (raty / ratx), SCR_HEIGHT);
+		glViewport(static_cast<GLint>(.5f * (SCR_WIDTH - SCR_WIDTH * (raty / ratx))), 0, static_cast<GLint>(SCR_WIDTH * (raty / ratx)), SCR_HEIGHT);
 	else
-		glViewport(0, .5f * (SCR_HEIGHT - SCR_HEIGHT * (ratx / raty)), SCR_WIDTH, SCR_HEIGHT * (ratx / raty));
+		glViewport(0, static_cast<GLint>(.5f * (SCR_HEIGHT - SCR_HEIGHT * (ratx / raty))), SCR_WIDTH, static_cast<GLint>(SCR_HEIGHT * (ratx / raty)));
 }
 
 void render2D(bool clearScreen) {

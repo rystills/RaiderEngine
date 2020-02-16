@@ -12,12 +12,18 @@ Player::Player(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), Col
 }
 
 bool Player::checkGrounded() {
-	if (vel.y < 0)
-		return false;
-	translate(glm::vec2(0, 1));
-	bool groundCol = anyCollisions();
-	translate(glm::vec2(0, -1));
-	return groundCol;
+	if (vel.y >= 0) {
+		translate(glm::vec2(0, 1));
+		if (anyCollisions()) {
+			// move onto the pixel grid vertically before attempting collision resolution
+			setPos(position.x, (int)position.y);
+			while (anyCollisions())
+				translate(0, -1);
+			return true;
+		}
+		translate(glm::vec2(0, -1));
+	}
+	return false;
 }
 
 bool Player::anyCollisions() {
@@ -35,7 +41,7 @@ bool Player::anyCollisions() {
 		for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
 			for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
 				Collider2D* tcol = t->tileColliders[t->map[i][r]];
-				if (tcol != NULL && collider->collision(center, rotation, tcol, glm::vec2(t->pos.x + i * t->gridSize, t->pos.y + r * t->gridSize), 0))
+				if (tcol != NULL && collider->collision(center, rotation, tcol, glm::vec2(t->pos.x + i * t->gridSize + t->gridSize*.5f, t->pos.y + r * t->gridSize + t->gridSize*.5f), 0))
 					return true;
 			}
 	}
@@ -44,10 +50,14 @@ bool Player::anyCollisions() {
 }
 
 bool Player::tryMove(bool isLeft) {
+	// TODO: perform movement in spriteSize subsets to avoid phasing at high speeds (same for grounded check)
 	translate(isLeft ? vel.x : 0, isLeft ? 0 : vel.y);
 	if (!anyCollisions())
 		return false;
-	do translate(isLeft ? signbit(vel.x) * 2 - 1 : 0, isLeft ? 0 : signbit(vel.y) * 2 - 1); while (anyCollisions());
+	// move onto the pixel grid before attempting collision resolution
+	setPos(glm::vec2(isLeft ? (int)position.x : position.x, isLeft ? position.y : (int)position.y));
+	while (anyCollisions())
+		translate(isLeft ? signbit(vel.x) * 2 - 1 : 0, isLeft ? 0 : signbit(vel.y) * 2 - 1);
 	return true;
 }
 

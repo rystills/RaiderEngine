@@ -17,6 +17,7 @@ bool Collider2D::linesIntersect(glm::vec2 pt1, glm::vec2 pt2, glm::vec2 pt3, glm
 	return ccw(pt1, pt3, pt4) != ccw(pt2, pt3, pt4) && ccw(pt1, pt2, pt3) != ccw(pt1, pt2, pt4);
 }
 
+// TODO: make sure all collision methods return false when two colliders are touching but not overlapping
 bool Collider2D::pointInPoly(glm::vec2 pt, glm::vec2 polyPts[], int numPts) {
 	bool collision = false;
 	for (int i = 0; i < numPts; ++i) {
@@ -29,8 +30,8 @@ bool Collider2D::pointInPoly(glm::vec2 pt, glm::vec2 polyPts[], int numPts) {
 
 bool Collider2D::collisionRectangleRectangle(Collider2DRectangle a, glm::vec2 aPos, Collider2DRectangle b, glm::vec2 bPos) {
 	return !(
-		(aPos.x - a.hwidth > bPos.x + b.hwidth || bPos.x - b.hwidth > aPos.x + a.hwidth) ||
-		(aPos.y - a.hheight > bPos.y + b.hheight || bPos.y - b.hheight > aPos.y + a.hheight)
+		(aPos.x - a.hwidth >= bPos.x + b.hwidth || bPos.x - b.hwidth >= aPos.x + a.hwidth) ||
+		(aPos.y - a.hheight >= bPos.y + b.hheight || bPos.y - b.hheight >= aPos.y + a.hheight)
 		);
 }
 
