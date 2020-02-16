@@ -33,11 +33,21 @@ bool Player::anyCollisions() {
 				if (collidesWith(&*kv.second[i]))
 					return true;
 	for (auto& t : tilemaps) {
-		// perform precise collision checking with all tiles that lie inside our bounding radius, with a buffer margin up to the tilemap's gridSize
-		int gridx = (center.x - t->pos.x) / t->gridSize;
-		int gridy = (center.y - t->pos.y) / t->gridSize;
-		int gridxMin = std::max(static_cast<int>(gridx - ceil((collider->boundingRadius+t->gridSize*.5f) / t->gridSize)),0), gridxMax = gridx + ceil((collider->boundingRadius+t->gridSize*.5f) / t->gridSize);
-		int gridyMin = std::max(static_cast<int>(gridy - ceil((collider->boundingRadius+t->gridSize*.5f) / t->gridSize)),0), gridyMax = gridy + ceil((collider->boundingRadius+t->gridSize*.5f) / t->gridSize);
+		// check collisions with all tiles that lie within the square containing our bounding radius
+		float normalX = center.x - t->pos.x, normalY = center.y - t->pos.y;
+		int gridxMin = std::max(0, static_cast<int>((normalX - collider->boundingRadius) / t->gridSize)),
+			gridxMax = std::max(0, static_cast<int>((normalX + collider->boundingRadius) / t->gridSize)),
+			gridyMin = std::max(0, static_cast<int>((normalY - collider->boundingRadius) / t->gridSize)),
+			gridyMax = std::max(0, static_cast<int>((normalY + collider->boundingRadius) / t->gridSize));
+		
+		// draw indicators on all tiles that we check for collisions
+		if (debugDraw)
+			for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
+				for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
+					queueDrawLine(glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f - 3, t->pos.y + r * t->gridSize + t->gridSize * .5f, 0), glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f + 3, t->pos.y + r * t->gridSize + t->gridSize * .5f, 0), Color::white);
+					queueDrawLine(glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f - 3, 0), glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f + 3, 0), Color::white);
+				}
+		
 		for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
 			for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
 				Collider2D* tcol = t->tileColliders[t->map[i][r]];
