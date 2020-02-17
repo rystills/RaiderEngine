@@ -60,6 +60,7 @@ int main() {
 	setKeyBinding("mvLeft", GLFW_KEY_A);
 	setKeyBinding("mvRight", GLFW_KEY_D);
 	setKeyBinding("jump", GLFW_KEY_B);
+	setKeyBinding("climb", GLFW_KEY_N);
 	setKeyBinding("saveMap", GLFW_KEY_S);
 	setKeyBinding("loadMap", GLFW_KEY_L);
 

@@ -71,7 +71,23 @@ bool Player::tryMove(bool isLeft) {
 	return true;
 }
 
+int Player::inWallJumpRange() {
+	for (int i = -1; i <= 1; i += 2) {
+		// check 4 pixels away
+		translate(glm::vec2(i * 4, 0));
+		bool col = anyCollisions();
+		translate(glm::vec2(i * -4, 0));
+		if (col)
+			return i == -1 ? 1 : 2;
+	}
+	return 0;
+}
+
 void Player::update() {
+	// grounded check
+	grounded = checkGrounded();
+	float decel = grounded ? groundDecel : airDecel;
+
 	// input -> horizontal delta velocity
 	glm::vec2 dVel((keyHeld("mvRight") - keyHeld("mvLeft")) * accel, 0);
 	// horizontal deceleration
@@ -84,17 +100,22 @@ void Player::update() {
 		setScale(facingRight * 2 - 1, scaleVal.y);
 	}
 	// vertical delta velocity
-	vel.y = (grounded = checkGrounded()) ? 0 : std::min(vel.y+gravity, maxFallVel);
+	vel.y = grounded ? 0 : std::min(vel.y+gravity, maxFallVel);
 	// jump check
-	if (grounded && keyPressed("jump"))
-		vel.y = -jumpVel;
-	
+	if (keyPressed("jump")) {
+		// grounded jump
+		if (grounded)
+			vel.y = -jumpVel;
+		// wall jump
+		else if (int wallDir = inWallJumpRange())
+			vel = glm::vec2(wallDir == 1 ? wallJumpxVel : -wallJumpxVel, -wallJumpyVel);
+	}
 	// move & resolve horizontal collisions
 	if (tryMove(true))
-		vel.x = 0;
+		// allow wall sliding and grabbing
+		vel = glm::vec2(0,std::min(vel.y,keyHeld("climb") ? 0 : wallSlideVel));
 	// move & resolve vertical collisions
 	if (tryMove(false))
 		vel.y = 0;
 }
-
 #endif
