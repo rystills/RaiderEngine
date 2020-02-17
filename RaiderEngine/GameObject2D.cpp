@@ -2,6 +2,7 @@
 #include "GameObject2D.hpp"
 #include "model.hpp"
 #include "settings.hpp"
+#include "Tilemap.hpp"
 
 GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter, float depth, Collider2D* collider) : 
 	position(position), rotation(rotation), color(color), scaleVal(scale), depth(depth), collider(collider) {
@@ -153,6 +154,22 @@ bool GameObject2D::inScreenBounds() {
 
 bool GameObject2D::collidesWith(GameObject2D* other) {
 	return collider && other->collider ? collider->collision(center, rotation, other->collider, other->center, other->rotation) : false;
+}
+bool GameObject2D::collidesWith(Tilemap* t) {
+	// check collisions with all tiles that lie within the square containing our bounding radius
+	float normalX = center.x - t->pos.x, normalY = center.y - t->pos.y;
+	int gridxMin = std::max(0, static_cast<int>((normalX - collider->boundingRadius) / t->gridSize)),
+		gridxMax = std::max(0, static_cast<int>((normalX + collider->boundingRadius) / t->gridSize)),
+		gridyMin = std::max(0, static_cast<int>((normalY - collider->boundingRadius) / t->gridSize)),
+		gridyMax = std::max(0, static_cast<int>((normalY + collider->boundingRadius) / t->gridSize));
+
+	for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
+		for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
+			Collider2D* tcol = t->tileColliders[t->map[i][r]];
+			if (tcol != NULL && collider->collision(center, rotation, tcol, glm::vec2(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f), 0))
+				return true;
+		}
+	return false;
 }
 
 void GameObject2D::recalculateModel() {

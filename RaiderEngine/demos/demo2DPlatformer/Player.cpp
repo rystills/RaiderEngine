@@ -29,33 +29,11 @@ bool Player::checkGrounded() {
 bool Player::anyCollisions() {
 	for (auto&& kv : gameObject2Ds)
 		for (unsigned int i = 0; i < kv.second.size(); ++i)
-			if (&*kv.second[i] != (GameObject2D*)this && kv.second[i]->collider)
-				if (collidesWith(&*kv.second[i]))
-					return true;
-	for (auto& t : tilemaps) {
-		// check collisions with all tiles that lie within the square containing our bounding radius
-		float normalX = center.x - t->pos.x, normalY = center.y - t->pos.y;
-		int gridxMin = std::max(0, static_cast<int>((normalX - collider->boundingRadius) / t->gridSize)),
-			gridxMax = std::max(0, static_cast<int>((normalX + collider->boundingRadius) / t->gridSize)),
-			gridyMin = std::max(0, static_cast<int>((normalY - collider->boundingRadius) / t->gridSize)),
-			gridyMax = std::max(0, static_cast<int>((normalY + collider->boundingRadius) / t->gridSize));
-		
-		// draw indicators on all tiles that we check for collisions
-		if (debugDraw)
-			for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
-				for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
-					queueDrawLine(glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f - 3, t->pos.y + r * t->gridSize + t->gridSize * .5f, 0), glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f + 3, t->pos.y + r * t->gridSize + t->gridSize * .5f, 0), Color::white);
-					queueDrawLine(glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f - 3, 0), glm::vec3(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f + 3, 0), Color::white);
-				}
-		
-		for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
-			for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
-				Collider2D* tcol = t->tileColliders[t->map[i][r]];
-				if (tcol != NULL && collider->collision(center, rotation, tcol, glm::vec2(t->pos.x + i * t->gridSize + t->gridSize*.5f, t->pos.y + r * t->gridSize + t->gridSize*.5f), 0))
-					return true;
-			}
-	}
-		
+			if (&*kv.second[i] != (GameObject2D*)this && collidesWith(&*kv.second[i]))
+				return true;
+	for (auto& t : tilemaps)
+		if (collidesWith(&*t))
+			return true;
 	return false;
 }
 
@@ -72,6 +50,7 @@ bool Player::tryMove(bool isLeft) {
 }
 
 int Player::inWallJumpRange() {
+	// TODO: if surrounded by walls on both sides, return the side with the closer wall
 	for (int i = -1; i <= 1; i += 2) {
 		// check 4 pixels away
 		translate(glm::vec2(i * 4, 0));
@@ -81,6 +60,22 @@ int Player::inWallJumpRange() {
 			return i == -1 ? 1 : 2;
 	}
 	return 0;
+}
+
+int Player::wallClimbing() {
+	if (keyHeld("climb")) {
+		translate(facingRight * 2 - 1, 0);
+		if (anyCollisions()) {
+			// TODO: abstract collision resolution to its own method
+			// move onto the pixel grid horizontally before attempting collision resolution
+			setPos((int)position.x, position.y);
+			while (anyCollisions())
+				translate(-(facingRight * 2 - 1), 0);
+			return true;
+		}
+		translate(-(facingRight * 2 - 1), 0);
+	}
+	return false;
 }
 
 void Player::update() {
@@ -111,9 +106,9 @@ void Player::update() {
 			vel = glm::vec2(wallDir == 1 ? wallJumpxVel : -wallJumpxVel, -wallJumpyVel);
 	}
 	// move & resolve horizontal collisions
-	if (tryMove(true))
+	if (tryMove(true) || (wallClimbing()))
 		// allow wall sliding and grabbing
-		vel = glm::vec2(0,std::min(vel.y,keyHeld("climb") ? 0 : wallSlideVel));
+		vel = glm::vec2(0,std::min(vel.y,keyHeld("climb") ? (keyHeld("mvUp") - keyHeld("mvDown")) * -wallClimbVel : wallSlideVel));
 	// move & resolve vertical collisions
 	if (tryMove(false))
 		vel.y = 0;

@@ -3,6 +3,7 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "Collider2D.hpp"
+#include "Tilemap.hpp"
 
 class GameObject2D {
 public:
@@ -73,6 +74,7 @@ public:
 	bool inScreenBounds();
 
 	bool collidesWith(GameObject2D* other);
+	bool collidesWith(Tilemap* t);
 
 	void recalculateModel();
 };

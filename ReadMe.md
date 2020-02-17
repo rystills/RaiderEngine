@@ -20,4 +20,5 @@ Here is the list of additional dependencies that are already bundled with the en
 Previews:
 <img src="previews\7_11_19 (3d carousel).png" width="960" height="540">  
 <img src="previews\1_30_20 (brick breaker).png" width="960" height="540">  
-<img src="previews\1_31_20 (2d particles).png" width="960" height="540">
+<img src="previews\1_31_20 (2d particles).png" width="960" height="540">  
+<img src="previews\2_17_20 (2d platformer).png" width="960" height="540">

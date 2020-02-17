@@ -50,6 +50,8 @@ int main() {
 	TARGET_HEIGHT  = 180;
 	SCR_WIDTH = 1280;
 	SCR_HEIGHT = 720;
+	UI_TARGET_WIDTH = 1920;
+	UI_TARGET_HEIGHT = 1080;
 	initEngine();
 	setEnableCursor(true);
 	// directories
@@ -59,13 +61,15 @@ int main() {
 	// keybindings
 	setKeyBinding("mvLeft", GLFW_KEY_A);
 	setKeyBinding("mvRight", GLFW_KEY_D);
+	setKeyBinding("mvUp", GLFW_KEY_W);
+	setKeyBinding("mvDown", GLFW_KEY_S);
 	setKeyBinding("jump", GLFW_KEY_B);
 	setKeyBinding("climb", GLFW_KEY_N);
-	setKeyBinding("saveMap", GLFW_KEY_S);
+	setKeyBinding("saveMap", GLFW_KEY_O);
 	setKeyBinding("loadMap", GLFW_KEY_L);
 
 	// fonts
-	freetypeLoadFont("Inter-Regular", 18);
+	freetypeLoadFont("Inter-Regular", 24);
 
 	// attempt to load in the saved map data and pass it directly into the tilemap constructor
 	std::fstream mapFile;
@@ -91,9 +95,10 @@ int main() {
 
 	setVsync(true);
 	setClearColor(0,0,0, 1.f);
-	addTextObject(new FpsDisplay(6, static_cast<float>(UI_TARGET_HEIGHT - 20), Color::magenta, "Inter-Regular", 18));
-	addTextObject(new TextObject("Press S/L to save/load the Tilemap from the disk", 6, static_cast<float>(UI_TARGET_HEIGHT - 44), Color::magenta, "Inter-Regular", 18));
-	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(UI_TARGET_HEIGHT - 68), Color::magenta, "Inter-Regular", 18));
+	addTextObject(new FpsDisplay(6, static_cast<float>(UI_TARGET_HEIGHT - 20), Color::white, "Inter-Regular", 24));
+	addTextObject(new TextObject("Press O/L to save/load the Tilemap from the disk", 6, static_cast<float>(UI_TARGET_HEIGHT - 50), Color::magenta, "Inter-Regular", 24));
+	addTextObject(new TextObject("Left click the grid spaces to cycle their tile types", 6, static_cast<float>(UI_TARGET_HEIGHT - 80), Color::magenta, "Inter-Regular", 24));
+	addTextObject(new TextObject("Press A/D to move the player, B to jump, and N + W/S to climb", 6, static_cast<float>(UI_TARGET_HEIGHT - 110), Color::magenta, "Inter-Regular", 24));
 	Player* player = (Player*)addGameObject2D(new Player(glm::vec2(8.f,TARGET_HEIGHT-22.f)));
 
 	int lastGridx = 0, lastGridy = 0;
