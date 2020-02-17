@@ -36,7 +36,7 @@ public:
 
 	void debugDraw(glm::vec2 pos, float rot) override;
 
-	void Collider2DRectangle::getCornerPoints(glm::vec2 pts[], glm::vec2 pos);
+	void getCornerPoints(glm::vec2 pts[], glm::vec2 pos);
 
-	void Collider2DRectangle::getRotatedCornerPoints(glm::vec2 pts[], glm::vec2 pos, float rot);
+	void getRotatedCornerPoints(glm::vec2 pts[], glm::vec2 pos, float rot);
 };

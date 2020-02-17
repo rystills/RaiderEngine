@@ -169,9 +169,8 @@ public:
 	@param thePoint: the point to rotate
 	@param theOrigin: the origin point around which to rotate our point
 	@param theRotation: the amount (in radians) by which to rotate the point
-	@returns: the new location of our point after rotating around the specified origin
 	*/
-	static void RotatePoint(glm::vec2& thePoint, glm::vec2& theOrigin, float theRotation);
+	static void RotatePoint(glm::vec2& thePoint, const glm::vec2& theOrigin, float theRotation);
 
 	void calculateBoundingRadius(glm::vec2 pts[], int numPts);
 

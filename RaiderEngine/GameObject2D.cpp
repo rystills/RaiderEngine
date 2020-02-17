@@ -158,7 +158,7 @@ bool GameObject2D::collidesWith(GameObject2D* other) {
 bool GameObject2D::collidesWith(Tilemap* t) {
 	// check collisions with all tiles that lie within the square containing our bounding radius
 	float normalX = center.x - t->pos.x, normalY = center.y - t->pos.y;
-	int gridxMin = std::max(0, static_cast<int>((normalX - collider->boundingRadius) / t->gridSize)),
+	unsigned int gridxMin = std::max(0, static_cast<int>((normalX - collider->boundingRadius) / t->gridSize)),
 		gridxMax = std::max(0, static_cast<int>((normalX + collider->boundingRadius) / t->gridSize)),
 		gridyMin = std::max(0, static_cast<int>((normalY - collider->boundingRadius) / t->gridSize)),
 		gridyMax = std::max(0, static_cast<int>((normalY + collider->boundingRadius) / t->gridSize));

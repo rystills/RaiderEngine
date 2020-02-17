@@ -199,7 +199,7 @@ glm::vec2 Collider2D::closestPointOnLine(float lx1, float ly1, float lx2, float 
 	return glm::vec2(cx, cy);
 }
 
-void Collider2D::RotatePoint(glm::vec2& thePoint, glm::vec2& theOrigin, float theRotation) {
+void Collider2D::RotatePoint(glm::vec2& thePoint, const glm::vec2& theOrigin, float theRotation) {
 	float tempX = (float)(theOrigin.x + (thePoint.x - theOrigin.x) * cos(theRotation) - (thePoint.y - theOrigin.y) * sin(theRotation));
 	thePoint.y = (float)(theOrigin.y + (thePoint.y - theOrigin.y) * cos(theRotation) + (thePoint.x - theOrigin.x) * sin(theRotation));
 	thePoint.x = tempX;
