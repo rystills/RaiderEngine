@@ -152,10 +152,10 @@ bool GameObject2D::inScreenBounds() {
 	return ((position.y + appliedScale.y < 0 || position.y >= TARGET_HEIGHT) || (position.x + appliedScale.x < 0 || position.x >= TARGET_WIDTH));
 }
 
-bool GameObject2D::collidesWith(GameObject2D* other) {
-	return collider && other->collider ? collider->collision(center, rotation, other->collider, other->center, other->rotation) : false;
+bool GameObject2D::collidesWith(GameObject2D* other, int colLayer) {
+	return collider && other->collider && other->collider->collisionLayer == colLayer ? collider->collision(center, rotation, other->collider, other->center, other->rotation) : false;
 }
-bool GameObject2D::collidesWith(Tilemap* t) {
+bool GameObject2D::collidesWith(Tilemap* t, int colLayer) {
 	// check collisions with all tiles that lie within the square containing our bounding radius
 	float normalX = center.x - t->pos.x, normalY = center.y - t->pos.y;
 	unsigned int gridxMin = std::max(0, static_cast<int>((normalX - collider->boundingRadius) / t->gridSize)),
@@ -166,7 +166,7 @@ bool GameObject2D::collidesWith(Tilemap* t) {
 	for (unsigned int i = gridxMin; i <= gridxMax && i < t->mapSize.x; ++i)
 		for (unsigned int r = gridyMin; r <= gridyMax && r < t->mapSize.y; ++r) {
 			Collider2D* tcol = t->tileColliders[t->map[i][r]];
-			if (tcol != NULL && collider->collision(center, rotation, tcol, glm::vec2(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f), 0))
+			if (tcol != NULL && tcol->collisionLayer == colLayer && collider->collision(center, rotation, tcol, glm::vec2(t->pos.x + i * t->gridSize + t->gridSize * .5f, t->pos.y + r * t->gridSize + t->gridSize * .5f), 0))
 				return true;
 		}
 	return false;

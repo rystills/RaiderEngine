@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DCircle::Collider2DCircle(float radius) : radius(radius), Collider2D(circle) {
+Collider2DCircle::Collider2DCircle(float radius, int collisionLayer) : radius(radius), Collider2D(circle, collisionLayer) {
 	boundingRadius = radius;
 }
 

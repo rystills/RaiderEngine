@@ -14,10 +14,11 @@ public:
 	float boundingRadius = 0;
 	ColliderType type;
 	const static int boundingRadiusBuffer = 2;
+	int collisionLayer = 0;
 	/*
 	Collider constructor: define the shape and collider type
 	*/
-	Collider2D(ColliderType type);
+	Collider2D(ColliderType type, int collisionLayer);
 
 	/*
 	check whether two colliders are overlapping (true) or not (false)

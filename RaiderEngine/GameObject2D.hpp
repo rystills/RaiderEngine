@@ -73,8 +73,8 @@ public:
 	*/
 	bool inScreenBounds();
 
-	bool collidesWith(GameObject2D* other);
-	bool collidesWith(Tilemap* t);
+	bool collidesWith(GameObject2D* other, int colLayer = 0);
+	bool collidesWith(Tilemap* t, int colLayer = 0);
 
 	void recalculateModel();
 };

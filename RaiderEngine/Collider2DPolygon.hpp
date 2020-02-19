@@ -13,7 +13,7 @@ public:
 	ColliderPolygon constructor: create a new polygon collider with the given vertices
 	@param inPoints: the list of relative point positions to this collider's center
 	*/
-	Collider2DPolygon(std::vector<glm::vec2> inPoints);
+	Collider2DPolygon(std::vector<glm::vec2> inPoints, int collisionLayer = 0);
 
 	/*
 	check whether two colliders are overlapping (true) or not (false)

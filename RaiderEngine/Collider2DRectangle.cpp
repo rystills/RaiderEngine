@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DRectangle::Collider2DRectangle(float hwidth, float hheight) : hwidth(hwidth), hheight(hheight), Collider2D(rectangle) {
+Collider2DRectangle::Collider2DRectangle(float hwidth, float hheight, int collisionLayer) : hwidth(hwidth), hheight(hheight), Collider2D(rectangle, collisionLayer) {
 	glm::vec2 pts[4];
 	getCornerPoints(pts, glm::vec2(0));
 	calculateBoundingRadius(pts, 4);

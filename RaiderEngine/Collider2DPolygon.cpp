@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints) : Collider2D(polygon) {
+Collider2DPolygon::Collider2DPolygon(std::vector<glm::vec2> inPoints, int collisionLayer) : Collider2D(polygon, collisionLayer) {
 	//create a deep copy of the input vector2 array so we can modify points locally
 	for (unsigned int i = 0; i < inPoints.size(); ++i)
 		points.push_back(glm::vec2(inPoints[i].x, inPoints[i].y));

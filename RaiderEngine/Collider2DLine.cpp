@@ -6,7 +6,7 @@
 #include "terminalColors.hpp"
 #include "graphics.hpp"
 
-Collider2DLine::Collider2DLine(float sx, float sy, float ex, float ey) : sx(sx), sy(sy), ex(ex), ey(ey), Collider2D(line) {
+Collider2DLine::Collider2DLine(float sx, float sy, float ex, float ey, int collisionLayer) : sx(sx), sy(sy), ex(ex), ey(ey), Collider2D(line, collisionLayer) {
 	glm::vec2 pts[2] = { glm::vec2(sx,sy),glm::vec2(ex,ey) };
 	calculateBoundingRadius(pts,2);
 }

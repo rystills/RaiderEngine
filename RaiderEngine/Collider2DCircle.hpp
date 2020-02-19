@@ -14,7 +14,7 @@ public:
 	@param radius: the radius of the circle
 	@param height: the height of the rectangle
 	*/
-	Collider2DCircle(float radius);
+	Collider2DCircle(float radius, int collisionLayer = 0);
 
 	/*
 	check whether two colliders are overlapping (true) or not (false)
