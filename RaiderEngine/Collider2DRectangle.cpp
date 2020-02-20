@@ -64,5 +64,4 @@ void Collider2DRectangle::debugDraw(glm::vec2 pos, float rot) {
 	for (int i = 0; i < 3; ++i)
 		queueDrawLine(glm::vec3(points[i].x,points[i].y,0), glm::vec3(points[i+1].x, points[i + 1].y, 0), glm::vec3(1,.5f,.5f));
 	queueDrawLine(glm::vec3(points[3].x, points[3].y, 0), glm::vec3(points[0].x, points[0].y, 0), glm::vec3(1, .5f, .5f));
-	drawLines();
 }

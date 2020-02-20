@@ -5,6 +5,7 @@
 // this file is responsible for graphics, including debug and text rendering
 inline unsigned int primitiveVBO, primitiveVAO;
 inline unsigned int textVBO, textVAO;
+inline unsigned int numPointsInVBO = 0, numLinesInVBO = 0;
 
 #define NR_LIGHTS 4
 inline unsigned int depthMapFBO[NR_LIGHTS];

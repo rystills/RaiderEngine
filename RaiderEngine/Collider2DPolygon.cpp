@@ -51,5 +51,4 @@ void Collider2DPolygon::debugDraw(glm::vec2 pos, float rot) {
 		queueDrawLine(glm::vec3(pos.x + pt1.x, pos.y + pt1.y, 0), glm::vec3(pos.x + pt2.x, pos.y + pt2.y, 0), glm::vec3(1, .5f, .5f));
 		pt1 = pt2;
 	}
-	drawLines();
 }

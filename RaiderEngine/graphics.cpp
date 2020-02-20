@@ -346,18 +346,15 @@ void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 void drawPoints() {
 	if (pointsQueue.empty())
 		return;
-	// TODO: clean up this method (switch to glBufferSubData, remove needless state changes)
-	// todo: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
+	// TODO: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * pointsQueue.size(), &pointsQueue[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glBindVertexArray(0);
+	if (pointsQueue.size() > numPointsInVBO) {
+		numPointsInVBO = pointsQueue.size();
+		glBufferData(GL_ARRAY_BUFFER, pointsQueue.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	}
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * pointsQueue.size(), &pointsQueue[0]);
 
-	glBindVertexArray(primitiveVAO);
 	glDrawArrays(GL_POINTS, 0, pointsQueue.size() / 6);
 	glBindVertexArray(0);
 	pointsQueue.clear();
@@ -396,17 +393,14 @@ void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& 
 void drawLines() {
 	if (linesQueue.empty())
 		return;
-	// TODO: clean up this method (switch to glBufferSubData, remove needless state changes)
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glBindVertexArray(0);
-
-	glBindVertexArray(primitiveVAO);
+	if (linesQueue.size() > numLinesInVBO) {
+		numLinesInVBO = linesQueue.size();
+		glBufferData(GL_ARRAY_BUFFER, linesQueue.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	}
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0]);
+	
 	glDrawArrays(GL_LINE_STRIP, 0, linesQueue.size() / 6);
 	glBindVertexArray(0);
 	linesQueue.clear();
@@ -577,6 +571,14 @@ void loadShaders() {
 
 	shaders["2DShader"]->use();
 	shaders["2DShader"]->setInt("image", 0);
+
+	shaders["lineShader"]->use();
+	glBindVertexArray(primitiveVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 }
 
 void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignoreNonShadowCasters) {
@@ -723,34 +725,35 @@ void debugDrawLightCubes() {
 
 void renderLines() {
 	// TODO: distinguish between queuing 3d lines and points to be rendered, and 2d lines and points to be rendered
-	if (debugDraw || !pointsQueue.empty() || !linesQueue.empty()) {
+	// draw 3d colliders
+	if (debugDraw)
+		debugDrawPhysics();
+	if (!pointsQueue.empty() || !linesQueue.empty()) {
 		// setup
 		if (shaders["lineShader"]->use()) {
 			glDisable(GL_DEPTH_TEST);
 			shaders["lineShader"]->setMat4("projection", mainCam->projection);
 			shaders["lineShader"]->setMat4("view", mainCam->view);
 		}
-		// draw user defined points and lines
 		drawPoints();
 		drawLines();
-
-		// draw 3d colliders
-		if (debugDraw)
-			debugDrawPhysics();
 	}
 }
 
 void renderLines2D() {
+	// TODO: enable rendering 2d points
 	if (debugDraw) {
-		// setup
-		if (shaders["lineShader2D"]->use())
-			glDisable(GL_DEPTH_TEST);
-
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
 			for (unsigned int i = 0; i < kv.second.size(); ++i)
 				if (kv.second[i]->collider)
 					kv.second[i]->collider->debugDraw(kv.second[i]->center, kv.second[i]->rotation);
+	}
+	if (!linesQueue.empty()) {
+		// setup
+		if (shaders["lineShader2D"]->use())
+			glDisable(GL_DEPTH_TEST);
+		drawLines();
 	}
 }
 
