@@ -48,7 +48,7 @@ void Tilemap::setTileData(GLfloat start[], int x, int y) {
 	start[23] = y0;
 }
 
-void Tilemap::init(std::string spriteName) {
+void Tilemap::init(std::string spriteName, std::vector<Collider2D*> cols) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
 	// TODO: consider instanced rendering visible tiles rather than storing and rendering entire tilemap every frame
 	// init VAO/VBO
@@ -73,24 +73,24 @@ void Tilemap::init(std::string spriteName) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	// fill the Tilemap with NULL colliders initially  
-	// TODO: pass colliders into tilemap constructor
+	// copy in provided colliders, setting any unspecified colliders to NULL
 	tileColliders.resize(numTileTypes, NULL);
+	memcpy(&tileColliders[0], &cols[0], sizeof(Collider2D*)*cols.size());
 
 }
 
-Tilemap::Tilemap(std::string spriteName, int numTileTypes, int gridSize, glm::vec2 mapSize, glm::vec2 pos, float depth) : numTileTypes(numTileTypes), gridSize(gridSize), mapSize(mapSize), pos(pos), depth(depth) {
+Tilemap::Tilemap(std::string spriteName, int numTileTypes, int gridSize, glm::vec2 mapSize, glm::vec2 pos, std::vector<Collider2D*> cols, float depth) : numTileTypes(numTileTypes), gridSize(gridSize), mapSize(mapSize), pos(pos), depth(depth) {
 	// init empty map, since none was provided
 	map.resize(static_cast<unsigned int>(mapSize.x));
 	for (unsigned int i = 0; i < mapSize.x; ++i)
 		map[i].resize(static_cast<unsigned int>(mapSize.y));
-	init(spriteName);
+	init(spriteName, cols);
 }
 
-Tilemap::Tilemap(std::string spriteName, int numTileTypes, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, float depth) : numTileTypes(numTileTypes), gridSize(gridSize), map(map), pos(pos), depth(depth) {
+Tilemap::Tilemap(std::string spriteName, int numTileTypes, int gridSize, std::vector<std::vector<unsigned int>> map, glm::vec2 pos, std::vector<Collider2D*> cols, float depth) : numTileTypes(numTileTypes), gridSize(gridSize), map(map), pos(pos), depth(depth) {
 	// infer mapSize from provided map
 	mapSize = glm::vec2(map.size(), map.size() > 0 ? map[0].size() : 0);
-	init(spriteName);
+	init(spriteName, cols);
 }
 
 void Tilemap::update() {

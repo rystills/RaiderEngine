@@ -725,6 +725,15 @@ void renderLines2D() {
 			for (unsigned int i = 0; i < kv.second.size(); ++i)
 				if (kv.second[i]->collider)
 					kv.second[i]->collider->debugDraw(kv.second[i]->center, kv.second[i]->rotation);
+		for (auto& t : tilemaps)
+			for (unsigned int i = 0; i < t->mapSize.x; ++i)
+				for (unsigned int r = 0; r < t->mapSize.y; ++r)
+					if (t->tileColliders[t->map[i][r]])
+						t->tileColliders[t->map[i][r]]->debugDraw(glm::vec2(t->pos.x + t->gridSize / 2.f + t->gridSize * i, t->pos.y + t->gridSize / 2.f + t->gridSize * r),0);
+				
+			
+
+		
 	}
 	if (!linesQueue.empty()) {
 		// setup
