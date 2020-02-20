@@ -332,21 +332,17 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 }
 
 void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
-	GLfloat points[6];
-	points[0] = pos.x;
-	points[1] = pos.y;
-	points[2] = pos.z;
-	points[3] = color.r;
-	points[4] = color.g;
-	points[5] = color.b;
-
-	pointsQueue.insert(std::end(pointsQueue), std::begin(points), std::end(points));
+	// TODO: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
+	size_t qsize = pointsQueue.size();
+	unsigned int vec3Size = 3 * sizeof(GLfloat);
+	pointsQueue.resize(qsize + 6);
+	memcpy(&pointsQueue[0] + qsize, &pos, vec3Size);
+	memcpy(&pointsQueue[0] + qsize + 3, &color, vec3Size);
 }
 
 void drawPoints() {
 	if (pointsQueue.empty())
 		return;
-	// TODO: offset screen coords by 0.5f to draw points from pixel centers rather than corners?
 	glBindVertexArray(primitiveVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, primitiveVBO);
 	if (pointsQueue.size() > numPointsInVBO) {
@@ -362,32 +358,13 @@ void drawPoints() {
 
 void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) {
 	// todo: offset screen coords by 0.5f to draw lines from pixel centers rather than corners?
-	GLfloat points[18];
-
-	points[0] = from.x;
-	points[1] = from.y;
-	points[2] = from.z;
-	points[3] = color.x;
-	points[4] = color.y;
-	points[5] = color.z;
-
-	points[6] = to.x;
-	points[7] = to.y;
-	points[8] = to.z;
-	points[9] = color.x;
-	points[10] = color.y;
-	points[11] = color.z;
-
-	// terminate each line with NANs so that we can draw the entire array of disjointed lines as a single linestrip
-	// TODO: consider replacing this with a primitive restart to save a bit of memory and render performance
-	points[12] = NAN;
-	points[13] = NAN;
-	points[14] = NAN;
-	points[15] = NAN;
-	points[16] = NAN;
-	points[17] = NAN;
-
-	linesQueue.insert(std::end(linesQueue), std::begin(points), std::end(points));
+	size_t qsize = linesQueue.size();
+	unsigned int vec3Size = 3 * sizeof(GLfloat);
+	linesQueue.resize(qsize + 12);
+	memcpy(&linesQueue[0] + qsize, &from, vec3Size);
+	memcpy(&linesQueue[0] + qsize+3, &color, vec3Size);
+	memcpy(&linesQueue[0] + qsize+6, &to, vec3Size);
+	memcpy(&linesQueue[0] + qsize+9, &color, vec3Size);
 }
 
 void drawLines() {
@@ -401,7 +378,7 @@ void drawLines() {
 	}
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0]);
 	
-	glDrawArrays(GL_LINE_STRIP, 0, linesQueue.size() / 6);
+	glDrawArrays(GL_LINES, 0, linesQueue.size() / 6);
 	glBindVertexArray(0);
 	linesQueue.clear();
 }
