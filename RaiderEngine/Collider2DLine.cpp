@@ -43,5 +43,5 @@ void Collider2DLine::getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot)
 void Collider2DLine::debugDraw(glm::vec2 pos, float rot) {
 	glm::vec2 points[2];
 	getRotatedPoints(points, pos, rot);
-	queueDrawLine(glm::vec3(points[0].x, points[0].y,0), glm::vec3(points[1].x, points[1].y,0), glm::vec3(1, .5f, .5f));
+	queueDrawLine(glm::vec3(points[0].x, points[0].y,0), glm::vec3(points[1].x, points[1].y,0), stateColors[collisionLayer % stateColors->length()]);
 }

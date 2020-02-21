@@ -48,7 +48,7 @@ void Collider2DPolygon::debugDraw(glm::vec2 pos, float rot) {
 	for (unsigned int i = 0; i < points.size(); ++i) {
 		pt2 = glm::vec2(points[i].x, points[i].y);
 		RotatePoint(pt2, glm::vec2(0, 0), rot);
-		queueDrawLine(glm::vec3(pos.x + pt1.x, pos.y + pt1.y, 0), glm::vec3(pos.x + pt2.x, pos.y + pt2.y, 0), glm::vec3(1, .5f, .5f));
+		queueDrawLine(glm::vec3(pos.x + pt1.x, pos.y + pt1.y, 0), glm::vec3(pos.x + pt2.x, pos.y + pt2.y, 0), stateColors[collisionLayer % stateColors->length()]);
 		pt1 = pt2;
 	}
 }

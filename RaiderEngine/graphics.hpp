@@ -23,7 +23,7 @@ inline unsigned int quadVBO;
 inline unsigned int cubeVAO;
 inline unsigned int cubeVBO;
 
-inline glm::vec3 stateColors[3] = { glm::vec3(255,0,0), glm::vec3(0,0,255), glm::vec3(255,255,255) };
+inline glm::vec3 stateColors[4] = { glm::vec3(1,1,1), glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,1) };
 
 // vectors containing model matrices and sprite colors, to be sent to the gpu for instanced rendering; grows as necessary
 inline std::vector<glm::mat4> modelMatrices(0);

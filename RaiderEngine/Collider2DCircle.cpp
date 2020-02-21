@@ -42,6 +42,6 @@ void Collider2DCircle::debugDraw(glm::vec2 pos, float rot) {
 		points[i] = glm::vec2(pos.x + cos(ang)*radius, pos.y + sin(ang)*radius);
 	}
 	for (int i = 0; i < numCirclePoints-1; ++i)
-		queueDrawLine(glm::vec3(points[i].x, points[i].y, 0), glm::vec3(points[i + 1].x, points[i + 1].y, 0), glm::vec3(1, .5f, .5f));
-	queueDrawLine(glm::vec3(points[numCirclePoints-1].x, points[numCirclePoints - 1].y, 0), glm::vec3(points[0].x, points[0].y, 0), glm::vec3(1, .5f, .5f));
+		queueDrawLine(glm::vec3(points[i].x, points[i].y, 0), glm::vec3(points[i + 1].x, points[i + 1].y, 0), stateColors[collisionLayer % stateColors->length()]);
+	queueDrawLine(glm::vec3(points[numCirclePoints-1].x, points[numCirclePoints - 1].y, 0), glm::vec3(points[0].x, points[0].y, 0), stateColors[collisionLayer % stateColors->length()]);
 }

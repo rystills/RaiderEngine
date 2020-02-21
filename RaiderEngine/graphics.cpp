@@ -845,8 +845,8 @@ void render(bool only2D) {
 	
 	render2D(only2D);
 	renderLines2D();
-	frameRenderTime = glfwGetTime() - sTime;
 	glfwSwapBuffers(window);
+	frameRenderTime = glfwGetTime() - sTime;
 }
 
 void initMainCamera() {

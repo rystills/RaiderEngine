@@ -76,7 +76,7 @@ void debugDrawPhysics() {
 	for (PxU32 i = 0; i < rb.getNbLines(); i++) {
 		const PxDebugLine& line = rb.getLines()[i];
 		// TODO: use correct state color, and draw PlayerController (same as before)
-		queueDrawLine(glm::vec3(line.pos0.x, line.pos0.y, line.pos0.z), glm::vec3(line.pos1.x, line.pos1.y, line.pos1.z), stateColors[2]);
+		queueDrawLine(glm::vec3(line.pos0.x, line.pos0.y, line.pos0.z), glm::vec3(line.pos1.x, line.pos1.y, line.pos1.z), stateColors[0]);
 	}
 }
 
