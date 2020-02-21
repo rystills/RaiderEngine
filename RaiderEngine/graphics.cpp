@@ -729,11 +729,7 @@ void renderLines2D() {
 			for (unsigned int i = 0; i < t->mapSize.x; ++i)
 				for (unsigned int r = 0; r < t->mapSize.y; ++r)
 					if (t->tileColliders[t->map[i][r]])
-						t->tileColliders[t->map[i][r]]->debugDraw(glm::vec2(t->pos.x + t->gridSize / 2.f + t->gridSize * i, t->pos.y + t->gridSize / 2.f + t->gridSize * r),0);
-				
-			
-
-		
+						t->tileColliders[t->map[i][r]]->debugDraw(glm::vec2(t->pos.x + t->gridSize / 2.f + t->gridSize * i, t->pos.y + t->gridSize / 2.f + t->gridSize * r),0);	
 	}
 	if (!linesQueue.empty()) {
 		// setup
@@ -838,6 +834,7 @@ void render2D(bool clearScreen) {
 }
 
 void render(bool only2D) {
+	double sTime = glfwGetTime();
 	if (!only2D) {
 		renderDepthMap();
 		renderGeometryPass();
@@ -848,6 +845,7 @@ void render(bool only2D) {
 	
 	render2D(only2D);
 	renderLines2D();
+	frameRenderTime = glfwGetTime() - sTime;
 	glfwSwapBuffers(window);
 }
 

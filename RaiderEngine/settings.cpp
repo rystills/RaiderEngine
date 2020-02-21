@@ -11,6 +11,7 @@
 #include "input.hpp"
 #include "ParticleEmitter2D.hpp"
 #include "audio.hpp"
+#include "timing.hpp"
 
 GameObject* addGameObject(GameObject* go) {
 	gameObjects[go->modelName].emplace_back(go);
@@ -161,6 +162,7 @@ void setFallbackShaderDir(std::string newDir) {
 update all objects in all object lists
 */
 void updateObjects() {
+	double sTime = glfwGetTime();
 	for (unsigned int i = 0; i < tilemaps.size(); ++i)
 		tilemaps[i]->update();
 	for (auto&& kv : gameObjects)
@@ -175,6 +177,7 @@ void updateObjects() {
 		particleEmitter2Ds[i]->update();
 	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->update();
+	frameUpdateTime = glfwGetTime() - sTime;
 }
 
 void initEngine() {
