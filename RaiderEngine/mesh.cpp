@@ -20,7 +20,7 @@ void Mesh::sendTexturesToShader(Shader shader) {
 	// bind appropriate textures
 	unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, heightNr = 0;
 	for (unsigned int i = 0; i < textures.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+		glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number;
 		std::string name = textures[i].type;
@@ -34,10 +34,13 @@ void Mesh::sendTexturesToShader(Shader shader) {
 			number = std::to_string(++heightNr);
 
 		// now set the sampler to the correct texture unit
-		glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+		shader.setInt((name + number).c_str(), i);
 		// and finally bind the texture
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
+	
+	// reactivate tex0 as this is the assumed state
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::draw(Shader shader, bool shouldSendTextures) {
@@ -47,10 +50,6 @@ void Mesh::draw(Shader shader, bool shouldSendTextures) {
 	// draw mesh
 	glBindVertexArray(*VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-
-	// always good practice to set everything back to defaults once configured
-	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::setupMesh() {

@@ -65,7 +65,6 @@ void initQuad() {
 void renderQuad() {
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
 }
 
 void initLightCube() {
@@ -102,7 +101,6 @@ void renderLightCube() {
 	// render Cube
 	glBindVertexArray(lightCubeVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-	glBindVertexArray(0);
 }
 
 void applyAnisotropicFiltering() {
@@ -133,7 +131,6 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		return;
 
 	// activate and prepare the shader
-	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(TextObject::VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, TextObject::VBO);
 	// only rebind the font atlas if we switched fonts, font sizes, or shaders (texture binding is not tied to the active shader, so other shaders likely wrote over our texture)
@@ -216,9 +213,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 
 	// render the full set of glyphs as a single triangle array
 	glBufferSubData(GL_ARRAY_BUFFER, 0, 24 * sizeof(GLfloat) * text.length(), &verts[0]);
-	glDrawArrays(GL_TRIANGLES, 0, text.length()*6);
-	
-	glBindVertexArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, text.length()*6);	
 }
 
 void freetypeLoadFont(std::string fontName, int fontSize) {
@@ -320,7 +315,6 @@ void drawPoints() {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * pointsQueue.size(), &pointsQueue[0]);
 
 	glDrawArrays(GL_POINTS, 0, pointsQueue.size() / 6);
-	glBindVertexArray(0);
 	pointsQueue.clear();
 }
 
@@ -347,7 +341,6 @@ void drawLines() {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0]);
 	
 	glDrawArrays(GL_LINES, 0, linesQueue.size() / 6);
-	glBindVertexArray(0);
 	linesQueue.clear();
 }
 
@@ -645,8 +638,10 @@ void renderLightingPass() {
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[3]);
 
+	// reactivate tex0 as this is the assumed state
+	glActiveTexture(GL_TEXTURE0);
 
-	// finally render quad
+	// finally, render everything to the screen as a single quad
 	renderQuad();
 
 	// copy content of geometry's depth buffer to default framebuffer's depth buffer
@@ -662,7 +657,7 @@ void debugDrawLightCubes() {
 	shaders["lightCube"]->setMat4("projection", mainCam->projection);
 	shaders["lightCube"]->setMat4("view", mainCam->view);
 	for (unsigned int i = 0; i < lights.size(); ++i) {
-		shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
+		shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(lights[i]->radius*.005f)));
 		shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
 		renderLightCube();
 	}
@@ -727,7 +722,6 @@ void render2D(bool clearScreen) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// render Tilemaps
-	glActiveTexture(GL_TEXTURE0);
 	shaders["tilemapShader"]->use();
 	for (unsigned int i = 0; i < tilemaps.size(); ++i) {
 		glBindVertexArray(tilemaps[i]->VAO);
@@ -768,14 +762,12 @@ void render2D(bool clearScreen) {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::vec3), &colorVectors[0]);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, kv.second.size());
 	}
-	glBindVertexArray(0);
 
 	// render Particle2Ds
 	glDisable(GL_DEPTH_TEST);
 
 	shaders["Particle2DShader"]->use();
 	glBindVertexArray(ParticleEmitter2D::VAO);
-	glActiveTexture(GL_TEXTURE0);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
 	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
 	for (int i = 0; i < 2; glBlendFunc(GL_SRC_ALPHA, GL_ONE), ++i) {
@@ -792,7 +784,6 @@ void render2D(bool clearScreen) {
 			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
 		}
 	}
-	glBindVertexArray(0);
 
 	// render text
 	// TODO: text rendering should be orderable too
