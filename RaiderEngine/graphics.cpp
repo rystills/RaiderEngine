@@ -68,72 +68,40 @@ void renderQuad() {
 	glBindVertexArray(0);
 }
 
-void initCube() {
-	float vertices[] = {
-		// back face
-		-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-		1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-		1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
-		1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-		-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-		-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-		// front face
-		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-		1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-		1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-		1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-		-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-		// left face
-		-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-		-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-		-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-		-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-		-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-		-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-		// right face
-		1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-		1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-		1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
-		1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-		1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-		1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
-		// bottom face
-		-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-		1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-		1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-		1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-		-1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-		-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-		// top face
-		-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-		1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-		1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
-		1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-		-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-		-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+void initLightCube() {
+	GLfloat cubeStripVerts[] = {
+		-1.f, 1.f, 1.f,
+		1.f, 1.f, 1.f,
+		-1.f, -1.f, 1.f,
+		1.f, -1.f, 1.f,
+		1.f, -1.f, -1.f,
+		1.f, 1.f, 1.f,
+		1.f, 1.f, -1.f,
+		-1.f, 1.f, 1.f,
+		-1.f, 1.f, -1.f,
+		-1.f, -1.f, 1.f,
+		-1.f, -1.f, -1.f,
+		1.f, -1.f, -1.f,
+		-1.f, 1.f, -1.f,
+		1.f, 1.f, -1.f 
 	};
-	glGenVertexArrays(1, &cubeVAO);
-	glGenBuffers(1, &cubeVBO);
+	glGenVertexArrays(1, &lightCubeVAO);
+	glGenBuffers(1, &lightCubeVBO);
 	// fill buffer
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeStripVerts), cubeStripVerts, GL_STATIC_DRAW);
 	// link vertex attributes
-	glBindVertexArray(cubeVAO);
+	glBindVertexArray(lightCubeVAO);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
-void renderCube() {
+void renderLightCube() {
 	// render Cube
-	glBindVertexArray(cubeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(lightCubeVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 	glBindVertexArray(0);
 }
 
@@ -527,7 +495,7 @@ void loadShaders() {
 	// load shaders
 	shaders["shaderGeometryPass"] = std::make_unique<Shader>("g_buffer.vs", "g_buffer.fs");
 	shaders["shaderLightingPass"] = std::make_unique<Shader>("deferred_shading.vs", "deferred_shading.fs");
-	shaders["shaderLightBox"] = std::make_unique<Shader>("deferred_light_box.vs", "deferred_light_box.fs");
+	shaders["lightCube"] = std::make_unique<Shader>("lightCube.vs", "lightCube.fs");
 	shaders["lineShader"] = std::make_unique<Shader>("lineShader.vs", "lineShader.fs");
 	shaders["lineShader2D"] = std::make_unique<Shader>("lineShader2D.vs", "lineShader2D.fs");
 	shaders["textShader"] = std::make_unique<Shader>("textShader.vs", "textShader.fs");
@@ -690,13 +658,13 @@ void renderLightingPass() {
 
 void debugDrawLightCubes() {
 	// render lights on top of scene
-	shaders["shaderLightBox"]->use();
-	shaders["shaderLightBox"]->setMat4("projection", mainCam->projection);
-	shaders["shaderLightBox"]->setMat4("view", mainCam->view);
-	for (unsigned int i = 0; i < lights.size(); i++) {
-		shaders["shaderLightBox"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
-		shaders["shaderLightBox"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
-		renderCube();
+	shaders["lightCube"]->use();
+	shaders["lightCube"]->setMat4("projection", mainCam->projection);
+	shaders["lightCube"]->setMat4("view", mainCam->view);
+	for (unsigned int i = 0; i < lights.size(); ++i) {
+		shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(.1f)));
+		shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
+		renderLightCube();
 	}
 }
 
@@ -949,7 +917,7 @@ void initGraphics() {
 		checkDisableNvidiaThreadedOptimization();
 	initGL();
 	initQuad();
-	initCube();
+	initLightCube();
 	initGBuffer();
 	initDepthMaps();
 	initPhysics();

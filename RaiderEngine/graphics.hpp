@@ -20,8 +20,8 @@ inline float ambientStrength = .3f;
 inline unsigned int quadVAO;
 inline unsigned int quadVBO;
 
-inline unsigned int cubeVAO;
-inline unsigned int cubeVBO;
+inline unsigned int lightCubeVAO;
+inline unsigned int lightCubeVBO;
 
 inline glm::vec3 stateColors[4] = { glm::vec3(1,1,1), glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,1) };
 
@@ -56,12 +56,12 @@ render a 1x1 XY quad in NDC
 */
 void renderQuad();
 
-void initCube();
+void initLightCube();
 
 /*
 render a 1x1 3D cube in NDC
 */
-void renderCube();
+void renderLightCube();
 
 // enable anisotropic filtering for all textures, if supported on the user's graphics card
 void applyAnisotropicFiltering();

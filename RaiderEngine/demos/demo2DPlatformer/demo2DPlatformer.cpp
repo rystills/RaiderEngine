@@ -71,6 +71,10 @@ int main() {
 	// fonts
 	freetypeLoadFont("Inter-Regular", 24);
 
+	// tile colliders
+	Collider2D* tileCol = addCollider2D("8x8TileCollider", new Collider2DRectangle(4, 4));
+	std::vector<Collider2D*> tileCols{ NULL,tileCol,tileCol, NULL };
+
 	// attempt to load in the saved map data and pass it directly into the tilemap constructor
 	std::fstream mapFile;
 	mapFile.open("demos/demo2DPlatformer/map.txt", std::fstream::in);
@@ -82,16 +86,11 @@ int main() {
 			for (int r = 0; r < mapHeight; ++r)
 				mapFile >> mapData[i][r];
 		mapFile.close();
-		t = addTilemap(new Tilemap("tilemap.png", 4, 8, mapData, glm::vec2(0,-2)));
+		t = addTilemap(new Tilemap("tilemap.png", 4, 8, mapData, glm::vec2(0,-2), tileCols));
 	}
 	else
 		// no map data found; create an empty tilemap with the desired dimensions
-		t = addTilemap(new Tilemap("tilemap.png", 4, 8, glm::vec2(40, 23), glm::vec2(0,-2)));
-
-	// add colliders to tilemap
-	Collider2D* tileCol = addCollider2D("8x8TileCollider", new Collider2DRectangle(4, 4));
-	t->tileColliders[1] = tileCol;
-	t->tileColliders[2] = tileCol;
+		t = addTilemap(new Tilemap("tilemap.png", 4, 8, glm::vec2(40, 23), glm::vec2(0,-2), tileCols));
 
 	setVsync(true);
 	setClearColor(0,0,0, 1.f);

@@ -337,12 +337,6 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\deferred_light_box.fs">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\deferred_light_box.vs">
-      <Filter>Source Files\shaders</Filter>
-    </None>
     <None Include="shaders\deferred_shading.fs">
       <Filter>Source Files\shaders</Filter>
     </None>
@@ -398,6 +392,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\tilemapShader.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lightCube.vs">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lightCube.fs">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

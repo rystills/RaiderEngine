@@ -259,8 +259,8 @@
     <None Include="shaders\2DShader.vs" />
     <None Include="shaders\lineShader.fs" />
     <None Include="shaders\lineShader.vs" />
-    <None Include="shaders\deferred_light_box.fs" />
-    <None Include="shaders\deferred_light_box.vs" />
+    <None Include="shaders\lightCube.fs" />
+    <None Include="shaders\lightCube.vs" />
     <None Include="shaders\deferred_shading.fs" />
     <None Include="shaders\deferred_shading.vs" />
     <None Include="shaders\g_buffer.fs" />
