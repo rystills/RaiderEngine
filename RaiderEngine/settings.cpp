@@ -87,27 +87,27 @@ void removeLight(int ind) {
 }
 
 void setVsync(bool shouldUse) {
-	if (useVsync != shouldUse) {
-		useVsync = shouldUse;
-		glfwSwapInterval(useVsync);
+	if (renderState.useVsync != shouldUse) {
+		renderState.useVsync = shouldUse;
+		glfwSwapInterval(renderState.useVsync);
 	}
 }
 
 void setWindowMode(int newWidth, int newHeight, bool newFullScreen) {
-	fullScreen = newFullScreen;
+	renderState.fullScreen = newFullScreen;
 	setScreenDimensions(newWidth, newHeight);
 	// TODO: force 60 hz on higher refresh rate monitors?
-	glfwSetWindowMonitor(window, fullScreen ? glfwGetPrimaryMonitor() : nullptr, fullScreen ? 0 : (MONITOR_WIDTH - SCR_WIDTH) / 2, 
-		fullScreen ? 0 : (MONITOR_HEIGHT - SCR_HEIGHT) / 2, SCR_WIDTH,SCR_HEIGHT, MONITOR_REFRESH_RATE);
+	glfwSetWindowMonitor(window, renderState.fullScreen ? glfwGetPrimaryMonitor() : nullptr, renderState.fullScreen ? 0 : (MONITOR_WIDTH - SCR_WIDTH) / 2,
+		renderState.fullScreen ? 0 : (MONITOR_HEIGHT - SCR_HEIGHT) / 2, SCR_WIDTH,SCR_HEIGHT, MONITOR_REFRESH_RATE);
 	// when entering fullscreen mode, vsync must be reenabled
-	if (fullScreen && useVsync)
+	if (renderState.fullScreen && renderState.useVsync)
 		glfwSwapInterval(1);
 }
 
 void setEnableCursor(bool shouldEnable) {
-	if (enableCursor != shouldEnable) {
-		enableCursor = shouldEnable;
-		glfwSetInputMode(window, GLFW_CURSOR, enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	if (renderState.enableCursor != shouldEnable) {
+		renderState.enableCursor = shouldEnable;
+		glfwSetInputMode(window, GLFW_CURSOR, renderState.enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 	}
 }
 
@@ -119,13 +119,50 @@ void setScreenDimensions(glm::vec2 res) {
 	frameBufferSizeCallback(window, static_cast<int>(res.x), static_cast<int>(res.y));
 }
 
+void setShouldBlend(bool blend) {
+	if (renderState.blend != blend) {
+		renderState.blend = blend;
+		if (renderState.blend)
+			glEnable(GL_BLEND);
+		else
+			glDisable(GL_BLEND);
+	}
+}
+
+void setShouldDepthTest(bool test) {
+	if (test != renderState.depthTest) {
+		renderState.depthTest = test;
+		if (renderState.depthTest)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+	}
+}
+
+void setBlendFunc(int funcSrc, int funcDest) {
+	if (funcSrc != renderState.blendFuncSrc || funcDest != renderState.blendFuncDest) {
+		renderState.blendFuncSrc = funcSrc;
+		renderState.blendFuncDest = funcDest;
+		glBlendFunc(renderState.blendFuncSrc, renderState.blendFuncDest);
+	}
+}
+
+void setAmbientStrength(float as) {
+	if (as != renderState.ambientStrength)
+		renderState.ambientStrength = as;
+}
+
 void setClearColor(glm::vec4 newColor) {
-	clearColor = newColor;
-	glClearColor(newColor.r, newColor.g, newColor.b, newColor.a);
+	if (newColor != renderState.clearColor) {
+		renderState.clearColor = newColor;
+		glClearColor(newColor.r, newColor.g, newColor.b, newColor.a);
+	}
 }
 void setClearColor(float r, float g, float b, float a) {
-	clearColor = glm::vec4(r,g,b,a);
-	glClearColor(r,g,b,a);
+	if (r != renderState.clearColor.r || g != renderState.clearColor.g || b != renderState.clearColor.b || a != renderState.clearColor.a) {
+		renderState.clearColor = glm::vec4(r,g,b,a);
+		glClearColor(r,g,b,a);
+	}
 }
 
 void setMapDir(std::string newDir) {

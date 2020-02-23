@@ -13,7 +13,7 @@ void FlickerLight::update() {
 	Light::update();
 	// flicker once flickerWait time has elapsed
 	if (prevTime + flickerWait < elapsedTime) {
-		on = !on;
+		setOn(!on);
 		prevTime += flickerWait;
 		// choose a new time to wait within a small range when the light is off, and a much larger range when the light is on
 		flickerWait = chooseFlickerWait(on ? 3 : .45f);

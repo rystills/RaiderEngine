@@ -41,7 +41,7 @@ void resetSingleFrameInput() {
 void checkDemoToggles() {
 	// fullscreen toggle
 	if (keyPressed(GLFW_KEY_F11))
-		setWindowMode(fullScreen ? 1280 : MONITOR_WIDTH, fullScreen ? 720 : MONITOR_HEIGHT, !fullScreen);
+		setWindowMode(renderState.fullScreen ? 1280 : MONITOR_WIDTH, renderState.fullScreen ? 720 : MONITOR_HEIGHT, !renderState.fullScreen);
 
 	// debug toggle
 	if (keyStates[GLFW_KEY_F3][pressed])

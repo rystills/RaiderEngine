@@ -10,12 +10,9 @@ inline unsigned int numPointsInVBO = 0, numLinesInVBO = 0;
 #define NR_LIGHTS 4
 inline unsigned int depthMapFBO[NR_LIGHTS];
 inline unsigned int depthCubemap[NR_LIGHTS];
-inline glm::vec4 clearColor(0,0,0,1);
 
 inline std::vector<GLfloat> pointsQueue;
 inline std::vector<GLfloat> linesQueue;
-inline bool twoSidedDrawing = true;
-inline float ambientStrength = .3f;
 
 inline unsigned int quadVAO;
 inline unsigned int quadVBO;

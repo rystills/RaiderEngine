@@ -9,8 +9,10 @@ public:
 	float radius;
 	float maxBrightness;
 	bool on = true;
+	bool dirty = true;
 	Light(glm::vec3 position, float strength, glm::vec3 color);
 	
+	void setOn(bool nowOn);
 	virtual void update() {}
 
 private:

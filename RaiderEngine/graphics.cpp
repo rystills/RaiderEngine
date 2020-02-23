@@ -134,12 +134,12 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	glBindVertexArray(TextObject::VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, TextObject::VBO);
 	// only rebind the font atlas if we switched fonts, font sizes, or shaders (texture binding is not tied to the active shader, so other shaders likely wrote over our texture)
-	if (s.use() || lastFontUsed.first != fontName || lastFontUsed.second != fontSize) {
-		lastFontUsed = { fontName, fontSize };
+	if (s.use() || renderState.lastFontUsed.first != fontName || renderState.lastFontUsed.second != fontSize) {
+		renderState.lastFontUsed = { fontName, fontSize };
 		glBindTexture(GL_TEXTURE_2D, fonts[fontName][fontSize].first);
 	}
-	if (lastFontColor != color) {
-		lastFontColor = color;
+	if (renderState.lastFontColor != color) {
+		renderState.lastFontColor = color;
 		s.setVec3("textColor", color.x, color.y, color.z);
 	}
 
@@ -453,7 +453,7 @@ GLFWwindow* initWindow() {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	if (fullScreen)
+	if (renderState.fullScreen)
 		setWindowMode(SCR_WIDTH, SCR_HEIGHT, true);
 
 	// callback events
@@ -465,9 +465,9 @@ GLFWwindow* initWindow() {
 	glfwSetKeyCallback(window, key_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, renderState.enableCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
-	glfwSwapInterval(useVsync);
+	glfwSwapInterval(renderState.useVsync);
 
 	return window;
 }
@@ -526,12 +526,12 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 		if (ignoreNonShadowCasters && !kv.second[0]->castShadows)
 			continue;
 		// toggle face culling when drawing a double-sided object
-		if (kv.second[0]->drawTwoSided != twoSidedDrawing) {
+		if (kv.second[0]->drawTwoSided != renderState.twoSidedDrawing) {
 			if (kv.second[0]->drawTwoSided)
 				glDisable(GL_CULL_FACE);
 			else
 				glEnable(GL_CULL_FACE);
-			twoSidedDrawing = !twoSidedDrawing;
+			renderState.twoSidedDrawing = !renderState.twoSidedDrawing;
 		}
 		// no instancing can be done if only a single GameObject uses this model
 		if (kv.second.size() == 1) {
@@ -546,6 +546,7 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 					kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
 				// now render the current submesh for all GameObjects
 				// TODO: further optimize this with instanced rendering via glDrawElementsInstanced (will require some alterations to the shader)
+				// TODO: store dirty state for GameObject model (same as GameObject2D)
 				for (unsigned int r = 0; r < kv.second.size(); ++r) {
 					shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[r]->position) * kv.second[r]->rotation, kv.second[r]->scale));
 					kv.second[r]->model->meshes[i].draw(*shaders[shaderName], false);
@@ -557,24 +558,25 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 
 void renderDepthMap() {
 	// create depth cubemap transformation matrices
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
+	setShouldBlend(true);
+	setShouldDepthTest(true);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	shaders["pointShadowsDepth"]->use();
-	shaders["pointShadowsDepth"]->setFloat("far_plane", mainCam->far_plane);
+	if (mainCam->far_plane != renderState.far_plane)
+		shaders["pointShadowsDepth"]->setFloat("far_plane", mainCam->far_plane);
 	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, mainCam->near_plane, mainCam->far_plane);
 	for (unsigned int k = 0; k < lights.size(); ++k) {
 		if (lights[k]->on) {
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[k]);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glm::vec3 lightPos = lights[k]->position;
-			std::vector<glm::mat4> shadowTransforms;
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			std::vector<glm::mat4> shadowTransforms {
+			shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+			shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+			shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)) };
 
 			// render scene to depth cubemap
 			for (unsigned int i = 0; i < 6; ++i)
@@ -587,14 +589,17 @@ void renderDepthMap() {
 
 void renderGeometryPass() {
 	setGlViewport();
-	glDisable(GL_BLEND);
+	setShouldBlend(false);
 	// geometry pass: render scene's geometry/color data into gbuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderGeometryPass"]->use();
-	shaders["shaderGeometryPass"]->setMat4("projection", mainCam->projection);
-	shaders["shaderGeometryPass"]->setMat4("view", mainCam->view);
-	shaders["shaderGeometryPass"]->setVec3("viewPos", mainCam->Position);
+	if (mainCam->projection != renderState.projection)
+		shaders["shaderGeometryPass"]->setMat4("projection", mainCam->projection);
+	if (mainCam->view != renderState.view)
+		shaders["shaderGeometryPass"]->setMat4("view", mainCam->view);
+	if (mainCam->Position != renderState.viewPos)
+		shaders["shaderGeometryPass"]->setVec3("viewPos", mainCam->Position);
 	drawGameObjects("shaderGeometryPass");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -604,31 +609,41 @@ void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderLightingPass"]->use();
-	glActiveTexture(GL_TEXTURE0);
+	if (renderState.clearColor != renderState.prevClearColor)
+		shaders["shaderLightingPass"]->setVec4("clearColor", renderState.clearColor);
+	if (renderState.ambientStrength != renderState.prevAmbientStrength)
+		shaders["shaderLightingPass"]->setFloat("ambientStrength", renderState.ambientStrength);
 	glBindTexture(GL_TEXTURE_2D, gBuffer.position);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gBuffer.normal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gBuffer.albedoSpec);
 	// send light relevant uniforms
-	shaders["shaderLightingPass"]->setInt("NR_LIGHTS", lights.size());
+	if (renderState.numLights != lights.size())
+		shaders["shaderLightingPass"]->setInt("NR_LIGHTS", lights.size());
+
 	for (unsigned int i = 0; i < lights.size(); ++i) {
-		if (lights[i]->on) {
-			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", true);
-			shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
-			shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
-			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
-			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
-			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+		if (lights[i]->dirty) {
+			lights[i]->dirty = false;
+			// TODO: cascade dirty flag when removing a light from the scene
+			if (lights[i]->on) {
+				// NOTE: consider further breaking down dirty state on a per-attribute basis
+				shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Position", lights[i]->position);
+				shaders["shaderLightingPass"]->setVec3("lights[" + std::to_string(i) + "].Color", lights[i]->color);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+			}
+			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", lights[i]->on);
 		}
-		else
-			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", false);
 	}
-	shaders["shaderLightingPass"]->setVec3("viewPos", mainCam->Position);
+	
 	// shadow and lighting uniforms
-	shaders["shaderLightingPass"]->setFloat("far_plane", mainCam->far_plane);
-	shaders["shaderLightingPass"]->setFloat("ambientStrength", ambientStrength);
-	shaders["shaderLightingPass"]->setVec4("clearColor", clearColor);
+	if (mainCam->Position != renderState.viewPos)
+		shaders["shaderLightingPass"]->setVec3("viewPos", mainCam->Position);
+	if (mainCam->far_plane != renderState.far_plane)
+		shaders["shaderLightingPass"]->setFloat("far_plane", mainCam->far_plane);
+	
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
 	glActiveTexture(GL_TEXTURE4);
@@ -646,16 +661,16 @@ void renderLightingPass() {
 
 	// copy content of geometry's depth buffer to default framebuffer's depth buffer
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.buffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // TODO: internal format of FBO and default framebuffer must match (implementation defined?)
 	glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void debugDrawLightCubes() {
 	// render lights on top of scene
 	shaders["lightCube"]->use();
-	shaders["lightCube"]->setMat4("projection", mainCam->projection);
-	shaders["lightCube"]->setMat4("view", mainCam->view);
+	if (mainCam->projection != renderState.projection)
+		shaders["lightCube"]->setMat4("projection", mainCam->projection);
+	if (mainCam->view != renderState.view)
+		shaders["lightCube"]->setMat4("view", mainCam->view);
 	for (unsigned int i = 0; i < lights.size(); ++i) {
 		shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(lights[i]->radius*.005f)));
 		shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
@@ -671,9 +686,11 @@ void renderLines() {
 	if (!pointsQueue.empty() || !linesQueue.empty()) {
 		// setup
 		if (shaders["lineShader"]->use()) {
-			glDisable(GL_DEPTH_TEST);
-			shaders["lineShader"]->setMat4("projection", mainCam->projection);
-			shaders["lineShader"]->setMat4("view", mainCam->view);
+			setShouldDepthTest(false);
+			if (mainCam->projection != renderState.projection)
+				shaders["lineShader"]->setMat4("projection", mainCam->projection);
+			if (mainCam->view != renderState.view)
+				shaders["lineShader"]->setMat4("view", mainCam->view);
 		}
 		drawPoints();
 		drawLines();
@@ -697,12 +714,13 @@ void renderLines2D() {
 	if (!linesQueue.empty()) {
 		// setup
 		if (shaders["lineShader2D"]->use())
-			glDisable(GL_DEPTH_TEST);
+			setShouldDepthTest(false);
 		drawLines();
 	}
 }
 
 void setGlViewport() {
+	// TODO: store in renderState
 	float ratx = SCR_WIDTH / static_cast<float>(TARGET_WIDTH), raty = SCR_HEIGHT / static_cast<float>(TARGET_HEIGHT);
 	if (ratx == raty)
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -715,11 +733,11 @@ void setGlViewport() {
 void render2D(bool clearScreen) {
 	// TODO: store opengl state and check before attempting redundant state changes (minor performance increase)
 	setGlViewport();
-	glEnable(GL_DEPTH_TEST);
+	setShouldDepthTest(true);
 	// clear the depth buffer so 2D objects don't compete with 3d objects for visibility
 	glClear(GL_DEPTH_BUFFER_BIT | (clearScreen ? GL_COLOR_BUFFER_BIT : 0));
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	setShouldBlend(true);
+	setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// render Tilemaps
 	shaders["tilemapShader"]->use();
@@ -764,13 +782,13 @@ void render2D(bool clearScreen) {
 	}
 
 	// render Particle2Ds
-	glDisable(GL_DEPTH_TEST);
+	setShouldDepthTest(false);
 
 	shaders["Particle2DShader"]->use();
 	glBindVertexArray(ParticleEmitter2D::VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter2D::VBO);
-	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
-	for (int i = 0; i < 2; glBlendFunc(GL_SRC_ALPHA, GL_ONE), ++i) {
+	setBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+	for (int i = 0; i < 2; setBlendFunc(GL_SRC_ALPHA, GL_ONE), ++i) {
 		// render particles in two passes; once in black, and once normally. Results in additive blending between particles, and normal blending with everything else
 		// TODO: there may be a way to optimize this. Consider rendering to a second buffer rather than doing two passes, or possible single-pass solution using premultiplied alpha
 		for (auto&& pe : particleEmitter2Ds) {
@@ -787,7 +805,7 @@ void render2D(bool clearScreen) {
 
 	// render text
 	// TODO: text rendering should be orderable too
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);
 }
@@ -805,6 +823,16 @@ void render(bool only2D) {
 	render2D(only2D);
 	renderLines2D();
 	glfwSwapBuffers(window);
+
+	// update render state
+	renderState.prevAmbientStrength = renderState.ambientStrength;
+	renderState.prevClearColor = renderState.clearColor;
+	renderState.projection = mainCam->projection;
+	renderState.view = mainCam->view;
+	renderState.viewPos = mainCam->Position;
+	renderState.numLights = lights.size();
+	renderState.far_plane = mainCam->far_plane;
+
 	frameRenderTime = glfwGetTime() - sTime;
 }
 
@@ -902,6 +930,7 @@ void checkDisableNvidiaThreadedOptimization() {
 }
 
 void initGraphics() {
+	renderState.clearColor.a = 1;
 	glfwSetErrorCallback(glfwErrorCallback);
 	window = initWindow();
 	if (forceDisableNvidiaThreadedOptimization)

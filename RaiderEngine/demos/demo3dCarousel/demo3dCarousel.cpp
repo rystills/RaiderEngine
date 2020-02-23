@@ -43,17 +43,17 @@ void checkSwitchMap(int mapNum) {
 	switch (scene) {
 	case 1:
 		setClearColor(.6f, .3f, .5f, 1);
-		ambientStrength = 0;
+		setAmbientStrength(0);
 		loadMap("hallway");
 		break;
 	case 2:
 		setClearColor(0, .75f, 1, 1);
-		ambientStrength = 0.4f;
+		setAmbientStrength(0.4f);
 		loadMap("field");
 		break;
 	case 3:
 		setClearColor(0, 0, .2f, 1);
-		ambientStrength = 0.15f;
+		setAmbientStrength(0.15f);
 		loadMap("bookshelf");
 		break;
 	}
@@ -116,7 +116,7 @@ int main() {
 
 		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
 		if (scene == 2) 
-			ambientStrength = .5f*static_cast<float>(sin(totalTime)) + .5f;
+			setAmbientStrength(.5f*static_cast<float>(sin(totalTime)) + .5f);
 
 		// update player
 		player.update();

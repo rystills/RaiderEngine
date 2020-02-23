@@ -13,9 +13,6 @@
 
 // this file holds global settings and shared engine data
 inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720, TARGET_WIDTH = 1280, TARGET_HEIGHT = 720, UI_TARGET_WIDTH = 1280, UI_TARGET_HEIGHT = 720, MONITOR_WIDTH = 0, MONITOR_HEIGHT = 0, MONITOR_REFRESH_RATE = 0;
-inline bool useVsync = false;
-inline bool enableCursor = false;
-inline bool fullScreen = false;
 inline const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 inline bool debugDraw = false;
 inline float anisoFilterAmount = 0.0f;
@@ -36,14 +33,31 @@ inline std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject>>>
 inline std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject2D>>> gameObject2Ds;
 inline std::vector<std::unique_ptr<Light>> lights;
 inline std::unordered_map<std::string, std::unordered_map<int, std::pair< GLuint, Character[numFontCharacters]>>> fonts;
-inline std::pair<std::string, int> lastFontUsed;
-inline glm::vec3 lastFontColor;
 inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
 inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
 inline std::vector<std::unique_ptr<Tilemap>> tilemaps;
 inline bool forceDisableNvidiaThreadedOptimization = false;
+
+// openGL render state
+struct RenderState {
+	bool blend = false, depthTest = false;
+	int blendFuncSrc, blendFuncDest;
+	// TODO: all render state vars should likely be given a proper update method
+	glm::mat4 projection, view;
+	unsigned int numLights;
+	glm::vec3 viewPos;
+	float far_plane;
+	float ambientStrength = .3f, prevAmbientStrength;
+	glm::vec4 clearColor, prevClearColor;
+	bool twoSidedDrawing = true;
+	bool useVsync = false;
+	bool enableCursor = false;
+	bool fullScreen = false;
+	std::pair<std::string, int> lastFontUsed;
+	glm::vec3 lastFontColor;
+} inline renderState;
 
 /* methods to add/remove objects from the engine */
 GameObject* addGameObject(GameObject* go);
@@ -84,6 +98,14 @@ void setEnableCursor(bool shouldEnable);
 
 void setScreenDimensions(int width, int height);
 void setScreenDimensions(glm::vec2 res);
+
+void setShouldBlend(bool blend);
+
+void setShouldDepthTest(bool test);
+
+void setBlendFunc(int funcSrc, int funcDest);
+
+void setAmbientStrength(float as);
 
 void setClearColor(glm::vec4 newColor);
 void setClearColor(float r, float g, float b, float a);

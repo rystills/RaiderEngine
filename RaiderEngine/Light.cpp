@@ -8,6 +8,14 @@ Light::Light(glm::vec3 position, float strength, glm::vec3 color) : position(pos
 	calculateMaxBrightness();
 	calculateRadius();
 }
+
+void Light::setOn(bool nowOn) {
+	if (nowOn != on) {
+		on = nowOn;
+		dirty = true;
+	}
+}
+
 void Light::calculateMaxBrightness() {
 	maxBrightness = std::fmaxf(std::fmaxf(color.r, color.g), color.b);
 }

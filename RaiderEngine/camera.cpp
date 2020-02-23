@@ -21,7 +21,7 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 void Camera::updateViewProj() {
 	projection = glm::perspective(glm::radians(Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, near_plane, far_plane);
-	view = glm::lookAt(Position, Position + Front, Up);;
+	view = glm::lookAt(Position, Position + Front, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction) {
