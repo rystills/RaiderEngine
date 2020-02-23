@@ -52,6 +52,7 @@ void initQuad() {
 	};
 	// setup plane VAO
 	glGenVertexArrays(1, &quadVAO);
+	GLuint quadVBO;
 	glGenBuffers(1, &quadVBO);
 	glBindVertexArray(quadVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
@@ -60,6 +61,8 @@ void initQuad() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glBindVertexArray(0);
+	glDeleteBuffers(1, &quadVBO);
 }
 
 void renderQuad() {
@@ -85,6 +88,7 @@ void initLightCube() {
 		1.f, 1.f, -1.f 
 	};
 	glGenVertexArrays(1, &lightCubeVAO);
+	GLuint lightCubeVBO;
 	glGenBuffers(1, &lightCubeVBO);
 	// fill buffer
 	glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
@@ -95,6 +99,7 @@ void initLightCube() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glDeleteBuffers(1, &lightCubeVBO);
 }
 
 void renderLightCube() {
@@ -121,7 +126,7 @@ void initBuffers() {
 }
 
 void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered) {
-	// TODO: precalculate individual VBOs in TextObjects for faster rendering
+	// TODO: precalculate individual VAOs in TextObjects for faster rendering
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
 		ERRORCOLOR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl)

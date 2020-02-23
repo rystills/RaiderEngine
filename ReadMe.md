@@ -4,18 +4,18 @@ Place the libs folder directly in ".\RaiderEngine\RaiderEngine" and place all of
 If you're not on Windows, you'll need to build the dependencies yourself. Please take a look at the libs folder from the download above to see how to structure the build. This build process will be automated in the future.  
   
 Here is the list of dependencies you'll need to build:  
-- assimp (model loading)  
-- freetype (font loading)  
-- glad (openGL loader)  
-- glfw (openGL framework)  
-- glm (openGL mathematics)  
-- physX (physics engine)  
-- openALsoft (audio playback)  
-- NvAPI (Nvidia application profile configuration)  
+ • assimp (model loading)  
+ • freetype (font loading)  
+ • glad (openGL loader)  
+ • glfw (openGL framework)  
+ • glm (openGL mathematics)  
+ • physX (physics engine)  
+ • openALsoft (audio playback)  
+ • NvAPI (Nvidia application profile configuration)  
   
 Here is the list of additional dependencies that are already bundled with the engine:  
-- stb_vorbis (audio loading and decoding)  
-- stb_image (image loading)  
+ • stb_vorbis (audio loading and decoding)  
+ • stb_image (image loading)  
   
 Previews:  
 <img src="previews\7_11_19 (3d carousel).png" width="960" height="540">  

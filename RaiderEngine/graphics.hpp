@@ -15,10 +15,7 @@ inline std::vector<GLfloat> pointsQueue;
 inline std::vector<GLfloat> linesQueue;
 
 inline unsigned int quadVAO;
-inline unsigned int quadVBO;
-
 inline unsigned int lightCubeVAO;
-inline unsigned int lightCubeVBO;
 
 inline glm::vec3 stateColors[4] = { glm::vec3(1,1,1), glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,1) };
 
