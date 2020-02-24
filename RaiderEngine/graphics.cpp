@@ -540,7 +540,9 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 		}
 		// no instancing can be done if only a single GameObject uses this model
 		if (kv.second.size() == 1) {
-			shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[0]->position) * kv.second[0]->rotation, kv.second[0]->scale));
+			if (kv.second[0]->isDirty)
+				kv.second[0]->recalculateModelTransform();
+			shaders[shaderName]->setMat4("model", kv.second[0]->modelTransform);
 			kv.second[0]->model->draw(*shaders[shaderName], shouldSendTextures);
 		}
 		else {
@@ -551,9 +553,10 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 					kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
 				// now render the current submesh for all GameObjects
 				// TODO: further optimize this with instanced rendering via glDrawElementsInstanced (will require some alterations to the shader)
-				// TODO: store dirty state for GameObject model (same as GameObject2D)
 				for (unsigned int r = 0; r < kv.second.size(); ++r) {
-					shaders[shaderName]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), kv.second[r]->position) * kv.second[r]->rotation, kv.second[r]->scale));
+					if (kv.second[r]->isDirty)
+						kv.second[r]->recalculateModelTransform();
+					shaders[shaderName]->setMat4("model", kv.second[r]->modelTransform);
 					kv.second[r]->model->meshes[i].draw(*shaders[shaderName], false);
 				}
 			}

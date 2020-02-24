@@ -7,7 +7,8 @@ class GameObject {
 public:
 	glm::vec3 position;
 	glm::mat4 rotation;
-	glm::vec3 scale;
+	glm::vec4 prevRot;
+	glm::vec3 scaleVal;
 	Model* model;
 	bool grabbable;
 	std::string modelName;
@@ -19,6 +20,8 @@ public:
 	bool usePhysics = true;
 	bool drawTwoSided = false;
 	bool castShadows = true;
+	glm::mat4 modelTransform;
+	bool isDirty = true;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -50,15 +53,30 @@ public:
 	@param rot: the quaternion representation of our initial rotation
 	*/
 	void addPhysics(glm::quat rot);
-	/*
-	update the GameObject instance
-	*/
-	virtual void update();
 
+	void recalculateModelTransform();
+
+	// transform methods
+	// TODO: these methods will have no effect on active physics enabled GameObjects; optional physics overrides should be implemented for each one
+	void rotate(const float& angle, glm::vec3 const& axes);
+	
 	/*
 	update the GameObject's rotation from a vec3 of euler angles
 	@param rotationEA: the desired rotation (in radian euler angles) to set
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	*/
-	glm::quat setRotation(glm::vec3 rotationEA, bool fixInitialRotation = false);
+	glm::quat setRotation(const glm::vec3& rotationEA, const bool& fixInitialRotation = false);
+
+	void translate(glm::vec3 const& amnt);
+
+	void setPos(glm::vec3 const& newPos);
+
+	void scale(glm::vec3 const& amnt);
+
+	void setScale(glm::vec3 const& newScale);
+
+	/*
+	update the GameObject instance
+	*/
+	virtual void update();
 };

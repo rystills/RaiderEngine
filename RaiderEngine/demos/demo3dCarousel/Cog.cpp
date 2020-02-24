@@ -6,10 +6,9 @@
 void Cog::update() {
 	GameObject::update();
 	elapsedTime += deltaTime;
-	if (wallMounted) {
+	if (wallMounted)
 		// rotation for wall-mounted cogs is purely graphical; no need to get the physics engine involved
-		rotation = glm::rotate(rotation, elapsedTime / 2 * rotSpeed * (counterClockWise ? -1 : 1), glm::vec3(0, 1, 0));
-	}
+		rotate(deltaTime / 2 * rotSpeed * (counterClockWise ? -1 : 1), glm::vec3(0, 1, 0));
 }
 
 std::string Cog::getDisplayString() {

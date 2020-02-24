@@ -6,7 +6,7 @@
 #include "physics.hpp"
 
 GameObject::GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic, bool grabbable, bool fixInitialRotation, bool usePhysics) :
-position(position), scale(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics) {
+position(position), scaleVal(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics) {
 	setModel(modelName, makeStatic == 1);
 	isStatic = makeStatic > 0;
 	if (isStatic)
@@ -28,11 +28,11 @@ void GameObject::setModel(std::string modelName, bool makeStatic) {
 void GameObject::addPhysics(glm::quat rot) {
 	if (!usePhysics) return;
 	// calculate mass and prepare physics data structures
-	float averageScale = (scale.x + scale.y + scale.z) / 3;
+	float averageScale = (scaleVal.x + scaleVal.y + scaleVal.z) / 3;
 	mass = model->isStaticMesh ? 0.0f : model->volume * averageScale * 1000;
 	PxQuat physRot(rot.x, rot.y, rot.z, rot.w);
 	PxVec3 physPot(position.x, position.y, position.z);
-	PxMeshScale physScale(PxVec3(scale.x, scale.y, scale.z), PxQuat(PxIdentity));
+	PxMeshScale physScale(PxVec3(scaleVal.x, scaleVal.y, scaleVal.z), PxQuat(PxIdentity));
 
 	// our body type depends on our staticness, which may or may not match our model's staticness
 	if (isStatic)
@@ -56,20 +56,58 @@ void GameObject::addPhysics(glm::quat rot) {
 	gScene->addActor(*body);
 }
 
-void GameObject::update() {
-	// update position and rotation to match the physics body
-	if (usePhysics) {
-		PxTransform pose = body->getGlobalPose();
-		position.x = pose.p.x; position.y = pose.p.y; position.z = pose.p.z;
-		rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));
-	}
+void GameObject::recalculateModelTransform() {
+	modelTransform = glm::scale(glm::translate(glm::mat4(1.0f), position) * rotation, scaleVal);
+	isDirty = false;
 }
 
-glm::quat GameObject::setRotation(glm::vec3 rotationEA, bool fixInitialRotation) {
+void GameObject::rotate(const float& angle, glm::vec3 const& axes) {
+	rotation = glm::rotate(rotation, angle, axes);
+	isDirty = true;
+}
+
+glm::quat GameObject::setRotation(const glm::vec3& rotationEA, const bool& fixInitialRotation) {
 	glm::quat q = glm::quat(rotationEA);
 	// fix dynamic object initial rotation with a 90 degree offset
 	if (fixInitialRotation)
 		q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;
 	rotation = glm::toMat4(q);
 	return q;
+}
+
+void GameObject::translate(glm::vec3 const& amnt) {
+	position += amnt;
+	isDirty = true;
+}
+
+void GameObject::setPos(glm::vec3 const& newPos) {
+	position = newPos;
+	isDirty = true;
+}
+
+void GameObject::scale(glm::vec3 const& amnt) {
+	scaleVal += amnt;
+	isDirty = true;
+}
+
+void GameObject::setScale(glm::vec3 const& newScale) {
+	scaleVal = newScale;
+	isDirty = true;
+}
+
+void GameObject::update() {
+	// update position and rotation to match the physics body
+	if (usePhysics) {
+		PxTransform pose = body->getGlobalPose();
+		if (std::memcmp(&pose.p, &position, sizeof(glm::vec3)) != 0) {
+			std::memcpy(&position, &pose.p, sizeof(glm::vec3));
+			isDirty = true;
+		}
+		
+		if (std::memcmp(&pose.q, &prevRot, sizeof(glm::vec4)) != 0) {
+			std::memcpy(&prevRot, &pose.q, sizeof(glm::vec4));
+			rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));
+			isDirty = true;
+		}
+	}
 }
