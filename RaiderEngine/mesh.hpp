@@ -48,9 +48,6 @@ public:
 	*/
 	void sendTexturesToShader(Shader shader);
 
-    // render the mesh
-	void draw(Shader shader, bool shouldSendTextures = true);
-
 private:
     /*
 	initialize all the buffer objects/arrays

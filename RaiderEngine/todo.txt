@@ -17,7 +17,6 @@
 -automate building, similar to how glitter lays it out
 
 ~Optimization~
--add automatic GameObject render instancing (see GameObject2D instanced rendering for reference)
 -send lights to shader in order of distance from player and importance, and render shadows for first N lights
 -add a flag to mark Objects as non shadow casting or non shadow receiving
 

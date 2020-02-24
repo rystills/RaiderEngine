@@ -22,6 +22,7 @@ public:
 	bool castShadows = true;
 	glm::mat4 modelTransform;
 	bool isDirty = true;
+	inline static GLuint instancedModelVBO;
 
 	/*
 	GameObject constructor: creates a new GameObject with the specified transforms and model
@@ -35,6 +36,8 @@ public:
 	@param usePhysics: whether or not this GameObject should be added to the physics world
 	*/
 	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation = true, bool usePhysics = true);
+
+	static void initStaticVertexBuffer();
 
 	/*
 	return a string detailing information about this object, used in the hallway demo when the user right clicks a GameObject

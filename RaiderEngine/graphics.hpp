@@ -20,7 +20,9 @@ inline unsigned int lightCubeVAO;
 inline glm::vec3 stateColors[4] = { glm::vec3(1,1,1), glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,1) };
 
 // vectors containing model matrices and sprite colors, to be sent to the gpu for instanced rendering; grows as necessary
-inline std::vector<glm::mat4> modelMatrices(0);
+inline std::vector<glm::mat4> modelMatrices2D(0);
+inline std::vector<glm::mat4> modelMatrices3D(0);
+// TODO: consider supporting color mixing for 3d GameObjects as well
 inline std::vector<glm::vec3> colorVectors(0);
 
 inline glm::highp_mat4 OrthoProjection, UIOrthoProjection;

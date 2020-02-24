@@ -14,6 +14,10 @@ position(position), scaleVal(scale), grabbable(grabbable), modelName(modelName),
 	addPhysics(setRotation(rotationEA, fixInitialRotation));
 }
 
+void GameObject::initStaticVertexBuffer() {
+	glGenBuffers(1, &instancedModelVBO);
+}
+
 std::string GameObject::getDisplayString() {
 	return "";
 }

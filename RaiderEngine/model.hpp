@@ -49,13 +49,6 @@ public:
 	float calculateVolume();
 
 	/*
-	draw the model using the specified shader
-	@param shader: the shader to use while drawing the model
-	@param shouldSendTextures: whether or not to bind the appropriate textures before rendering
-	*/
-	void draw(Shader shader, bool shouldSendTextures = true);
-
-	/*
 	process the specified mesh from the scene returned by ASSIMP, producing a mesh instance with the relevant ASSIMP mesh data, and adding it to meshes
 	@param mesh: the ASSIMP mesh to process
 	@param scene: the scene of which the specified mesh is a part

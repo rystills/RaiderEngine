@@ -115,11 +115,6 @@ float Model::calculateVolume() {
 	return volume / 6.0f;  // since the determinant give 6 times tetra volume
 }
 
-void Model::draw(Shader shader, bool shouldSendTextures) {
-	for (unsigned int i = 0; i < meshes.size(); ++i)
-		meshes[i].draw(shader, shouldSendTextures);
-}
-
 void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// data to fill
 	std::vector<Vertex> vertices;

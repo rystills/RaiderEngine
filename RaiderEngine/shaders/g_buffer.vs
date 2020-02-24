@@ -13,17 +13,17 @@ out VS_OUT {
 	vec3 TangentFragPos;
 } vs_out;
 
-uniform mat4 model;
+layout (location = 5) in mat4 instanceMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 viewPos;
 
 void main() {
-    vec4 worldPos = model * vec4(aPos, 1.0);
+    vec4 worldPos = instanceMatrix * vec4(aPos, 1.0);
     vs_out.FragPos = worldPos.xyz; 
     vs_out.TexCoords = aTexCoords;
     
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    mat3 normalMatrix = transpose(inverse(mat3(instanceMatrix)));
     vec3 T = normalize(normalMatrix * aTangent);
     vec3 N = normalize(normalMatrix * aNormal);
     T = normalize(T - dot(T, N) * N);

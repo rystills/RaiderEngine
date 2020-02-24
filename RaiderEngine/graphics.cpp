@@ -525,6 +525,8 @@ void loadShaders() {
 }
 
 void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignoreNonShadowCasters) {
+	// TODO: consider caching model matrix array / buffered VAO data for static GameObjects
+	glBindBuffer(GL_ARRAY_BUFFER, GameObject::instancedModelVBO);
 	for (auto&& kv : gameObjects) {
 		if (kv.second.size() == 0)
 			continue;
@@ -538,28 +540,24 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 				glEnable(GL_CULL_FACE);
 			renderState.twoSidedDrawing = !renderState.twoSidedDrawing;
 		}
-		// no instancing can be done if only a single GameObject uses this model
-		if (kv.second.size() == 1) {
-			if (kv.second[0]->isDirty)
-				kv.second[0]->recalculateModelTransform();
-			shaders[shaderName]->setMat4("model", kv.second[0]->modelTransform);
-			kv.second[0]->model->draw(*shaders[shaderName], shouldSendTextures);
-		}
-		else {
-			// iterate through all submeshes
-			for (unsigned int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
-				// transfer the textures for the current submesh once initially
-				if (shouldSendTextures)
-					kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
-				// now render the current submesh for all GameObjects
-				// TODO: further optimize this with instanced rendering via glDrawElementsInstanced (will require some alterations to the shader)
-				for (unsigned int r = 0; r < kv.second.size(); ++r) {
-					if (kv.second[r]->isDirty)
-						kv.second[r]->recalculateModelTransform();
-					shaders[shaderName]->setMat4("model", kv.second[r]->modelTransform);
-					kv.second[r]->model->meshes[i].draw(*shaders[shaderName], false);
-				}
+		// iterate through all submeshes
+		for (unsigned int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
+			glBindVertexArray(*kv.second[0]->model->meshes[i].VAO);
+			// transfer the textures for the current submesh once initially
+			if (shouldSendTextures)
+				kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
+			// now render the current submesh for all GameObjects
+			if (kv.second.size() > modelMatrices3D.capacity()) {
+				modelMatrices3D.reserve(kv.second.size());
+				glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::mat4), NULL, GL_DYNAMIC_DRAW);
 			}
+			for (unsigned int r = 0; r < kv.second.size(); ++r) {
+				if (kv.second[r]->isDirty)
+					kv.second[r]->recalculateModelTransform();
+				modelMatrices3D[r] = kv.second[r]->modelTransform;
+			}
+			glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::mat4), &modelMatrices3D[0]);
+			glDrawElementsInstanced(GL_TRIANGLES, kv.second[0]->model->meshes[i].indices.size(), GL_UNSIGNED_INT, 0, kv.second.size());			
 		}
 	}
 }
@@ -739,7 +737,6 @@ void setGlViewport() {
 }
 
 void render2D(bool clearScreen) {
-	// TODO: store opengl state and check before attempting redundant state changes (minor performance increase)
 	setGlViewport();
 	setShouldDepthTest(true);
 	// clear the depth buffer so 2D objects don't compete with 3d objects for visibility
@@ -767,9 +764,9 @@ void render2D(bool clearScreen) {
 			continue;
 		glBindTexture(GL_TEXTURE_2D, kv.second[0]->sprite.id);
 		// copy GameObject2D model matrices before rendering them all in one go
-		// TODO: consider caching model matrix array for static GameObject2Ds
-		if (kv.second.size() > modelMatrices.capacity()) {
-			modelMatrices.reserve(kv.second.size());
+		// TODO: consider caching model matrix array / buffered VAO data for static GameObject2Ds
+		if (kv.second.size() > modelMatrices2D.capacity()) {
+			modelMatrices2D.reserve(kv.second.size());
 			colorVectors.reserve(kv.second.size());
 			glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedModelVBO);
 			glBufferData(GL_ARRAY_BUFFER, kv.second.size() * sizeof(glm::mat4), NULL, GL_DYNAMIC_DRAW);
@@ -779,11 +776,11 @@ void render2D(bool clearScreen) {
 		for (unsigned int i = 0; i < kv.second.size(); ++i) {
 			if (kv.second[i]->isDirty)
 				kv.second[i]->recalculateModel();
-			modelMatrices[i] = kv.second[i]->model;
+			modelMatrices2D[i] = kv.second[i]->model;
 			colorVectors[i] = kv.second[i]->color;
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedModelVBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::mat4), &modelMatrices[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::mat4), &modelMatrices2D[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, GameObject2D::instancedColorVBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::vec3), &colorVectors[0]);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, kv.second.size());
@@ -954,6 +951,7 @@ void initGraphics() {
 	loadShaders();
 	calcOrthoProjection();
 	Model::createDefaultMaterialMaps();
+	GameObject::initStaticVertexBuffer();
 	GameObject2D::initStaticVertexBuffer();
 	ParticleEmitter2D::initVertexObjects();
 	TextObject::initVertexObjects();

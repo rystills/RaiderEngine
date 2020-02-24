@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "shader.hpp"
 #include "mesh.hpp"
+#include "GameObject.hpp"
 
 void deleteVAO(GLuint* v) {
 	glDeleteVertexArrays(1, v);
@@ -43,15 +44,6 @@ void Mesh::sendTexturesToShader(Shader shader) {
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void Mesh::draw(Shader shader, bool shouldSendTextures) {
-	if (shouldSendTextures)
-		sendTexturesToShader(shader);
-
-	// draw mesh
-	glBindVertexArray(*VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-}
-
 void Mesh::setupMesh() {
 	VAO = std::move(std::unique_ptr < GLuint, std::function<void(GLuint*)>>{ new GLuint(0), std::bind(&deleteVAO, std::placeholders::_1) });
 	// create buffers/arrays
@@ -84,6 +76,23 @@ void Mesh::setupMesh() {
 	// vertex bitangent
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+
+	// instance model matrix
+	glBindBuffer(GL_ARRAY_BUFFER, GameObject::instancedModelVBO);
+	GLsizei vec4Size = sizeof(glm::vec4);
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+	glEnableVertexAttribArray(6);
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+	glEnableVertexAttribArray(7);
+	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+	glEnableVertexAttribArray(8);
+	glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+	glVertexAttribDivisor(5, 1);
+	glVertexAttribDivisor(6, 1);
+	glVertexAttribDivisor(7, 1);
+	glVertexAttribDivisor(8, 1);
 
 	glBindVertexArray(0);
 	glDeleteBuffers(1, &VBO);
