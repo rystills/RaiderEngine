@@ -15,6 +15,7 @@
 inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720, TARGET_WIDTH = 1280, TARGET_HEIGHT = 720, UI_TARGET_WIDTH = 1280, UI_TARGET_HEIGHT = 720, MONITOR_WIDTH = 0, MONITOR_HEIGHT = 0, MONITOR_REFRESH_RATE = 0;
 inline const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 inline bool debugDraw = false;
+inline bool drawLightSpheres = false;
 inline float anisoFilterAmount = 0.0f;
 inline const int numFontCharacters = 128;  // we only care about the first 128 characters stored in a given font file, at least for now
 

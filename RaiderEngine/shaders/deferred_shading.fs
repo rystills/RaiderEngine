@@ -109,8 +109,7 @@ void main()
 		if (lights[i].On) {
 			// calculate distance between light source and current fragment
 			float distance = length(lights[i].Position - FragPos);
-			if(distance < lights[i].Radius)
-			{
+			if(distance < lights[i].Radius) {
 				float shadow = ShadowCalculation(FragPos, Normal, lights[i].Position, i);
 				// diffuse
 				vec3 lightDir = normalize(lights[i].Position - FragPos);
