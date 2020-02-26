@@ -96,8 +96,12 @@ float ShadowCalculation(vec3 fragPos, vec3 normal, vec3 lightPos, int lightNum)
 void main()
 {             
     // retrieve data from gbuffer
-    vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;
+    // respect the existing clear color if we have nothing to draw
+    if (Normal == vec3(0.0, 0.0, 0.0)) { 
+        discard; 
+    }
+    vec3 FragPos = texture(gPosition, TexCoords).rgb;
     float emission = texture(gNormal, TexCoords).a;
     vec3 Diffuse = texture(gAlbedoSpec, TexCoords).rgb;
     float Specular = texture(gAlbedoSpec, TexCoords).a;

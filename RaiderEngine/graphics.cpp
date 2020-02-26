@@ -599,6 +599,7 @@ void renderGeometryPass() {
 	setShouldBlend(false);
 	// geometry pass: render scene's geometry/color data into gbuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderGeometryPass"]->use();
 	if (mainCam->projection != renderState.projection)
@@ -614,6 +615,7 @@ void renderGeometryPass() {
 
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
+	glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders["shaderLightingPass"]->use();
 	if (renderState.clearColor != renderState.prevClearColor)
