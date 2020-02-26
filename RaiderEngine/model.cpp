@@ -8,7 +8,7 @@
 #include "terminalColors.hpp"
 
 std::unordered_map<std::string, Texture> Model::texturesLoaded;
-Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap;
+Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap, Model::defaultEmissionMap;
 
 void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint Wrap_T, GLuint Filter_Min, GLuint Filter_Max) {
 	// generate a new opengl texture to which to write the texture data
@@ -170,8 +170,8 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 }
 
 void Model::createDefaultMaterialMaps() {
-	Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap };
-	std::vector<std::vector<unsigned char>> mapColors = { {255,0,255},{122,122,255},{122,122,122},{0,0,0} };
+	Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap, &Model::defaultEmissionMap };
+	std::vector<std::vector<unsigned char>> mapColors = { {255,0,255},{122,122,255},{122,122,122},{0,0,0},{0,0,0} };
 	for (int i = 0; i < numMapTypes; ++i) {
 		// setup a new texture
 		unsigned int textureID;
@@ -256,8 +256,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		mat->GetTexture(type, i, &str);
 		// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
 		// TODO: don't hardcode png as extension
-		std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png" };
-		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap };
+		std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png", "_EMISS.png" };
+		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap, &Model::defaultEmissionMap };
 		for (int k = 0; k < numMapTypes; ++k) {
 			// get current map name
 			std::string mapName = str.C_Str();

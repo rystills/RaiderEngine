@@ -4,8 +4,8 @@
 #include "physics.hpp"
 
 inline std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
-inline const int numMapTypes = 4;
-inline std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height" };
+inline const int numMapTypes = 5;
+inline std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_height", "texture_emission" };
 
 /*
 load the specified texture from the specified directory
@@ -17,7 +17,7 @@ void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S = GL_RE
 class Model {
 public:
 	static std::unordered_map<std::string, Texture> texturesLoaded;  // store all textures loaded for re-use across models 
-	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap;  // blank maps for materials which don't use the given effects
+	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultHeightMap, defaultEmissionMap;  // blank maps for materials which don't use the given effects
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 	PxBase* collisionMesh;

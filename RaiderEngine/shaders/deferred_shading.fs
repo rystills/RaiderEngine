@@ -98,6 +98,7 @@ void main()
     // retrieve data from gbuffer
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;
+    float emission = texture(gNormal, TexCoords).a;
     vec3 Diffuse = texture(gAlbedoSpec, TexCoords).rgb;
     float Specular = texture(gAlbedoSpec, TexCoords).a;
     
@@ -126,7 +127,7 @@ void main()
 			}
 		}
     }    
-	vec3 lighting = ambient + diffuseSpec;// * Diffuse;   
+	vec3 lighting = ambient + diffuseSpec + emission;// * Diffuse;   
 	// apply linear fog matching clear color, starting at 10 units and capping out at 50 units
 	// formula: min(1,-x + y*max(minval,dist)) where y = 1/(maxval-minval), x = -y*minval
 	float fog = min(1,-.25+.025*max(10,distance(viewPos,FragPos)));

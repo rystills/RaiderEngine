@@ -377,10 +377,10 @@ void initGBuffer() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gBuffer.position, 0);
-	// normal color buffer
+	// normal + emission color buffer
 	glGenTextures(1, &gBuffer.normal);
 	glBindTexture(GL_TEXTURE_2D, gBuffer.normal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gBuffer.normal, 0);
@@ -672,36 +672,36 @@ void renderLightingPass() {
 }
 
 void debugDrawLightCubes() {
-	shaders["lightCube"]->use();
-	if (mainCam->projection != renderState.projection)
+	if (debugDraw) {
+		shaders["lightCube"]->use();
 		shaders["lightCube"]->setMat4("projection", mainCam->projection);
-	if (mainCam->view != renderState.view)
 		shaders["lightCube"]->setMat4("view", mainCam->view);
-	for (unsigned int i = 0; i < lights.size(); ++i) {
-		// render small solid cube at light position
-		shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(lights[i]->radius*.005f)));
-		shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
-		renderLightCube();
-		if (drawLightSpheres) {
-			// render wireframe sphere showing light radius
-			#define numSegs 12
-			#define PI glm::pi<float>()
-			#define TAU glm::two_pi<float>()
-			glm::vec3 vertPositions[numSegs * numSegs];
-			for (int k = 0; k < numSegs; ++k) {
-				for (int r = 0; r < numSegs; ++r) {
-					glm::vec2 seg(k / static_cast<float>(numSegs-1), r / static_cast<float>(numSegs-1));
-					vertPositions[k * numSegs + r] = lights[i]->position + lights[i]->radius * glm::vec3(
-						std::cos(seg.x * TAU) * std::sin(seg.y * PI),
-						std::cos(seg.y * PI), 
-						std::sin(seg.x * TAU) * std::sin(seg.y * PI));
+		for (unsigned int i = 0; i < lights.size(); ++i) {
+			// render small solid cube at light position
+			shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(lights[i]->radius*.005f)));
+			shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
+			renderLightCube();
+			if (drawLightSpheres) {
+				// render wireframe sphere showing light radius
+				#define numSegs 12
+				#define PI glm::pi<float>()
+				#define TAU glm::two_pi<float>()
+				glm::vec3 vertPositions[numSegs * numSegs];
+				for (int k = 0; k < numSegs; ++k) {
+					for (int r = 0; r < numSegs; ++r) {
+						glm::vec2 seg(k / static_cast<float>(numSegs-1), r / static_cast<float>(numSegs-1));
+						vertPositions[k * numSegs + r] = lights[i]->position + lights[i]->radius * glm::vec3(
+							std::cos(seg.x * TAU) * std::sin(seg.y * PI),
+							std::cos(seg.y * PI), 
+							std::sin(seg.x * TAU) * std::sin(seg.y * PI));
+					}
 				}
-			}
-			for (int k = 0; k < numSegs; ++k) {
-				for (int r = 0; r < numSegs; ++r) {
-					if (r != numSegs-1)
-						queueDrawLine(vertPositions[k * numSegs + r], vertPositions[k * numSegs + (r+1)%numSegs], Color::yellow);
-					queueDrawLine(vertPositions[k * numSegs + r], vertPositions[((k+1)%numSegs) * numSegs + r], Color::yellow);
+				for (int k = 0; k < numSegs; ++k) {
+					for (int r = 0; r < numSegs; ++r) {
+						if (r != numSegs-1)
+							queueDrawLine(vertPositions[k * numSegs + r], vertPositions[k * numSegs + (r+1)%numSegs], Color::yellow);
+						queueDrawLine(vertPositions[k * numSegs + r], vertPositions[((k+1)%numSegs) * numSegs + r], Color::yellow);
+					}
 				}
 			}
 		}

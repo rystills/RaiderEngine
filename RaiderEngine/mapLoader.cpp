@@ -40,7 +40,7 @@ std::vector<std::string> extractNameArgs(std::string name) {
 		else {
 			std::string namedArg = token.substr(0, eqpos);
 			if (namedArg == "castShadows")
-				tempProp.castShadows = token[eqpos+1] == 1;
+				tempProp.castShadows = token[eqpos+1] == '1';
 		}
 	}
 
