@@ -40,6 +40,7 @@ inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
 inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
 inline std::vector<std::unique_ptr<Tilemap>> tilemaps;
 inline bool forceDisableNvidiaThreadedOptimization = false;
+inline bool ignoreModelTexturePaths = true;
 
 // openGL render state
 struct RenderState {

@@ -7,6 +7,8 @@
 struct ProcessObjectProperties {
 	glm::vec3 pos, rot, scale, geoPos;
 	std::string fullName, prevName;
+	// named args
+	bool castShadows = true;
 } inline tempProp;
 /*
 extract the base mesh name from an assimp node name, removing $_transform information, trailing numbers, and constructor arguments

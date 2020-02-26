@@ -28,7 +28,7 @@ attempt to switch to the selected map
 */
 void checkSwitchMap(int mapNum) {
 	// base case: can't switch to the same scene or an invalid scene
-	if (mapNum == scene || (mapNum < 1 || mapNum > 3))
+	if (mapNum == scene || (mapNum < 1 || mapNum > 4))
 		return;
 	// clear the current scene
 	for (auto&& kv : gameObjects)
@@ -56,6 +56,11 @@ void checkSwitchMap(int mapNum) {
 		setAmbientStrength(0.15f);
 		loadMap("bookshelf");
 		break;
+	case 4:
+		setClearColor(0, 0, 0, 1);
+		setAmbientStrength(0.2f);
+		loadMap("warehouse");
+		break;
 	}
 }
 
@@ -77,6 +82,7 @@ int main() {
 	setKeyBinding("loadScene1", GLFW_KEY_1);
 	setKeyBinding("loadScene2", GLFW_KEY_2);
 	setKeyBinding("loadScene3", GLFW_KEY_3);
+	setKeyBinding("loadScene4", GLFW_KEY_4);
 	setKeyBinding("run", GLFW_KEY_LEFT_SHIFT);
 	setKeyBinding("jump", GLFW_KEY_SPACE);
 	setKeyBinding("crouch", GLFW_KEY_LEFT_CONTROL);
@@ -113,6 +119,8 @@ int main() {
 			checkSwitchMap(2);
 		else if (keyPressed("loadScene3"))
 			checkSwitchMap(3);
+		else if (keyPressed("loadScene4"))
+			checkSwitchMap(4);
 
 		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
 		if (scene == 2) 

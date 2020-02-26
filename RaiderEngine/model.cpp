@@ -261,7 +261,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		for (int k = 0; k < numMapTypes; ++k) {
 			// get current map name
 			std::string mapName = str.C_Str();
-			std::string mapBaseName = mapName.substr(0, mapName.find_last_of('.'));
+			int sPos = ignoreModelTexturePaths ? ('\\' + mapName).find_last_of('\\') : 0;
+			std::string mapBaseName = mapName.substr(sPos, mapName.find_last_of('.')-sPos);
 			mapName = mapBaseName + mapExtensions[k];
 
 			// check if the current texture has already been loaded
