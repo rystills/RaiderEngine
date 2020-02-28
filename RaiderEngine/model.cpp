@@ -8,7 +8,7 @@
 #include "terminalColors.hpp"
 
 std::unordered_map<std::string, Texture> Model::texturesLoaded;
-Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultHeightMap, Model::defaultEmissionMap;
+Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultEmissionMap;
 
 void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint Wrap_T, GLuint Filter_Min, GLuint Filter_Max) {
 	// generate a new opengl texture to which to write the texture data
@@ -135,7 +135,8 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			glm::vec2 vec;
 			// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-			vec.x = mesh->mTextureCoords[0][i].x, vec.y = mesh->mTextureCoords[0][i].y;
+			// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
+			vec.x = mesh->mTextureCoords[0][i].x, vec.y = -mesh->mTextureCoords[0][i].y;
 			vertex.TexCoords = vec;
 		}
 		else
@@ -170,7 +171,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 }
 
 void Model::createDefaultMaterialMaps() {
-	Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap, &Model::defaultEmissionMap };
+	Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
 	std::vector<std::vector<unsigned char>> mapColors = { {255,0,255},{122,122,255},{122,122,122},{0,0,0},{0,0,0} };
 	for (int i = 0; i < numMapTypes; ++i) {
 		// setup a new texture
@@ -256,8 +257,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		mat->GetTexture(type, i, &str);
 		// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
 		// TODO: don't hardcode png as extension
-		std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_DISP.png", "_EMISS.png" };
-		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultHeightMap, &Model::defaultEmissionMap };
+		std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_EMISS.png" };
+		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
 		for (int k = 0; k < numMapTypes; ++k) {
 			// get current map name
 			std::string mapName = str.C_Str();

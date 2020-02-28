@@ -100,6 +100,9 @@ void main()
     // respect the existing clear color if we have nothing to draw
     if (Normal == vec3(0.0, 0.0, 0.0)) { 
         discard; 
+        // NOTE: we can avoid setting clearColor to black and then back to the desired color each frame by 
+        // having it always be black and setting the desired color here instead via FragColor = clearColor * ambientStrength;
+        // however, that would disallow rendering in front of something other than a solid color (ie. 2D sprite/skybox) so it is not used
     }
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
     float emission = texture(gNormal, TexCoords).a;

@@ -9,8 +9,6 @@ out VS_OUT {
     vec3 FragPos;
     vec2 TexCoords;
     mat3 TBN;
-	vec3 TangentViewPos;
-	vec3 TangentFragPos;
 } vs_out;
 
 layout (location = 5) in mat4 instanceMatrix;
@@ -30,8 +28,6 @@ void main() {
     vec3 B = cross(N, T);
     
     vs_out.TBN = transpose(mat3(T, B, N)); 
-	vs_out.TangentViewPos = vs_out.TBN * viewPos;
-    vs_out.TangentFragPos = vs_out.TBN * vs_out.FragPos;   
     
     gl_Position = projection * view * worldPos;
 }

@@ -19,7 +19,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 void Mesh::sendTexturesToShader(Shader shader) {
 	// bind appropriate textures
-	unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, heightNr = 0, emissionNR = 0;
+	unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, emissionNR = 0;
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
 		// retrieve texture number (the N in diffuse_textureN)
@@ -31,8 +31,6 @@ void Mesh::sendTexturesToShader(Shader shader) {
 			number = std::to_string(++specularNr);
 		else if (name == "texture_normal")
 			number = std::to_string(++normalNr);
-		else if (name == "texture_height")
-			number = std::to_string(++heightNr);
 		else if (name == "texture_emission")
 			number = std::to_string(++emissionNR);
 
