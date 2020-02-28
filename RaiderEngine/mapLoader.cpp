@@ -88,7 +88,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			//std::cout << "generating object: " << name << std::endl;
-			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, name))->castShadows = tempProp.castShadows;
+			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, name))->castShadows &= tempProp.castShadows;
 			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
@@ -96,7 +96,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
 			GameObject* go = objectRegistry->instantiateGameObject(name, tempProp.pos + tempProp.geoPos, tempProp.rot, tempProp.scale, argList);
 			if (go)
-				go->castShadows = tempProp.castShadows;
+				go->castShadows &= tempProp.castShadows;
 			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
@@ -115,7 +115,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
 			models.insert(std::make_pair(tempProp.fullName, baseModel));
-			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false))->castShadows = tempProp.castShadows;
+			addGameObject(new GameObject(tempProp.pos + tempProp.geoPos, glm::vec3(tempProp.rot.x, tempProp.rot.y, tempProp.rot.z), tempProp.scale, tempProp.fullName, true, false, false))->castShadows &= tempProp.castShadows;
 			goto clearTransform;
 		}
 		else {
