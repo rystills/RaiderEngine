@@ -58,16 +58,23 @@ void Model::generateCollisionShape() {
 	// nothing to generate for an empty mesh
 	if (meshes.size() == 0)
 		return;
-	// combine verts and tris
+	// combine vertices
 	std::vector<Vertex> verts;
-	std::vector<unsigned int> inds;
-	for (unsigned int i = 0; i < meshes.size(); ++i) {
+	for (unsigned int i = 0; i < meshes.size(); ++i)
 		verts.insert(verts.end(), meshes[i].vertices.begin(), meshes[i].vertices.end());
-		inds.insert(inds.end(), meshes[i].indices.begin(), meshes[i].indices.end());
-	}
 	volume = calculateVolume();
 	// note: consider removing the isStaticMesh flag and allowing a Model to contain one or both of the triangle mesh and convex hull depending on the staticness of the GameObjects which use it
 	if (isStaticMesh) {
+		// conbine triangles (vertex lists)
+		std::vector<unsigned int> inds;
+		for (unsigned int i = 0, vertsAdded = 0; i < meshes.size(); vertsAdded += meshes[i].vertices.size(), ++i) {
+			unsigned int curInd = inds.size();
+			inds.insert(inds.end(), meshes[i].indices.begin(), meshes[i].indices.end());
+			// offset vertex indices by the number of vertices already present in the vector
+			if (vertsAdded != 0)
+				for (unsigned int r = curInd; r < inds.size(); ++r)
+					inds[r] += vertsAdded;
+		}
 		// create mesh shape from model tris
 		PxTriangleMeshDesc meshDesc;
 		meshDesc.points.count = verts.size();
@@ -83,7 +90,7 @@ void Model::generateCollisionShape() {
 		PxTriangleMeshCookingResult::Enum result;
 		bool status = gCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
 		if (!status)
-			ERRORCOLOR(std::cout << "error while cooking triangle mesh" << std::endl)
+			ERRORCOLOR(std::cout << "error while cooking triangle mesh: " << result << std::endl)
 
 		PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
 		collisionMesh = gPhysics->createTriangleMesh(readBuffer);
@@ -124,7 +131,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;
 		glm::vec3 vector; // store data in a temporary glm vector as ASSIMP vectors cannot be directly converted
-						  // positions
+		// positions
 		vector.x = mesh->mVertices[i].x, vector.y = mesh->mVertices[i].y, vector.z = mesh->mVertices[i].z;
 		vertex.Position = vector;
 		// normals
