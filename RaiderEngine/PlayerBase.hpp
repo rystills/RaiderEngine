@@ -13,6 +13,7 @@ public:
 	float runSpeed = 480;
 	float maxMoveSpeedRatio = 1 / 60.f;
 	float height = 1;
+	float stepHeight = .1f;
 	float crouchScale = .3f;
 	float radius = .5f;
 	float playerGravity = 42;
@@ -20,6 +21,7 @@ public:
 	float groundStoppingSpeed = 180;
 	float airStoppingSpeed = 12;
 	float airControl = .1f;
+	float headBumpDist = .001f;
 
 	glm::vec3 velocity;
 	bool crouching = false;

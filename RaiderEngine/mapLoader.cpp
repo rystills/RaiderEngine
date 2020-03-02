@@ -48,6 +48,7 @@ std::vector<std::string> extractNameArgs(std::string name) {
 }
 
 void processMapNode(aiNode* node, const aiScene* scene) {
+	// TODO: fix broken transform in grouped meshes (+ some meshes requiring a 'reset xform')
 	// determine the full name and real name of the current node
 	tempProp.fullName = node->mName.C_Str();
 	std::string name = stripNodeName(tempProp.fullName);

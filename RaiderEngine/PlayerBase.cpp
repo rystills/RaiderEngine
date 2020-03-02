@@ -21,6 +21,7 @@ void PlayerBase::init() {
 	PxShape* shape;
 	controller->getActor()->getShapes(&shape, 1);
 	shape->setQueryFilterData(noHitFilterData);
+	controller->setStepOffset(stepHeight);
 }
 
 void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {
@@ -99,7 +100,19 @@ void PlayerBase::update() {
 		if (grounded && keyHeld("jump"))
 			// jump velocity is a burst, so deltaTime is ignored
 			velocity.y = jumpStrength;
-	// TODO: set velocity to 0 if the player bumps their head on a ceiling
+
+	// stop moving up if we hit our head on a ceiling
+	if (velocity.y > 0) {
+		PxSceneReadLock scopedLock(*gScene);
+		PxCapsuleGeometry geom(radius, height / 2);
+		PxExtendedVec3 position = controller->getPosition();
+		PxVec3 pos((float)position.x, (float)position.y + height/2 + headBumpDist, (float)position.z);
+		PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
+
+		PxOverlapBuffer hit;
+		if (gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
+			velocity.y = 0;
+	}
 
 	// apply to controller
 	PxVec3 physVelocity(velocity.x * deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
