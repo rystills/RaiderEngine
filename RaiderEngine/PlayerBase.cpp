@@ -106,7 +106,7 @@ void PlayerBase::update() {
 		PxSceneReadLock scopedLock(*gScene);
 		PxCapsuleGeometry geom(radius, height / 2);
 		PxExtendedVec3 position = controller->getPosition();
-		PxVec3 pos((float)position.x, (float)position.y + height/2 + headBumpDist, (float)position.z);
+		PxVec3 pos((float)position.x, (float)position.y + (crouching ? ((height - height * crouchScale) / 2) : height/2) + headBumpDist, (float)position.z);
 		PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
 
 		PxOverlapBuffer hit;

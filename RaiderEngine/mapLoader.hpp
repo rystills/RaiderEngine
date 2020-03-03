@@ -4,12 +4,17 @@
 // this file is responsible for loading maps from special FBX files
 
 // TODO: do something more elegant than using a global temp struct
-struct ProcessObjectProperties {
+struct assimpNodeTransform {
 	glm::vec3 pos, rot, scale, geoPos;
+};
+
+struct ProcessObjectProperties {
+	assimpNodeTransform trans;
 	std::string fullName, prevName;
 	// named args
 	bool castShadows = true;
 } inline tempProp;
+inline std::unordered_map<aiNode*,assimpNodeTransform> nodeTransformDict;
 /*
 extract the base mesh name from an assimp node name, removing $_transform information, trailing numbers, and constructor arguments
 @param fullName: the node name provided by assimp that we wish to strip
