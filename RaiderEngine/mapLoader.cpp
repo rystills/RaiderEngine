@@ -52,66 +52,43 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 	tempProp.fullName = node->mName.C_Str();
 	std::string name = stripNodeName(tempProp.fullName);
 
-	// extract the transform data from the current node
-	aiVector3D aiPos, aiRot, aiScale;
-	node->mTransformation.Decompose(aiScale, aiRot, aiPos);
-	glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-	glm::vec3 rot = glm::vec3(aiRot.x - glm::half_pi<float>(), -aiRot.y, aiRot.z);
-	glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
-	if (nodeTransformDict.contains(node->mParent) && strcmp(node->mParent->mName.C_Str(),"RootNode")!=0) {
-		//std::cout << node->mParent->mName.C_Str() << std::endl;
-		assimpNodeTransform p = nodeTransformDict[node->mParent];
-		aiMatrix4x4 parentAITrans(aiVector3D(p.scale.x, p.scale.y, p.scale.z), aiQuaternion(p.rot.x, p.rot.y, p.rot.z), aiVector3D(p.pos.x, p.pos.y, p.pos.z));
-		aiMatrix4x4 res = node->mTransformation;
-		aiMultiplyMatrix4(&res, &parentAITrans);
-		aiVector3D resPos, resRot, resScale;
-		res.Decompose(resScale, resRot, resPos);
-		
-		tempProp.trans.pos = glm::vec3(resPos.x, resPos.y, resPos.z);
-		tempProp.trans.rot = glm::vec3(resRot.x, resRot.y, resRot.z);
-		tempProp.trans.scale = glm::vec3(resScale.x, resScale.y, resScale.z);
-	}
+	//aiMultiplyMatrix4(&tempProp.trans, &node->mTransformation);
+	//aiTransposeMatrix4(&node->mTransformation);
+	
+	// if we have a parent besides the scene root, multiply our transform by its transform
+	if (nodeTransformDict.contains(node->mParent) && strcmp(node->mParent->mName.C_Str(),"RootNode")!=0)
+		aiMultiplyMatrix4(&tempProp.trans, &nodeTransformDict[node->mParent]),std::cout << "has parent" << std::endl;
 
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
 	bool isTransformNode = false;
-	if (tempProp.fullName.find("$_Translation") != std::string::npos) {
-		isTransformNode = true;
-		tempProp.trans.pos = pos;
+	for (int i = 0; i < transformIdentifiers.size(); ++i) {
+		if (isTransformNode = tempProp.fullName.find(transformIdentifiers[i]) != std::string::npos) {
+			aiMultiplyMatrix4(&tempProp.trans, &node->mTransformation);
+			break;
+		}
 	}
-	else if (tempProp.fullName.find("$_PreRotation") != std::string::npos) {
-		// note: pre-rotation data is ignored and manually applied to rotation above
-		isTransformNode = true;
-	}
-	else if (tempProp.fullName.find("$_GeometricTranslation") != std::string::npos) {
-		isTransformNode = true;
-		tempProp.trans.geoPos = pos;
-	}
-	else if (tempProp.fullName.find("$_Rotation") != std::string::npos) {
-		isTransformNode = true;
-		tempProp.trans.rot = rot;
-	}
-	else if (tempProp.fullName.find("$_Scaling") != std::string::npos) {
-		isTransformNode = true;
-		tempProp.trans.scale = scale;
-	}
-	/*if (tempProp.fullName.find("Group") != std::string::npos) {
-		std::cout << node->mName.C_Str() << ", " << node->mParent->mName.C_Str() << std::endl;
-	}*/
-	//std::cout << node->mName.C_Str() << ", " << (node->mParent ? node->mParent->mName.C_Str() : "NULL")  << std::endl;
 
 	if (!isTransformNode) {
 		std::vector<std::string> argList = extractNameArgs(tempProp.fullName);
+		// decompose transform for object instantiation
+		aiVector3D aiPos, aiRot, aiScale;
+		tempProp.trans.Decompose(aiScale, aiRot, aiPos);
+		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
+		//std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+		glm::vec3 rot = glm::vec3(aiRot.x, -aiRot.y, aiRot.z); //glm::vec3(aiRot.x - glm::half_pi<float>(), -aiRot.y, aiRot.z);
+		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+
 		// convert nodes starting with o_ into GameObject instances using the named model
 		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			//std::cout << "generating object: " << name << std::endl;
-			addGameObject(new GameObject(tempProp.trans.pos + tempProp.trans.geoPos, tempProp.trans.rot, tempProp.trans.scale, name))->castShadows &= tempProp.castShadows;
+			addGameObject(new GameObject(pos, rot, scale, name))->castShadows &= tempProp.castShadows;
 			goto clearTransform;
 		}
 		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
-			GameObject* go = objectRegistry->instantiateGameObject(name, tempProp.trans.pos + tempProp.trans.geoPos, tempProp.trans.rot, tempProp.trans.scale, argList);
+			GameObject* go = objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
 			if (go)
 				go->castShadows &= tempProp.castShadows;
 			goto clearTransform;
@@ -119,7 +96,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
 			// create a light
-			objectRegistry->instantiateLight(name, tempProp.trans.pos + tempProp.trans.geoPos, tempProp.trans.rot, tempProp.trans.scale, argList);
+			objectRegistry->instantiateLight(name, pos, rot, scale, argList);
 			goto clearTransform;
 		}
 		else if (node->mNumMeshes > 0) {
@@ -132,18 +109,15 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
 			models.insert(std::make_pair(tempProp.fullName, baseModel));
-			addGameObject(new GameObject(tempProp.trans.pos + tempProp.trans.geoPos, glm::vec3(tempProp.trans.rot.x, tempProp.trans.rot.y, tempProp.trans.rot.z), tempProp.trans.scale, tempProp.fullName, true, false, false))->castShadows &= tempProp.castShadows;
+			addGameObject(new GameObject(pos, rot, scale, tempProp.fullName, true, false, false))->castShadows &= tempProp.castShadows;
 			goto clearTransform;
 		}
 		else {
 		clearTransform:
 			// copy this transform into our transform dict for group transform lookups
-			nodeTransformDict[node] = assimpNodeTransform{ tempProp.trans.pos + tempProp.trans.geoPos, glm::vec3(tempProp.trans.rot.x + glm::half_pi<float>(), tempProp.trans.rot.y,tempProp.trans.rot.z), tempProp.trans.scale, tempProp.trans.geoPos };
+			nodeTransformDict[node] = tempProp.trans;
 			// reset the accumulated transform properties first thing once we finish building an object
-			tempProp.trans.pos = glm::vec3(0, 0, 0);
-			tempProp.trans.geoPos = glm::vec3(0, 0, 0);
-			tempProp.trans.rot = glm::vec3(-glm::half_pi<float>(), 0, 0);
-			tempProp.trans.scale = glm::vec3(1, 1, 1);
+			tempProp.trans = aiMatrix4x4();
 			tempProp.castShadows = true;
 		}
 	}
@@ -168,6 +142,7 @@ void loadMap(std::string mapName) {
 	// now process nodes recursively with custom instructions since this is a map model
 	tempProp.prevName = "";
 	nodeTransformDict.clear();
+	tempProp.trans = aiMatrix4x4();
 	processMapNode(scene->mRootNode, scene);
 	SUCCESSCOLOR(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl)
 }

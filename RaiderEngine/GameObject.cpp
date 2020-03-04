@@ -71,10 +71,13 @@ void GameObject::rotate(const float& angle, glm::vec3 const& axes) {
 }
 
 glm::quat GameObject::setRotation(const glm::vec3& rotationEA, const bool& fixInitialRotation) {
-	glm::quat q = glm::quat(rotationEA);
+	if (modelName == "book")
+		std::cout << position.x << ", " << position.y << ", " << position.z << std::endl;
+	
+	glm::quat q = glm::quat(fixInitialRotation ? glm::vec3(rotationEA.x + glm::half_pi<float>(),-rotationEA.y,rotationEA.z) : rotationEA);
 	// fix dynamic object initial rotation with a 90 degree offset
-	if (fixInitialRotation)
-		q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;
+	/*if (fixInitialRotation)
+		q = glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)) * q;*/
 	rotation = glm::toMat4(q);
 	return q;
 }
