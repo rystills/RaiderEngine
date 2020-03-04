@@ -122,59 +122,51 @@ float Model::calculateVolume() {
 	return volume / 6.0f;  // since the determinant give 6 times tetra volume
 }
 
-void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
-	// data to fill
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+std::pair<int,int> Model::processMesh(const ofbx::Mesh* mesh, int indicesOffset, int normalsOffset) {
+	// fbx mesh data
+	const ofbx::Geometry* geom = mesh->getGeometry();
+	int vertexCount = geom->getVertexCount();
+	const ofbx::Vec3* mverts = geom->getVertices();
+	int indexCount = geom->getIndexCount();
+	const int* minds = geom->getFaceIndices();
 
-	// Walk through each of the mesh's vertices
-	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-		Vertex vertex;
-		glm::vec3 vector; // store data in a temporary glm vector as ASSIMP vectors cannot be directly converted
-		// positions
-		vector.x = mesh->mVertices[i].x, vector.y = mesh->mVertices[i].y, vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
-		// normals
-		vector.x = mesh->mNormals[i].x, vector.y = mesh->mNormals[i].y, vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
-		// texture coordinates, if included
-		if (mesh->mTextureCoords[0]) {
-			glm::vec2 vec;
-			// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-			// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
-			vec.x = mesh->mTextureCoords[0][i].x, vec.y = -mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
-		}
-		else
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		// tangent
-		vector.x = mesh->mTangents[i].x, vector.y = mesh->mTangents[i].y, vector.z = mesh->mTangents[i].z;
-		vertex.Tangent = vector;
-		// bitangent
-		vector.x = mesh->mBitangents[i].x, vector.y = mesh->mBitangents[i].y, vector.z = mesh->mBitangents[i].z;
-		vertex.Bitangent = vector;
+	const ofbx::Vec3* mnormals = geom->getNormals();
+	const ofbx::Vec2* muvs = geom->getUVs();
+	const ofbx::Vec3* mtangents = geom->getTangents();
+	bool hasNormals = mnormals != nullptr;
+	bool hasUVs = muvs != nullptr;
+	bool hasTangents = mtangents != nullptr;
 
-		// finished populating the current vertex
-		vertices.push_back(vertex);
+	// populate engine mesh data
+	std::vector<Vertex> vertices(vertexCount);
+	std::vector<unsigned int> indices(indexCount);
+	std::cout << "face count: " << indexCount << std::endl;
+	// vertices
+	for (unsigned int i = 0; i < vertexCount; ++i) {
+		vertices[i].Position = glm::vec3(mverts[i].x, mverts[i].y, mverts[i].z);
+		vertices[i].Normal = hasNormals ? glm::vec3(mnormals[normalsOffset + i + 1].x, mnormals[normalsOffset + i + 1].y, mnormals[normalsOffset + i + 1].z) : glm::vec3();
+		// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
+		// TODO: multiplve sets of uvs
+		vertices[i].TexCoords = hasUVs ? glm::vec2(muvs[i].x,-muvs[i].y) : glm::vec2();
+		vertices[i].Tangent = hasTangents ? glm::vec3(mtangents[i].x, mtangents[i].y, mtangents[i].z) : glm::vec3();
 	}
-	// now wak through each of the mesh's faces and retrieve the corresponding vertex indices
-	for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
-		// retrieve all indices of the face and store them in the indices vector
-		for (unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
-			indices.push_back(mesh->mFaces[i].mIndices[j]);
+	// faces (vertex indices)
+	for (unsigned int i = 0; i < indexCount; ++i)
+		indices[i] = ((minds[i] < 0) ? -minds[i]-1 : minds[i]);
 
 	// process materials
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-	// Same applies to other texture as the following list summarizes:
-	// diffuse: texture_diffuseN
-	// specular: texture_specularN
-	// normal: texture_normalN
-
+	// TODO: multiple sets of materials
+	int numMats = mesh->getMaterialCount();
+	std::vector<std::string> mats(numMats);
+	for (int i = 0; i < numMats; ++i) {
+		char n[150];
+		mesh->getMaterial(i)->getTexture(ofbx::Texture::TextureType::DIFFUSE)->getFileName().toString(n);
+		mats[i] = n;
+	}
+		
 	// return a mesh object created from the extracted mesh data
-	meshes.emplace_back(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"));
+	meshes.emplace_back(vertices, indices, loadMaterialTextures(mats, aiTextureType_DIFFUSE, "texture_diffuse"));
+	return std::pair<int, int>(vertexCount,indexCount);
 }
 
 void Model::createDefaultMaterialMaps() {
@@ -232,67 +224,67 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 }
 
 void Model::loadModel(std::string const& path) {
-	// read the model file via ASSIMP
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiModelProcessFlags);
-	// check for errors
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl)
+	// TODO: repeat logic with mapLoader - abstract
+	ofbx::IScene* g_scene = nullptr;
+	#pragma warning(disable:4996)
+	FILE* fp = fopen(path.c_str(), "rb");
+	if (!fp) {
+		ERRORCOLOR(std::cout << "unable to open map file: '" << path << "'" << std::endl);
 		return;
 	}
 
-	// process ASSIMP's root node recursively
-	processNode(scene->mRootNode, scene);
+	fseek(fp, 0, SEEK_END);
+	long file_size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	auto* content = new ofbx::u8[file_size];
+	fread(content, 1, file_size, fp);
+	g_scene = ofbx::load((ofbx::u8*)content, file_size, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
+	if (!g_scene) {
+		ERRORCOLOR(std::cout << "error while loading map: ";
+		OutputDebugString(ofbx::getError()));
+		return;
+	}
+	int mesh_count = g_scene->getMeshCount();
+	std::pair<int, int> offsets(0, 0);
+	for (int i = 0; i < mesh_count; ++i)
+		offsets = processMesh(g_scene->getMesh(i), offsets.first, offsets.second);
+
+	delete[] content;
+	fclose(fp);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene) {
-	// process each mesh located at the current node
-	for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-		// the node object only contains indices to index the actual objects in the scene. 
-		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		processMesh(scene->mMeshes[node->mMeshes[i]], scene);
-
-	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
-	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		processNode(node->mChildren[i], scene);
-}
-
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName) {
+std::vector<Texture> Model::loadMaterialTextures(std::vector<std::string> mapNames, aiTextureType type, std::string typeName) {
 	std::vector<Texture> textures;
-	for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
-		aiString str;
-		mat->GetTexture(type, i, &str);
+	for (unsigned int i = 0; i < mapNames.size(); ++i) {
+		std::string mapName = mapNames[i];
 		// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
 		// TODO: don't hardcode png as extension
 		std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_EMISS.png" };
 		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
 		for (int k = 0; k < numMapTypes; ++k) {
-			// get current map name
-			std::string mapName = str.C_Str();
 			int sPos = ignoreModelTexturePaths ? ('\\' + mapName).find_last_of('\\') : 0;
 			std::string mapBaseName = mapName.substr(sPos, mapName.find_last_of('.')-sPos);
-			mapName = mapBaseName + mapExtensions[k];
-
+			std::string mapNameFinal = mapBaseName + mapExtensions[k];
 			// check if the current texture has already been loaded
-			std::unordered_map<std::string, Texture>::iterator search = texturesLoaded.find(mapName);
+			std::unordered_map<std::string, Texture>::iterator search = texturesLoaded.find(mapNameFinal);
 			if (search != texturesLoaded.end())
 				// texture already exists
 				textures.push_back(search->second);
 			else {
 				// texture does not exist yet; try to load it 
-				if (std::filesystem::exists(textureDir + mapBaseName + '/' + mapName)) {
+				if (std::filesystem::exists(textureDir + mapBaseName + '/' + mapNameFinal)) {
 					Texture extraTex;
-					textureFromFile(textureDir + mapBaseName + '/' + mapName, extraTex);
+					textureFromFile(textureDir + mapBaseName + '/' + mapNameFinal, extraTex);
 					extraTex.type = mapTypes[k];
 					textures.push_back(extraTex);
-					texturesLoaded[mapName] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESSCOLOR(std::cout << "loaded " << mapTypes[k] << " texture: '" << mapName << "'" << std::endl)
+					texturesLoaded[mapNameFinal] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+					SUCCESSCOLOR(std::cout << "loaded " << mapTypes[k] << " texture: '" << mapNameFinal << "'" << std::endl)
 				}
 				else {
 					// can't find texture; fall back to default of matching type
 					textures.push_back(*mapDefaults[k]);
-					if (k) WARNINGCOLOR(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[k] << " map" << std::endl)
-					else ERRORCOLOR(std::cout << "unable to find diffuse map for texture: '" << str.C_Str() << "'; falling back to default diffuse map" << std::endl)
+					if (k) WARNINGCOLOR(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << mapNames[i] << "'; falling back to default " << mapTypes[k] << " map" << std::endl)
+					else ERRORCOLOR(std::cout << "unable to find diffuse map for texture: '" << mapNames[i] << "'; falling back to default diffuse map" << std::endl)
 				}
 			}
 		}

@@ -53,7 +53,7 @@ public:
 	@param mesh: the ASSIMP mesh to process
 	@param scene: the scene of which the specified mesh is a part
 	*/
-	void processMesh(aiMesh* mesh, const aiScene* scene);
+	std::pair<int, int> processMesh(const ofbx::Mesh* mesh, int indicesOffset = 0, int normalsOffset = 0);
 
 	/*
 	generate the default material maps, used as fallbacks when the respective map type is not present for a texture
@@ -71,13 +71,6 @@ private:
 	*/
 	void loadModel(std::string const& path);
 
-    /*
-	processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-	@param node: the current node to process
-	@param scene: the entire scene returned by ASSIMP
-	*/
-	void processNode(aiNode* node, const aiScene* scene);
-
 	/*
 	check all material textures of a given type and load the textures if they're not loaded yet
 	@param mat: the ASSIMP material
@@ -85,5 +78,5 @@ private:
 	@param typeName: a string representation of the texture type (see processMesh for options)
 	@returns: a vector containing all of the textures loaded either just now or previously
 	*/
-	static std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+	static std::vector<Texture> loadMaterialTextures(std::vector<std::string> mapNames, aiTextureType type, std::string typeName);
 };

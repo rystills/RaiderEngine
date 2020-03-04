@@ -12,6 +12,7 @@ struct ProcessObjectProperties {
 } inline tempProp;
 inline std::unordered_map<aiNode*, aiMatrix4x4> nodeTransformDict;
 inline std::vector<std::string> transformIdentifiers = { "$_Translation", "$_PreRotation", "$_GeometricTranslation", "$_Rotation", "$_Scaling" };
+inline bool tempCastShadows = true;
 
 /*
 extract the base mesh name from an assimp node name, removing $_transform information, trailing numbers, and constructor arguments

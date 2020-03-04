@@ -40,7 +40,7 @@ std::vector<std::string> extractNameArgs(std::string name) {
 		else {
 			std::string namedArg = token.substr(0, eqpos);
 			if (namedArg == "castShadows")
-				tempProp.castShadows = token[eqpos+1] == '1';
+				tempCastShadows = token[eqpos+1] == '1';
 		}
 	}
 
@@ -57,18 +57,31 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 	
 	// if we have a parent besides the scene root, multiply our transform by its transform
 	if (nodeTransformDict.contains(node->mParent) && strcmp(node->mParent->mName.C_Str(),"RootNode")!=0)
-		aiMultiplyMatrix4(&tempProp.trans, &nodeTransformDict[node->mParent]),std::cout << "has parent" << std::endl;
+		aiMultiplyMatrix4(&tempProp.trans, &nodeTransformDict[node->mParent]),std::cout << "has parent; parent name is: " << node->mParent->mName.C_Str() << std::endl;
 
 	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
 	bool isTransformNode = false;
 	for (int i = 0; i < transformIdentifiers.size(); ++i) {
 		if (isTransformNode = tempProp.fullName.find(transformIdentifiers[i]) != std::string::npos) {
 			aiMultiplyMatrix4(&tempProp.trans, &node->mTransformation);
+			if (i == 0) {
+				aiVector3D aiPos, aiRot, aiScale;
+				node->mTransformation.Decompose(aiScale, aiRot, aiPos);
+				std::cout << "pos: " << aiPos.x << ", " << aiPos.y << ", " << aiPos.z << std::endl;
+			}
+			if (i == 2) {
+				aiVector3D aiPos, aiRot, aiScale;
+				node->mTransformation.Decompose(aiScale, aiRot, aiPos);
+				std::cout << "geoPos: " << aiPos.x << ", " << aiPos.y << ", " << aiPos.z << std::endl;
+			}
 			break;
 		}
 	}
 
+	/*if (node->mName.C_Str() == "rootNode")
+		goto clearTransform;*/
 	if (!isTransformNode) {
+		std::cout << "non-transform node name: " << node->mName.C_Str() << std::endl;
 		std::vector<std::string> argList = extractNameArgs(tempProp.fullName);
 		// decompose transform for object instantiation
 		aiVector3D aiPos, aiRot, aiScale;
@@ -105,8 +118,8 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 			//TODO: consider using name here rather than fullName so we can re-use static geometry too
 			//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
 			Model* baseModel = new Model();
-			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
+			//for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+				//baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
 			models.insert(std::make_pair(tempProp.fullName, baseModel));
 			addGameObject(new GameObject(pos, rot, scale, tempProp.fullName, true, false, false))->castShadows &= tempProp.castShadows;
@@ -131,18 +144,88 @@ void loadMap(std::string mapName) {
 	// load the map as a typical model via ASSIMP
 	double sTime = glfwGetTime();
 	std::string directory = mapDir + '/' + mapName + ".fbx";
-	Assimp::Importer importer;
+	/*Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl)
 		return;
+	}*/
+	ofbx::IScene* g_scene = nullptr;
+	
+	#pragma warning(disable:4996)
+	FILE* fp = fopen(directory.c_str(), "rb");
+	if (!fp) {
+		ERRORCOLOR(std::cout << "unable to open map file: '" << directory << "'" << std::endl);
+		return;
 	}
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
+
+	fseek(fp, 0, SEEK_END);
+	long file_size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	auto* content = new ofbx::u8[file_size];
+	fread(content, 1, file_size, fp);
+	g_scene = ofbx::load((ofbx::u8*)content, file_size, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
+	if (!g_scene) {
+		ERRORCOLOR(std::cout << "error while loading map: ";
+		OutputDebugString(ofbx::getError()));
+		return;
+	}
+	std::pair<int, int> offsets(0, 0);
+	int mesh_count = g_scene->getMeshCount();
+	std::cout << "num meshes: " << mesh_count << std::endl;
+	for (int i = 0; i < mesh_count; ++i) {
+		//std::cout << g_scene->getMesh(i)->name << std::endl;
+		const ofbx::Mesh* mesh = g_scene->getMesh(i);
+		const char* fullName = mesh->name;
+		ofbx::Vec3 opos = mesh->getLocalTranslation();
+		ofbx::Vec3 orot = mesh->getLocalRotation();
+		ofbx::Vec3 oscale = mesh->getLocalScaling();
+		glm::vec3 pos(opos.x, opos.y, opos.z);
+		glm::vec3 rot(orot.x - glm::half_pi<float>(), -orot.y, orot.z);
+		glm::vec3 scale(oscale.x, oscale.y, oscale.z);
+		std::vector<std::string> argList = extractNameArgs(fullName);
+		std::string name = stripNodeName(fullName);
+
+		// TODO: name args
+		if (strncmp(fullName, "o_", 2) == 0) {
+			// load a barebones physics enabled model
+			addGameObject(new GameObject(pos, rot, scale, name))->castShadows &= tempCastShadows;
+		}
+		else if (strncmp(fullName, "go_", 3) == 0) {
+			// load a class
+			GameObject* go = objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
+			if (go)
+				go->castShadows &= tempCastShadows;
+		}
+		else if (strncmp(fullName, "l_", 2) == 0) {
+			// create a light
+			objectRegistry->instantiateLight(name, pos, rot, scale, argList);
+		}
+		else {
+			// produce a model from a static mesh
+			//TODO: consider using name here rather than fullName so we can re-use static geometry too
+			Model* baseModel = new Model();
+			baseModel->processMesh(mesh,offsets.first,offsets.second);
+			baseModel->generateCollisionShape();
+			models.insert(std::make_pair(fullName, baseModel));
+			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, false))->castShadows &= tempCastShadows;
+		}
+		const ofbx::Geometry* geom = mesh->getGeometry();
+		offsets.first += geom->getVertexCount();
+		offsets.second += geom->getIndexCount();
+	}
+
+	delete[] content;
+	fclose(fp);
+
+	
+	
 	// now process nodes recursively with custom instructions since this is a map model
-	tempProp.prevName = "";
+	/*tempProp.prevName = "";
 	nodeTransformDict.clear();
 	tempProp.trans = aiMatrix4x4();
-	processMapNode(scene->mRootNode, scene);
+	processMapNode(scene->mRootNode, scene);*/
 	SUCCESSCOLOR(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl)
 }

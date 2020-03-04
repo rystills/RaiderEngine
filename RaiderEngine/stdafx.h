@@ -50,6 +50,10 @@
 #include "nvapi.h"
 #include "NvApiDriverSettings.h"
 
+// openfbx
+#include "miniz.h"
+#include "ofbx.h"
+
 // demo build selection
 #define DEMO_3D_CAROUSEL 1
 #define DEMO_BRICK_BREAKER 2

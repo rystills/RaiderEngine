@@ -184,7 +184,13 @@
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="mapLoader.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="miniz.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="ofbx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ParticleEmitter2D.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="PlayerBase.cpp" />
@@ -233,11 +239,13 @@
     <ClInclude Include="GameObject2D.hpp" />
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mapLoader.hpp" />
+    <ClInclude Include="miniz.h" />
     <ClInclude Include="ObjectRegistryBase.hpp" />
     <ClInclude Include="input.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
+    <ClInclude Include="ofbx.h" />
     <ClInclude Include="ParticleEmitter2D.hpp" />
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="PlayerBase.hpp" />

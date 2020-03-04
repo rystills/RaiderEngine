@@ -192,6 +192,12 @@
     <ClCompile Include="demos\demo2DPlatformer\Player.cpp">
       <Filter>Source Files\demos\demo2DPlatformer</Filter>
     </ClCompile>
+    <ClCompile Include="miniz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ofbx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -331,6 +337,12 @@
     </ClInclude>
     <ClInclude Include="demos\demo2DPlatformer\Player.hpp">
       <Filter>Source Files\demos\demo2DPlatformer</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ofbx.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
