@@ -123,56 +123,28 @@ float Model::calculateVolume() {
 }
 
 void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
-	// data to fill
-	std::vector<Vertex> vertices;
+	std::vector<Vertex> vertices(mesh->mNumVertices);
 	std::vector<unsigned int> indices;
 
-	// Walk through each of the mesh's vertices
+	// populate vertex data
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-		Vertex vertex;
-		glm::vec3 vector; // store data in a temporary glm vector as ASSIMP vectors cannot be directly converted
-		// positions
-		vector.x = mesh->mVertices[i].x, vector.y = mesh->mVertices[i].y, vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
-		// normals
-		vector.x = mesh->mNormals[i].x, vector.y = mesh->mNormals[i].y, vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
-		// texture coordinates, if included
-		if (mesh->mTextureCoords[0]) {
-			glm::vec2 vec;
-			// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-			// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
-			vec.x = mesh->mTextureCoords[0][i].x, vec.y = -mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
-		}
-		else
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		// tangent
-		vector.x = mesh->mTangents[i].x, vector.y = mesh->mTangents[i].y, vector.z = mesh->mTangents[i].z;
-		vertex.Tangent = vector;
-		// bitangent
-		vector.x = mesh->mBitangents[i].x, vector.y = mesh->mBitangents[i].y, vector.z = mesh->mBitangents[i].z;
-		vertex.Bitangent = vector;
-
-		// finished populating the current vertex
-		vertices.push_back(vertex);
+		vertices[i].Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertices[i].Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
+		// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+		// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
+		vertices[i].TexCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, -mesh->mTextureCoords[0][i].y) : glm::vec2(0.f);
+		vertices[i].Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 	}
-	// now wak through each of the mesh's faces and retrieve the corresponding vertex indices
+	// populate index (triangle) data
 	for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
-		// retrieve all indices of the face and store them in the indices vector
 		for (unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
 			indices.push_back(mesh->mFaces[i].mIndices[j]);
 
 	// process materials
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-	// Same applies to other texture as the following list summarizes:
-	// diffuse: texture_diffuseN
-	// specular: texture_specularN
-	// normal: texture_normalN
-
+	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	// return a mesh object created from the extracted mesh data
 	meshes.emplace_back(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"));
 }
