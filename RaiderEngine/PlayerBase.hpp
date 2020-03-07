@@ -21,7 +21,7 @@ public:
 	float groundStoppingSpeed = 180;
 	float airStoppingSpeed = 12;
 	float airControl = .1f;
-	float headBumpDist = .001f;
+	float headBumpDist = .1f;
 
 	glm::vec3 velocity;
 	bool crouching = false;

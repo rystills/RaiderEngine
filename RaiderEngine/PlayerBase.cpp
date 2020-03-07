@@ -104,9 +104,9 @@ void PlayerBase::update() {
 	// stop moving up if we hit our head on a ceiling
 	if (velocity.y > 0) {
 		PxSceneReadLock scopedLock(*gScene);
-		PxCapsuleGeometry geom(radius, height / 2);
+		PxCapsuleGeometry geom(radius, height * (crouching ? crouchScale : 1) * .5f);
 		PxExtendedVec3 position = controller->getPosition();
-		PxVec3 pos((float)position.x, (float)position.y + (crouching ? ((height - height * crouchScale) / 2) : height/2) + headBumpDist, (float)position.z);
+		PxVec3 pos((float)position.x, (float)position.y + headBumpDist, (float)position.z);
 		PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
 
 		PxOverlapBuffer hit;
@@ -124,6 +124,7 @@ void PlayerBase::update() {
 			PxSceneReadLock scopedLock(*gScene);
 			PxCapsuleGeometry geom(radius, height / 2);
 			PxExtendedVec3 position = controller->getPosition();
+			// take half of the difference between our standing height and our crouch height to get the amount we need to move up
 			PxVec3 pos((float)position.x, (float)position.y + ((height - height * crouchScale) / 2), (float)position.z);
 			PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
 
