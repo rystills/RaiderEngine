@@ -2,15 +2,10 @@
 #include "stdafx.h"
 
 // this file is responsible for loading maps from special FBX files
-
-// TODO: do something more elegant than using a global temp struct
-struct ProcessObjectProperties {
-	aiMatrix4x4 trans;
-	std::string fullName, prevName;
-	// named args
+struct MapNodeFlags {
 	bool castShadows = true;
-} inline tempProp;
-inline std::unordered_map<aiNode*, aiMatrix4x4> nodeTransformDict;
+} inline mapNodeFlags;
+
 inline std::vector<std::string> transformIdentifiers = { "$_Translation", "$_PreRotation", "$_GeometricTranslation", "$_Rotation", "$_Scaling" };
 
 /*

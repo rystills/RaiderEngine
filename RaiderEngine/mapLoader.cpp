@@ -40,86 +40,78 @@ std::vector<std::string> extractNameArgs(std::string name) {
 		else {
 			std::string namedArg = token.substr(0, eqpos);
 			if (namedArg == "castShadows")
-				tempProp.castShadows = token[eqpos+1] == '1';
+				mapNodeFlags.castShadows = token[eqpos+1] == '1';
 		}
 	}
-
 	return args;
 }
 
 void processMapNode(aiNode* node, const aiScene* scene) {
-	// determine the full name and real name of the current node
-	tempProp.fullName = node->mName.C_Str();
-	std::string name = stripNodeName(tempProp.fullName);
-
-	//aiMultiplyMatrix4(&tempProp.trans, &node->mTransformation);
-	//aiTransposeMatrix4(&node->mTransformation);
-	
-	// if we have a parent besides the scene root, multiply our transform by its transform
-	if (nodeTransformDict.contains(node->mParent) && strcmp(node->mParent->mName.C_Str(),"RootNode")!=0)
-		aiMultiplyMatrix4(&tempProp.trans, &nodeTransformDict[node->mParent]),std::cout << "has parent" << std::endl;
-
-	// check what type of data the current node is designated to store, and update the corresponding transform data if relevant
+	std::string fullName = node->mName.C_Str();
+	// check if the current node contains a transform
 	bool isTransformNode = false;
-	for (int i = 0; i < transformIdentifiers.size(); ++i) {
-		if (isTransformNode = tempProp.fullName.find(transformIdentifiers[i]) != std::string::npos) {
-			aiMultiplyMatrix4(&tempProp.trans, &node->mTransformation);
-			break;
-		}
-	}
+	for (int i = 0; i < transformIdentifiers.size() && !isTransformNode; ++i)
+		isTransformNode = fullName.find(transformIdentifiers[i]) != std::string::npos;
 
 	if (!isTransformNode) {
-		std::vector<std::string> argList = extractNameArgs(tempProp.fullName);
+		std::string name = stripNodeName(fullName);
+		std::vector<std::string> argList = extractNameArgs(fullName);
+		// calculate transform by multiplying transform matrices from the parent node all the way down to the current node
+		aiNode* n = node;
+		std::vector<aiNode*> nodes;
+		// TODO: may be unnecessary to ignore the root node here
+		while (n != NULL && n->mName.C_Str()!="RootNode") {
+			nodes.push_back(n);
+			n = n->mParent;
+		}
+		aiMatrix4x4 trans = nodes[nodes.size()-1]->mTransformation;
+		nodes.pop_back();
+		while (!nodes.empty()) {
+			trans *= nodes[nodes.size() - 1]->mTransformation;
+			nodes.pop_back();
+		}
+		
 		// decompose transform for object instantiation
 		aiVector3D aiPos, aiRot, aiScale;
-		tempProp.trans.Decompose(aiScale, aiRot, aiPos);
+		trans.Decompose(aiScale, aiRot, aiPos);
 		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-		//std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
-		glm::vec3 rot = glm::vec3(aiRot.x, -aiRot.y, aiRot.z); //glm::vec3(aiRot.x - glm::half_pi<float>(), -aiRot.y, aiRot.z);
+		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.y, aiRot.z);
 		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+		// NOTE: changing the pivot of an 'o_' / 'go_' / 'l_' mesh in the map file won't have any effect in assimp unless you reset xform afterwards;
+		// if you want to change the actual object's pivot rather than just the spawn location, you'll need to offset its mesh in the corresponding model file
 
 		// convert nodes starting with o_ into GameObject instances using the named model
-		if (strncmp(tempProp.fullName.c_str(), "o_", 2) == 0) {
+		if (strncmp(fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			//std::cout << "generating object: " << name << std::endl;
-			addGameObject(new GameObject(pos, rot, scale, name))->castShadows &= tempProp.castShadows;
-			goto clearTransform;
+			addGameObject(new GameObject(pos, rot, scale, name))->castShadows &= mapNodeFlags.castShadows;
 		}
-		else if (strncmp(tempProp.fullName.c_str(), "go_", 3) == 0) {
+		else if (strncmp(fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
 			GameObject* go = objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
 			if (go)
-				go->castShadows &= tempProp.castShadows;
-			goto clearTransform;
+				go->castShadows &= mapNodeFlags.castShadows;
 		}
-		else if (strncmp(tempProp.fullName.c_str(), "l_", 2) == 0) {
+		else if (strncmp(fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
 			// create a light
 			objectRegistry->instantiateLight(name, pos, rot, scale, argList);
-			goto clearTransform;
 		}
 		else if (node->mNumMeshes > 0) {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
 			// generate a new model from the mesh list
 			//TODO: consider using name here rather than fullName so we can re-use static geometry too
-			//std::cout << "generating static geometry: " << tempProp.fullName << std::endl;
+			//std::cout << "generating static geometry: " << fullName << std::endl;
 			Model* baseModel = new Model();
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
-			models.insert(std::make_pair(tempProp.fullName, baseModel));
-			addGameObject(new GameObject(pos, rot, scale, tempProp.fullName, true, false, false))->castShadows &= tempProp.castShadows;
-			goto clearTransform;
+			models.insert(std::make_pair(fullName, baseModel));
+			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, false))->castShadows &= mapNodeFlags.castShadows;
 		}
-		else {
-		clearTransform:
-			// copy this transform into our transform dict for group transform lookups
-			nodeTransformDict[node] = tempProp.trans;
-			// reset the accumulated transform properties first thing once we finish building an object
-			tempProp.trans = aiMatrix4x4();
-			tempProp.castShadows = true;
-		}
+		// reset the current node flags
+		mapNodeFlags.castShadows = true;
 	}
 
 	// recurse over child nodes regardless of current node type
@@ -140,9 +132,7 @@ void loadMap(std::string mapName) {
 	}
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
-	tempProp.prevName = "";
-	nodeTransformDict.clear();
-	tempProp.trans = aiMatrix4x4();
+	//trans = aiMatrix4x4();
 	processMapNode(scene->mRootNode, scene);
 	SUCCESSCOLOR(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl)
 }
