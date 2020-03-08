@@ -3,6 +3,7 @@
 
 // this file is responsible for loading maps from special FBX files
 struct MapNodeFlags {
+	bool usePhysics = true;
 	bool castShadows = true;
 } inline mapNodeFlags;
 

@@ -33,7 +33,7 @@ std::vector<std::string> extractNameArgs(std::string name) {
 	// sequentually extract arguments delimited by commas
 	std::istringstream tokenStream(name.substr(sParenPos + 1, eParenPos - sParenPos - 1));
 	for (std::string token; std::getline(tokenStream, token, ',');) {
-		// special named args are stored directly in tempProp
+		// special named args are stored in mapNodeFlags
 		size_t eqpos = token.find('=');
 		if (eqpos == std::string::npos)
 			args.push_back(token);
@@ -41,6 +41,8 @@ std::vector<std::string> extractNameArgs(std::string name) {
 			std::string namedArg = token.substr(0, eqpos);
 			if (namedArg == "castShadows")
 				mapNodeFlags.castShadows = token[eqpos+1] == '1';
+			else if (namedArg == "usePhysics")
+				mapNodeFlags.usePhysics = token[eqpos+1] == '1';
 		}
 	}
 	return args;
@@ -84,14 +86,13 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		if (strncmp(fullName.c_str(), "o_", 2) == 0) {
 			// load a barebones physics enabled model
 			//std::cout << "generating object: " << name << std::endl;
-			addGameObject(new GameObject(pos, rot, scale, name))->castShadows &= mapNodeFlags.castShadows;
+			addGameObject(new GameObject(pos, rot, scale, name,0,true,true,mapNodeFlags.usePhysics,mapNodeFlags.castShadows));
 		}
 		else if (strncmp(fullName.c_str(), "go_", 3) == 0) {
 			// load a class
 			//std::cout << "generating instance of GameObject: " << name << std::endl;
+			// TODO: MapNodeFlags do not currently have any effect on 'go_' spawners due to the way the Object Registry handles arguments
 			GameObject* go = objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
-			if (go)
-				go->castShadows &= mapNodeFlags.castShadows;
 		}
 		else if (strncmp(fullName.c_str(), "l_", 2) == 0) {
 			//std::cout << "generating light: " << name << std::endl;
@@ -108,9 +109,10 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
 			models.insert(std::make_pair(fullName, baseModel));
-			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, false))->castShadows &= mapNodeFlags.castShadows;
+			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, false, mapNodeFlags.usePhysics, mapNodeFlags.castShadows));
 		}
 		// reset the current node flags
+		mapNodeFlags.usePhysics = true;
 		mapNodeFlags.castShadows = true;
 	}
 

@@ -15,7 +15,7 @@ void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
-	// load the texture data via stbi
+	// load the texture data via stbi (loading the data into memory first does not appear to improve performance vs stbi_load, unlike with stb_vorbis)
 	int width, height, nrComponents;
 	unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
 	if (data) {

@@ -35,7 +35,7 @@ public:
 	@param fixInitialRotation: whether or not the initial rotation needs to be fixed (this should be done for instantiated models, not static mesh data baked into a map)
 	@param usePhysics: whether or not this GameObject should be added to the physics world
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation = true, bool usePhysics = true);
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool fixInitialRotation = true, bool usePhysics = true, bool castShadows = true);
 
 	static void initStaticVertexBuffer();
 

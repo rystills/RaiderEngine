@@ -32,8 +32,10 @@ ALuint loadSound(std::string soundName) {
 	double sTime = glfwGetTime();
 	int numChannels, sample_rate;
 	ALshort* output;
-	std::ifstream input(soundDir + soundName, std::ios::binary);
-	std::vector<unsigned char> vec{ std::istreambuf_iterator<char>(input),std::istreambuf_iterator<char>() };
+	std::ifstream input(soundDir + soundName, std::ios::binary | std::ios::ate);
+	std::vector<unsigned char> vec(input.tellg());
+	input.seekg(0, std::ios::beg);
+	input.read((char*)vec.data(), vec.size());
 	int slen = stb_vorbis_decode_memory(&vec[0], vec.size(), &numChannels, &sample_rate, &output);
 
 	// convert sound data into an ALuint buffer
