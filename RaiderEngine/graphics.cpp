@@ -629,7 +629,7 @@ void renderLightingPass() {
 	glBindTexture(GL_TEXTURE_2D, gBuffer.albedoSpec);
 	// send light relevant uniforms
 	if (renderState.numLights != lights.size())
-		shaders["shaderLightingPass"]->setInt("NR_LIGHTS", lights.size());
+		shaders["shaderLightingPass"]->setInt("NR_LIGHTS", enableLighting ? lights.size() : 0);
 
 	for (unsigned int i = 0; i < lights.size(); ++i) {
 		if (lights[i]->dirty) {

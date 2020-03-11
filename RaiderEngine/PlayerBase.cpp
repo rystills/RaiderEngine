@@ -48,12 +48,16 @@ bool PlayerBase::canJump() {
 }
 
 void PlayerBase::update() {
+	// toggle between player synced camera and free cam
+	if (keyPressed("toggleFlyCam"))
+		flyCam = !flyCam;
+
 	// normalize camera front to get a constant speed regardless of pitch
 	glm::vec3 normalFront = glm::normalize(glm::cross(mainCam->WorldUp, mainCam->Right));
 	bool grounded = canJump();
 	// movement
 	float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
-	if (mainCam->controllable) {
+	if (mainCam->controllable && !flyCam) {
 		baseMoveSpeed = (crouching ? crouchSpeed : (keyHeld("run") ? runSpeed : walkSpeed));
 		forwardSpeed = (keyHeld("mvForward") - keyHeld("mvBackward")) * baseMoveSpeed;
 		strafeSpeed = (keyHeld("mvRight") - keyHeld("mvLeft")) * baseMoveSpeed;
@@ -138,6 +142,9 @@ void PlayerBase::update() {
 			controller->resize(height * (crouching ? crouchScale : 1));
 		}
 	}
-	syncCameraPos();
+	if (flyCam)
+		mainCam->moveFlycam();
+	else
+		syncCameraPos();
 	mainCam->updateViewProj();
 }

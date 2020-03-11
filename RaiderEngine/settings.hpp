@@ -16,6 +16,8 @@ inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720, TARGET_WIDTH = 1280, TAR
 inline const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 inline bool debugDraw = false;
 inline bool drawLightSpheres = false;
+// global visual debugging toggles
+inline bool enableDiffuse = true, enableSpecular = true, enableNormal = true, enableEmission = true, enableLighting = true;
 inline float anisoFilterAmount = 0.0f;
 inline const int numFontCharacters = 128;  // we only care about the first 128 characters stored in a given font file, at least for now
 

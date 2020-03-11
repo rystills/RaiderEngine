@@ -2,6 +2,8 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "GameObject.hpp"
+#include "settings.hpp"
+#include "model.hpp"
 
 void deleteVAO(GLuint* v) {
 	glDeleteVertexArrays(1, v);
@@ -37,7 +39,14 @@ void Mesh::sendTexturesToShader(Shader shader) {
 		// now set the sampler to the correct texture unit
 		shader.setInt((name + number).c_str(), i);
 		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		if (name == "texture_diffuse")
+			glBindTexture(GL_TEXTURE_2D, enableDiffuse ? textures[i].id : Model::defaultDiffuseMap.id);
+		else if (name == "texture_specular")
+			glBindTexture(GL_TEXTURE_2D, enableSpecular ? textures[i].id : Model::defaultSpecularMap.id);
+		else if (name == "texture_normal")
+			glBindTexture(GL_TEXTURE_2D, enableNormal ? textures[i].id : Model::defaultNormalMap.id);
+		else if (name == "texture_emission")
+			glBindTexture(GL_TEXTURE_2D, enableEmission ? textures[i].id : Model::defaultEmissionMap.id);
 	}
 	
 	// reactivate tex0 as this is the assumed state

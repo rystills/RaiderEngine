@@ -44,8 +44,24 @@ void checkDemoToggles() {
 		setWindowMode(renderState.fullScreen ? 1280 : MONITOR_WIDTH, renderState.fullScreen ? 720 : MONITOR_HEIGHT, !renderState.fullScreen);
 
 	// debug toggle
-	if (keyStates[GLFW_KEY_F3][pressed])
+	if (keyStates[GLFW_KEY_F6][pressed])
 		debugDraw = !debugDraw;
+
+	// lighting toggle
+	if (keyPressed(GLFW_KEY_F5)) {
+		enableLighting = !enableLighting;
+		renderState.numLights = -1;
+	}
+
+	// texture map toggles
+	if (keyStates[GLFW_KEY_F1][pressed])
+		enableDiffuse = !enableDiffuse;
+	if (keyStates[GLFW_KEY_F2][pressed])
+		enableNormal = !enableNormal;
+	if (keyStates[GLFW_KEY_F3][pressed])
+		enableSpecular = !enableSpecular;
+	if (keyStates[GLFW_KEY_F4][pressed])
+		enableEmission = !enableEmission;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {

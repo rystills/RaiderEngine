@@ -26,6 +26,7 @@ public:
 	glm::vec3 velocity;
 	bool crouching = false;
 	bool ctrlDown = false;
+	bool flyCam = false;
 
 	PlayerBase() { }
 

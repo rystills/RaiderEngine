@@ -11,7 +11,6 @@ inline bool mouseReleasedLeft = false;  // whether or not the left mouse button 
 inline bool mousePressedRight = false;  // whether or not the right mouse button was just pressed
 inline bool mouseHeldRight = false;  // whether or not the right mouse button is currently being held down
 inline bool mouseReleasedRight = false;  // whether or not the right mouse button was just released 
-inline bool f3Pressed = false;
 enum keyState { pressed = 0, held = 1, released = 2 };
 inline int keyStates[GLFW_KEY_LAST][3] = { 0 };
 inline std::unordered_map<std::string, unsigned int> keyBindings;
@@ -31,7 +30,7 @@ reset all input events that occur for a single frame only
 void resetSingleFrameInput();
 
 /*
-toggle fullscreen on f11 press or debugDraw on f3 press
+toggle fullScreen, debugDraw, or lighting
 */
 void checkDemoToggles();
 
