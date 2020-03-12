@@ -512,6 +512,7 @@ void loadShaders() {
 	shaders["shaderLightingPass"]->setInt("depthMap1", 4);
 	shaders["shaderLightingPass"]->setInt("depthMap2", 5);
 	shaders["shaderLightingPass"]->setInt("depthMap3", 6);
+	shaders["shaderLightingPass"]->setInt("depthMap4", 7);
 
 	shaders["2DShader"]->use();
 	shaders["2DShader"]->setInt("image", 0);
