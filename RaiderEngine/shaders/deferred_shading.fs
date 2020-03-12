@@ -8,11 +8,11 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 
 // shadows
-uniform samplerCube depthMap0;
-uniform samplerCube depthMap1;
-uniform samplerCube depthMap2;
-uniform samplerCube depthMap3;
-uniform samplerCube depthMap4;
+uniform samplerCubeShadow depthMap0;
+uniform samplerCubeShadow depthMap1;
+uniform samplerCubeShadow depthMap2;
+uniform samplerCubeShadow depthMap3;
+uniform samplerCubeShadow depthMap4;
 uniform float far_plane;
 uniform float ambientStrength = 0;
 uniform vec4 clearColor;
@@ -62,23 +62,20 @@ float ShadowCalculation(vec3 fragPos, vec3 normal, vec3 lightPos, int lightNum) 
     vec3 fragToLight = fragPos - lightPos;
     // now get current linear depth as the length between the fragment and light position
     float currentDepth = length(fragToLight);
-    // test for shadows
-    int shadow = 0;
-	// note: tweak the bias as you see fit. Higher bias will cause less shadow acne but more shadow displacement
 	vec3 lightDir = normalize(lightPos - fragPos);
-    // NOTE: decreasing the bias range results in less peter panning but more shadow acne (tweaked from .05-.005 to .15-.03)
-    float bias = max(0.15 * (1.0 - dot(normal, lightDir)), 0.03);
+    // NOTE: decreasing the bias range results in less peter panning but more shadow acne (tweaked from .05-.005 to .15-.03, divided by far_plane for samplerCubeShadow)
+    float bias = max(0.15/far_plane * (1.0 - dot(normal, lightDir)), .03/far_plane);
     float viewDistance = length(viewPos - fragPos);
     // NOTE: increasing the divisor results in harder shadows (tweaked from 25 to 50)
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 50.0;
-    // TODO: reimplement PCF on hardware (sampler2DShadow / samplerCubeShadow)
+    float shadow = 0;
     for (int i = 0; i < 20; ++i) { 
         int index = int(numPoisson*random(floor(fragPos*1000.0), i))%numPoisson;
         // use the fragment to light vector to sample from the depth map
         // TODO: 3d poisson sample rather than using the x value of the next entry for the 3rd dimension
-        float closestDepth = texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : (lightNum == 3 ? depthMap3 : depthMap4))), fragToLight + vec3(poissonDisk[index],poissonDisk[(index+1)%numPoisson].x) * diskRadius).r;
-        closestDepth *= far_plane;   // undo mapping [0;1]
-        shadow += int(currentDepth - bias > closestDepth);
+        float PCF = texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : (lightNum == 3 ? depthMap3 : depthMap4))), 
+        vec4(fragToLight + vec3(poissonDisk[index],poissonDisk[(index+1)%numPoisson].x) * diskRadius,currentDepth/far_plane-bias));
+        shadow += 1-PCF;
         // NOTE: early bail test (bailing after more iterations improves edge detection but reduces performance)
         if (i == 3 && (shadow == 0 || shadow == 4))
             return shadow/4.0;
