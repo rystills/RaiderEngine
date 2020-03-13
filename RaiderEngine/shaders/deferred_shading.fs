@@ -30,25 +30,16 @@ uniform int NR_LIGHTS;
 uniform Light lights[5]; // hard-coded maximum of 5 lights for now
 uniform vec3 viewPos;
 
-#define numPoisson 16
-vec2 poissonDisk[numPoisson] = vec2[]( 
-   vec2( -0.94201624, -0.39906216 ), 
-   vec2( 0.94558609, -0.76890725 ), 
-   vec2( -0.094184101, -0.92938870 ), 
-   vec2( 0.34495938, 0.29387760 ), 
-   vec2( -0.91588581, 0.45771432 ), 
-   vec2( -0.81544232, -0.87912464 ), 
-   vec2( -0.38277543, 0.27676845 ), 
-   vec2( 0.97484398, 0.75648379 ), 
-   vec2( 0.44323325, -0.97511554 ), 
-   vec2( 0.53742981, -0.47373420 ), 
-   vec2( -0.26496911, -0.41893023 ), 
-   vec2( 0.79197514, 0.19090188 ), 
-   vec2( -0.24188840, 0.99706507 ), 
-   vec2( -0.81409955, 0.91437590 ), 
-   vec2( 0.19984126, 0.78641367 ), 
-   vec2( 0.14383161, -0.14100790 ) 
+#define numSamples 20
+vec3 gridSamplingDisk[numSamples] = vec3[] (
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
+// NOTE: 8 samples chosen for early bail as the first 8 entries in the grid sampling disk represent the vertices of a cube, resulting in an effectively distributed initial sampling
+#define earlyBailCount 8
 
 // Returns a random number based on a vec3 and an int.
 float random(vec3 seed, int i){
@@ -69,18 +60,15 @@ float ShadowCalculation(vec3 fragPos, vec3 normal, vec3 lightPos, int lightNum) 
     // NOTE: increasing the divisor results in harder shadows (tweaked from 25 to 50)
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 50.0;
     float shadow = 0;
-    for (int i = 0; i < 20; ++i) { 
-        int index = int(numPoisson*random(floor(fragPos*1000.0), i))%numPoisson;
+    for (int i = 0; i < numSamples; ++i) { 
         // use the fragment to light vector to sample from the depth map
-        // TODO: 3d poisson sample rather than using the x value of the next entry for the 3rd dimension
-        float PCF = texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : (lightNum == 3 ? depthMap3 : depthMap4))), 
-        vec4(fragToLight + vec3(poissonDisk[index],poissonDisk[(index+1)%numPoisson].x) * diskRadius,currentDepth/far_plane-bias));
-        shadow += 1-PCF;
+        shadow += 1-texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : (lightNum == 3 ? depthMap3 : depthMap4))), 
+        vec4(fragToLight + gridSamplingDisk[i] * diskRadius,currentDepth/far_plane-bias));
         // NOTE: early bail test (bailing after more iterations improves edge detection but reduces performance)
-        if (i == 3 && (shadow == 0 || shadow == 4))
-            return shadow/4.0;
+        if (i == earlyBailCount-1 && (shadow == 0 || shadow == earlyBailCount))
+            return shadow/earlyBailCount;
     }
-    return shadow / float(20);
+    return shadow / numSamples;
         
     // display closestDepth as debug (to visualize depth cubemap)
     // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
