@@ -31,6 +31,7 @@ uniform Light lights[5]; // hard-coded maximum of 5 lights for now
 uniform vec3 viewPos;
 
 #define numSamples 20
+// TODO: should these points be normalized? currently the first 8 points (the cube vertices) are sampling farther away than the remaining 12 (this might actually be a good thing for early bail detection)
 vec3 gridSamplingDisk[numSamples] = vec3[] (
    vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
    vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),

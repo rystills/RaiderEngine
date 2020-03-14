@@ -20,6 +20,7 @@ inline bool drawLightSpheres = false;
 inline bool enableDiffuse = true, enableSpecular = true, enableNormal = true, enableEmission = true, enableLighting = true;
 inline float anisoFilterAmount = 0.0f;
 inline const int numFontCharacters = 128;  // we only care about the first 128 characters stored in a given font file, at least for now
+inline GLuint filterMin2D = GL_LINEAR_MIPMAP_LINEAR, filterMax2D= GL_LINEAR;
 
 inline std::string mapDir = "", modelDir = "", textureDir = "", soundDir = "", fontDir = "";
 

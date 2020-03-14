@@ -14,12 +14,29 @@ uniform sampler2D texture_specular1;
 uniform sampler2D texture_normal1;
 uniform sampler2D texture_emission1;
 
+float ditherThresholdMatrix[16] = float[] (
+1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
+13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
+4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
+16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
+);
+
 void main() {
     vec2 texCoords = fs_in.TexCoords;
     
-	// discard transparent pixels
-	if(texture(texture_diffuse1, texCoords).a < .5)
+	// discard fully transparent pixels
+	float alpha = texture(texture_diffuse1, texCoords).a;
+    if (alpha < .001)
         discard;
+
+    // TODO: consider separating dither alpha from diffuse alpha to allow diffuse alpha to discard at the old threshold of 0.5 (avoids shimmering foliage due to mipmaps / averaging transparency)
+    if (alpha < 1) {
+        int x = int(gl_FragCoord.x) % 4;
+        int y = int(gl_FragCoord.y) % 4;
+        int index = x + y * 4;
+        if (alpha < ditherThresholdMatrix[index])
+            discard;
+    }
 
     // store the fragment position vector in the first gbuffer texture
     gPosition = fs_in.FragPos;

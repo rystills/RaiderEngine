@@ -191,8 +191,8 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 	// texture does not exist yet; try to load it 
 	if (std::filesystem::exists(textureDir + texFullName)) {
 		Texture loadedTex;
-		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, GL_LINEAR/GL_LINEAR_MIPMAP_LINEAR may be preferable 
-		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
+		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, the default GL_LINEAR_MIPMAP_LINEAR/GL_LINEAR is likely preferable.
+		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, filterMin2D, filterMax2D);
 		loadedTex.type = "texture_diffuse";
 		texturesLoaded[texName] = loadedTex;
 		SUCCESSCOLOR(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl)
