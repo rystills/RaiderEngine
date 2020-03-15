@@ -22,7 +22,8 @@ public:
 	float Yaw;
 	float Pitch;
 	// Camera options
-	float MovementSpeed;
+	float movementSpeed = 4;
+	float sprintSpeed = 12;
 	float MouseSensitivity;
 	float Zoom;
 	bool controllable = true;

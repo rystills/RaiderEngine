@@ -2,8 +2,9 @@
 #include "camera.hpp"
 #include "settings.hpp"
 #include "timing.hpp"
+#include "input.hpp"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(8), MouseSensitivity(0.1f), Zoom(45.f) {
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(4), MouseSensitivity(0.1f), Zoom(45.f) {
 	Position = position;
 	WorldUp = up;
 	setYaw(yaw);
@@ -11,7 +12,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front
 	updateCameraVectors();
 }
 
-Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(8), MouseSensitivity(0.1f), Zoom(45.f) {
+Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(4), MouseSensitivity(0.1f), Zoom(45.f) {
 	Position = glm::vec3(posX, posY, posZ);
 	WorldUp = glm::vec3(upX, upY, upZ);
 	setYaw(yaw);
@@ -26,7 +27,7 @@ void Camera::updateViewProj() {
 
 void Camera::ProcessKeyboard(Camera_Movement direction) {
 	if (!controllable) return;
-	float velocity = MovementSpeed * deltaTime;
+	float velocity = (keyHeld("run") ? sprintSpeed : movementSpeed) * deltaTime;
 	if (direction == FORWARD)
 		//Position -= glm::normalize(glm::cross(Right, WorldUp)) * velocity;
 		Position += Front * velocity;

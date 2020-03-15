@@ -192,6 +192,9 @@
     <ClCompile Include="demos\demo2DPlatformer\Player.cpp">
       <Filter>Source Files\demos\demo2DPlatformer</Filter>
     </ClCompile>
+    <ClCompile Include="ObjectRegistryBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">

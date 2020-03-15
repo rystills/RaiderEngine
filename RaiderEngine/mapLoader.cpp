@@ -59,13 +59,10 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		std::string name = stripNodeName(fullName);
 		std::vector<std::string> argList = extractNameArgs(fullName);
 		// calculate transform by multiplying transform matrices from the parent node all the way down to the current node
-		aiNode* n = node;
 		std::vector<aiNode*> nodes;
-		// TODO: may be unnecessary to ignore the root node here
-		while (n != NULL && n->mName.C_Str()!="RootNode") {
+		for (aiNode* n = node; n != NULL; n = n->mParent)
 			nodes.push_back(n);
-			n = n->mParent;
-		}
+
 		aiMatrix4x4 trans = nodes[nodes.size()-1]->mTransformation;
 		nodes.pop_back();
 		while (!nodes.empty()) {
@@ -79,31 +76,18 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		glm::vec3 pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
 		glm::vec3 rot = glm::vec3(aiRot.x, aiRot.y, aiRot.z);
 		glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
-		// NOTE: changing the pivot of an 'o_' / 'go_' / 'l_' mesh in the map file won't have any effect in assimp unless you reset xform afterwards;
+		// NOTE: changing the pivot of a 'go_' / 'l_' mesh in the map file won't have any effect in assimp unless you reset xform afterwards;
 		// if you want to change the actual object's pivot rather than just the spawn location, you'll need to offset its mesh in the corresponding model file
-
-		// convert nodes starting with o_ into GameObject instances using the named model
-		if (strncmp(fullName.c_str(), "o_", 2) == 0) {
-			// load a barebones physics enabled model
-			//std::cout << "generating object: " << name << std::endl;
-			addGameObject(new GameObject(pos, rot, scale, name,0,true,true,mapNodeFlags.usePhysics,mapNodeFlags.castShadows));
-		}
-		else if (strncmp(fullName.c_str(), "go_", 3) == 0) {
-			// load a class
-			//std::cout << "generating instance of GameObject: " << name << std::endl;
-			// TODO: MapNodeFlags do not currently have any effect on 'go_' spawners due to the way the Object Registry handles arguments
-			GameObject* go = objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
-		}
-		else if (strncmp(fullName.c_str(), "l_", 2) == 0) {
-			//std::cout << "generating light: " << name << std::endl;
-			// create a light
+		if (strncmp(fullName.c_str(), "go_", 3) == 0)
+			// convert a node starting with go_ into a specific GameObject instance defined in the object registry
+			// NOTE: MapNodeFlags are applied to generic models by default, but must be explicitly handled when overloading ObjectRegistryBase to spawn custom classes
+			objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
+		else if (strncmp(fullName.c_str(), "l_", 2) == 0)
+			// convert a node starting with l_ into a specific Light instance defined in the object registry
 			objectRegistry->instantiateLight(name, pos, rot, scale, argList);
-		}
 		else if (node->mNumMeshes > 0) {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
 			// generate a new model from the mesh list
-			//TODO: consider using name here rather than fullName so we can re-use static geometry too
-			//std::cout << "generating static geometry: " << fullName << std::endl;
 			Model* baseModel = new Model();
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);

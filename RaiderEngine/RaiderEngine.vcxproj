@@ -185,6 +185,7 @@
     <ClCompile Include="mapLoader.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="ObjectRegistryBase.cpp" />
     <ClCompile Include="ParticleEmitter2D.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="PlayerBase.cpp" />
