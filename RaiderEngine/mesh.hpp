@@ -11,7 +11,7 @@ struct Vertex {
 
 struct Texture {
     unsigned int id;
-	std::string type;
+	enum MapType type;
 	std::string path;
 	GLuint width, height;
 };

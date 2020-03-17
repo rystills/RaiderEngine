@@ -55,13 +55,13 @@ void checkDemoToggles() {
 
 	// texture map toggles
 	if (keyStates[GLFW_KEY_F1][pressed])
-		enableDiffuse = !enableDiffuse;
+		enableTextureMaps[0] = !enableTextureMaps[0];
 	if (keyStates[GLFW_KEY_F2][pressed])
-		enableNormal = !enableNormal;
+		enableTextureMaps[1] = !enableTextureMaps[1];
 	if (keyStates[GLFW_KEY_F3][pressed])
-		enableSpecular = !enableSpecular;
+		enableTextureMaps[2] = !enableTextureMaps[2];
 	if (keyStates[GLFW_KEY_F4][pressed])
-		enableEmission = !enableEmission;
+		enableTextureMaps[3] = !enableTextureMaps[3];
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {

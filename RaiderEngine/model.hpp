@@ -3,10 +3,6 @@
 #include "mesh.hpp"
 #include "physics.hpp"
 
-inline std::vector<int> textureFormats = {NULL,GL_RED,NULL,GL_RGB,GL_RGBA};
-inline const int numMapTypes = 4;
-inline std::string mapTypes[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_emission" };
-
 /*
 load the specified texture from the specified directory
 @param path: the name of the texture file to load
@@ -14,10 +10,19 @@ load the specified texture from the specified directory
 */
 void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S = GL_REPEAT, GLuint Wrap_T = GL_REPEAT, GLuint Filter_Min = GL_LINEAR_MIPMAP_LINEAR, GLuint Filter_Max = GL_LINEAR);
 
+enum MapType { texture_diffuse, texture_normal, texture_specular, texture_emission }; 
+
 class Model {
 public:
-	static std::unordered_map<std::string, Texture> texturesLoaded;  // store all textures loaded for re-use across models 
-	static Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultEmissionMap;  // blank maps for materials which don't use the given effects
+	static inline std::unordered_map<std::string, Texture> texturesLoaded;  // store all textures loaded for re-use across models 
+	static inline Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultEmissionMap;  // blank maps for materials which don't use the given effects
+	static const int numMapTypes = 4;
+	static inline Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
+	static inline std::string mapTypeNames[numMapTypes] = { "texture_diffuse", "texture_normal", "texture_specular", "texture_emission" };
+	static inline std::vector<int> textureFormats = { NULL,GL_RED,NULL,GL_RGB,GL_RGBA };
+	// TODO: don't hardcode png as extension
+	static inline std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_EMISS.png" };
+
 	std::vector<Mesh> meshes;
 	bool gammaCorrection;
 	PxBase* collisionMesh;

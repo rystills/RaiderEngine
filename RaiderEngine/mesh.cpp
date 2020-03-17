@@ -21,32 +21,15 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 void Mesh::sendTexturesToShader(Shader shader) {
 	// bind appropriate textures
-	unsigned int diffuseNr = 0, specularNr = 0, normalNr = 0, emissionNR = 0;
-	for (unsigned int i = 0; i < textures.size(); i++) {
+	unsigned int texMapNums[Model::numMapTypes] = { 0 };
+	for (unsigned int i = 0; i < textures.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-		// retrieve texture number (the N in diffuse_textureN)
-		std::string number;
-		std::string name = textures[i].type;
-		if (name == "texture_diffuse")
-			number = std::to_string(++diffuseNr);
-		else if (name == "texture_specular")
-			number = std::to_string(++specularNr);
-		else if (name == "texture_normal")
-			number = std::to_string(++normalNr);
-		else if (name == "texture_emission")
-			number = std::to_string(++emissionNR);
+		MapType type = textures[i].type;
 
-		// now set the sampler to the correct texture unit
-		shader.setInt((name + number).c_str(), i);
-		// and finally bind the texture
-		if (name == "texture_diffuse")
-			glBindTexture(GL_TEXTURE_2D, enableDiffuse ? textures[i].id : Model::defaultDiffuseMap.id);
-		else if (name == "texture_specular")
-			glBindTexture(GL_TEXTURE_2D, enableSpecular ? textures[i].id : Model::defaultSpecularMap.id);
-		else if (name == "texture_normal")
-			glBindTexture(GL_TEXTURE_2D, enableNormal ? textures[i].id : Model::defaultNormalMap.id);
-		else if (name == "texture_emission")
-			glBindTexture(GL_TEXTURE_2D, enableEmission ? textures[i].id : Model::defaultEmissionMap.id);
+		// set the sampler to the correct texture unit
+		shader.setInt((Model::mapTypeNames[type] + std::to_string(++texMapNums[type])).c_str(), i);
+		// bind the texture
+		glBindTexture(GL_TEXTURE_2D, enableTextureMaps[type] ? textures[i].id : Model::mapDefaults[type]->id);
 	}
 	
 	// reactivate tex0 as this is the assumed state

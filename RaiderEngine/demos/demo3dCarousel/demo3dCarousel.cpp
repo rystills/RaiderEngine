@@ -59,7 +59,7 @@ void checkSwitchMap(int mapNum) {
 	case 4:
 		setClearColor(0, 0, 0, 1);
 		setAmbientStrength(0.2f);
-		loadMap("warehouse");
+		loadMap("storageCloset");
 		break;
 	}
 }

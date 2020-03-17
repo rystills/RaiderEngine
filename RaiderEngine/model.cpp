@@ -7,9 +7,6 @@
 #include "settings.hpp"
 #include "terminalColors.hpp"
 
-std::unordered_map<std::string, Texture> Model::texturesLoaded;
-Texture Model::defaultDiffuseMap, Model::defaultNormalMap, Model::defaultSpecularMap, Model::defaultEmissionMap;
-
 void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint Wrap_T, GLuint Filter_Min, GLuint Filter_Max) {
 	// generate a new opengl texture to which to write the texture data
 	unsigned int textureID;
@@ -19,9 +16,9 @@ void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint
 	int width, height, nrComponents;
 	unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
 	if (data) {
-		if (static_cast<unsigned int>(nrComponents) < textureFormats.size() && textureFormats[nrComponents] != NULL) {
+		if (static_cast<unsigned int>(nrComponents) < Model::textureFormats.size() && Model::textureFormats[nrComponents] != NULL) {
 			// establish the texture format based on the number of components returned by stbi
-			GLenum format = textureFormats[nrComponents];
+			GLenum format = Model::textureFormats[nrComponents];
 
 			// copy the stbi texture data into our new opengl texture
 			glBindTexture(GL_TEXTURE_2D, textureID);
@@ -150,7 +147,6 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 }
 
 void Model::createDefaultMaterialMaps() {
-	Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
 	std::vector<std::vector<unsigned char>> mapColors = { {255,0,255},{122,122,255},{122,122,122},{0,0,0},{0,0,0} };
 	for (int i = 0; i < numMapTypes; ++i) {
 		// setup a new texture
@@ -173,7 +169,7 @@ void Model::createDefaultMaterialMaps() {
 		mapDefaults[i]->path = "";
 		mapDefaults[i]->width = 1;
 		mapDefaults[i]->height = 1;
-		mapDefaults[i]->type = mapTypes[i];
+		mapDefaults[i]->type = static_cast<MapType>(i);
 	}
 }
 
@@ -193,7 +189,7 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 		Texture loadedTex;
 		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, the default GL_LINEAR_MIPMAP_LINEAR/GL_LINEAR is likely preferable.
 		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, filterMin2D, filterMax2D);
-		loadedTex.type = "texture_diffuse";
+		loadedTex.type = texture_diffuse;
 		texturesLoaded[texName] = loadedTex;
 		SUCCESSCOLOR(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl)
 		return loadedTex;
@@ -235,9 +231,6 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		aiString str;
 		mat->GetTexture(type, i, &str);
 		// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
-		// TODO: don't hardcode png as extension
-		std::string mapExtensions[numMapTypes] = { ".png", "_NRM.png", "_SPEC.png", "_EMISS.png" };
-		Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
 		for (int k = 0; k < numMapTypes; ++k) {
 			// get current map name
 			std::string mapName = str.C_Str();
@@ -255,15 +248,15 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 				if (std::filesystem::exists(textureDir + mapBaseName + '/' + mapName)) {
 					Texture extraTex;
 					textureFromFile(textureDir + mapBaseName + '/' + mapName, extraTex);
-					extraTex.type = mapTypes[k];
+					extraTex.type = static_cast<MapType>(k);
 					textures.push_back(extraTex);
 					texturesLoaded[mapName] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESSCOLOR(std::cout << "loaded " << mapTypes[k] << " texture: '" << mapName << "'" << std::endl)
+					SUCCESSCOLOR(std::cout << "loaded " << mapTypeNames[k] << " texture: '" << mapName << "'" << std::endl)
 				}
 				else {
 					// can't find texture; fall back to default of matching type
 					textures.push_back(*mapDefaults[k]);
-					if (k) WARNINGCOLOR(std::cout << "unable to find " << mapTypes[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypes[k] << " map" << std::endl)
+					if (k) WARNINGCOLOR(std::cout << "unable to find " << mapTypeNames[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypeNames[k] << " map" << std::endl)
 					else ERRORCOLOR(std::cout << "unable to find diffuse map for texture: '" << str.C_Str() << "'; falling back to default diffuse map" << std::endl)
 				}
 			}
