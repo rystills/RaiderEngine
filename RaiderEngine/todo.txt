@@ -23,6 +23,7 @@
 -reimplement throwing held object on right mouse button
 -reset object to starting position if it falls below the lowest map position - 100
 -TARGET 1920x1080 in all demos (currently 1280x720)
+-disable collisions between player and held object (prevents held object from obstructing movement / lifting player into the air)
 
 ~Collider2D~
 -cleanup code structure

@@ -43,7 +43,8 @@ void GameObject::addPhysics(glm::quat rot) {
 		body = gPhysics->createRigidStatic(PxTransform(physPot, physRot));
 	else {
 		body = gPhysics->createRigidDynamic(PxTransform(physPot, physRot));
-		static_cast<PxRigidDynamic*>(body)->setMass(mass);
+		// TODO: physx does not appear to handle objects with a small mass well; handle this properly rather than providing objects with a minimum of 10kg
+		static_cast<PxRigidDynamic*>(body)->setMass(10 + mass);
 	}
 
 	// our shape, unlike our body type, depends on our model's staticness

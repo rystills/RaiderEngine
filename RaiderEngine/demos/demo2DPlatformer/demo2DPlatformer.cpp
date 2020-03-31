@@ -52,6 +52,8 @@ int main() {
 	SCR_HEIGHT = 720;
 	UI_TARGET_WIDTH = 1920;
 	UI_TARGET_HEIGHT = 1080;
+	filterMin2D = GL_NEAREST_MIPMAP_NEAREST;
+	filterMax2D = GL_NEAREST;
 	initEngine();
 	setEnableCursor(true);
 	// directories
