@@ -3,8 +3,7 @@
 -reimplement forward rendering techniques in deferred renderer
 	-HDR
 	-bloom
-	-blending (using forward pass)
-	-spotlights w/ shadows
+	-spotlights / directional lights with shadows
 	-bake static shadows for stationary lights
 -SSAO
 -implement either deferred lighting or tile-based deferred shading so that light volumes can be utilized properly
@@ -17,7 +16,6 @@
 
 ~Optimization~
 -send lights to shader in order of distance from player and importance, and render shadows for first N lights
--add a flag to mark Objects as non shadow casting or non shadow receiving
 
 ~Demo~
 -reimplement throwing held object on right mouse button
