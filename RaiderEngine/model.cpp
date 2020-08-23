@@ -32,10 +32,10 @@ void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter_Max);
 		}
 		else
-			ERRORCOLOR(std::cout << "Error Loading texture '" << fileName << "': invalid number of components '" << nrComponents << "'" << std::endl)
+			ERRORCOLOR(std::cout << "Error Loading texture '" << fileName << "': invalid number of components '" << nrComponents << "'" << std::endl);
 	}
 	else
-		ERRORCOLOR(std::cout << "Texture failed to load at path: " << fileName << std::endl)
+		ERRORCOLOR(std::cout << "Texture failed to load at path: " << fileName << std::endl);
 
 	// cleanup
 	stbi_image_free(data);
@@ -62,7 +62,7 @@ void Model::generateCollisionShape() {
 	volume = calculateVolume();
 	// note: consider removing the isStaticMesh flag and allowing a Model to contain one or both of the triangle mesh and convex hull depending on the staticness of the GameObjects which use it
 	if (isStaticMesh) {
-		// conbine triangles (vertex lists)
+		// combine triangles (vertex lists)
 		std::vector<unsigned int> inds;
 		for (unsigned int i = 0, vertsAdded = 0; i < meshes.size(); vertsAdded += meshes[i].vertices.size(), ++i) {
 			unsigned int curInd = inds.size();
@@ -87,7 +87,7 @@ void Model::generateCollisionShape() {
 		PxTriangleMeshCookingResult::Enum result;
 		bool status = gCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
 		if (!status)
-			ERRORCOLOR(std::cout << "error while cooking triangle mesh: " << result << std::endl)
+			ERRORCOLOR(std::cout << "error while cooking triangle mesh: " << result << std::endl);
 
 		PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
 		collisionMesh = gPhysics->createTriangleMesh(readBuffer);
@@ -102,7 +102,7 @@ void Model::generateCollisionShape() {
 
 		PxDefaultMemoryOutputStream buf;
 		if (!gCooking->cookConvexMesh(convexDesc, buf))
-			ERRORCOLOR(std::cout << "error while cooking convex hull" << std::endl)
+			ERRORCOLOR(std::cout << "error while cooking convex hull" << std::endl);
 
 		PxDefaultMemoryInputData readBuffer(buf.getData(), buf.getSize());
 		collisionMesh = gPhysics->createConvexMesh(readBuffer);
@@ -191,11 +191,11 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, filterMin2D, filterMax2D);
 		loadedTex.type = texture_diffuse;
 		texturesLoaded[texName] = loadedTex;
-		SUCCESSCOLOR(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl)
+		SUCCESSCOLOR(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl);
 		return loadedTex;
 	}
 
-	ERRORCOLOR(std::cout << "unable to load texture: '" << texName << "' at path: '" << texFullName << "'; falling back to default diffuse map" << std::endl)
+	ERRORCOLOR(std::cout << "unable to load texture: '" << texName << "' at path: '" << texFullName << "'; falling back to default diffuse map" << std::endl);
 	return defaultDiffuseMap;
 }
 
@@ -205,7 +205,7 @@ void Model::loadModel(std::string const& path) {
 	const aiScene* scene = importer.ReadFile(path, aiModelProcessFlags);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl)
+		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
 		return;
 	}
 
@@ -251,13 +251,13 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 					extraTex.type = static_cast<MapType>(k);
 					textures.push_back(extraTex);
 					texturesLoaded[mapName] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-					SUCCESSCOLOR(std::cout << "loaded " << mapTypeNames[k] << " texture: '" << mapName << "'" << std::endl)
+					SUCCESSCOLOR(std::cout << "loaded " << mapTypeNames[k] << " texture: '" << mapName << "'" << std::endl);
 				}
 				else {
 					// can't find texture; fall back to default of matching type
 					textures.push_back(*mapDefaults[k]);
-					if (k) WARNINGCOLOR(std::cout << "unable to find " << mapTypeNames[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypeNames[k] << " map" << std::endl)
-					else ERRORCOLOR(std::cout << "unable to find diffuse map for texture: '" << str.C_Str() << "'; falling back to default diffuse map" << std::endl)
+					if (k) WARNINGCOLOR(std::cout << "unable to find " << mapTypeNames[k] << " map for texture: '" << str.C_Str() << "'; falling back to default " << mapTypeNames[k] << " map" << std::endl);
+					else ERRORCOLOR(std::cout << "unable to find diffuse map for texture: '" << str.C_Str() << "'; falling back to default diffuse map" << std::endl);
 				}
 			}
 		}

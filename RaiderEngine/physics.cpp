@@ -8,7 +8,7 @@ void initPhysics() {
 	// create a foundation so we can use PhysX
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
 	if (!gFoundation)
-		ERRORCOLOR(std::cout << "PxCreateFoundation failed!" << std::endl)
+		ERRORCOLOR(std::cout << "PxCreateFoundation failed!" << std::endl);
 
 	// create the top level physics object
 	bool recordMemoryAllocations = true;
@@ -18,7 +18,7 @@ void initPhysics() {
 
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), recordMemoryAllocations, gPvd);
 	if (!gPhysics)
-		ERRORCOLOR(std::cout << "PxCreatePhysics failed!" << std::endl)
+		ERRORCOLOR(std::cout << "PxCreatePhysics failed!" << std::endl);
 
 	// create physcs scene
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
@@ -42,7 +42,7 @@ void initPhysics() {
 	// cooking
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
 	if (!gCooking)
-		ERRORCOLOR(std::cout << "PxCreateCooking failed!" << std::endl)
+		ERRORCOLOR(std::cout << "PxCreateCooking failed!" << std::endl);
 
 	// filter groups
 	defaultFilterData.word0 = (1 << 0);

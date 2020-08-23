@@ -50,12 +50,12 @@ ALuint loadSound(std::string soundName) {
 	ALuint* source = new ALuint(0);
 	alGenSources(1, source);
 	alSourcei(*source, AL_BUFFER, buffer);
-	if (alGetError() != AL_NO_ERROR) ERRORCOLOR(std::cout << "Failed to load and/or play sound '" << soundName << "'" << std::endl)
+	if (alGetError() != AL_NO_ERROR) ERRORCOLOR(std::cout << "Failed to load and/or play sound '" << soundName << "'" << std::endl);
 
 	// now cleanup, add to the sound map, and return
 	alDeleteBuffers(1, &buffer);
 	sounds.insert({ soundName, std::unique_ptr<ALuint, std::function<void(ALuint*)>>(source, std::bind(&deleteAudioBuffer,std::placeholders::_1)) });
-	SUCCESSCOLOR(std::cout << "Finished loading sound '" << soundName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl)
+	SUCCESSCOLOR(std::cout << "Finished loading sound '" << soundName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl);
 	return *source;
 }
 

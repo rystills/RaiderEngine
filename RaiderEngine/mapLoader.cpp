@@ -30,7 +30,7 @@ std::vector<std::string> extractNameArgs(std::string name) {
 	if (sParenPos == std::string::npos || eParenPos == std::string::npos)
 		return args;
 
-	// sequentually extract arguments delimited by commas
+	// sequentially extract arguments delimited by commas
 	std::istringstream tokenStream(name.substr(sParenPos + 1, eParenPos - sParenPos - 1));
 	for (std::string token; std::getline(tokenStream, token, ',');) {
 		// special named args are stored in mapNodeFlags
@@ -113,12 +113,11 @@ void loadMap(std::string mapName) {
 	const aiScene* scene = importer.ReadFile(directory, aiMapProcessFlags);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl)
+		ERRORCOLOR(std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl);
 		return;
 	}
 	std::cout << "Loading map '" << mapName << "'" << std::endl;
 	// now process nodes recursively with custom instructions since this is a map model
-	//trans = aiMatrix4x4();
 	processMapNode(scene->mRootNode, scene);
-	SUCCESSCOLOR(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl)
+	SUCCESSCOLOR(std::cout << "Finished loading map '" << mapName << "' in " << glfwGetTime() - sTime << " seconds" << std::endl);
 }

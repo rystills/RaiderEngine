@@ -20,7 +20,7 @@ void updateTime() {
 	// if fps goes below 30, slow down the game speed rather than trying to interpolate (this should prevent occasional jitters from breaking the physics)
 	if (dtime > .034) {
 		if (totalTime != 0)
-			WARNINGCOLOR(std::cout << "Framerate jitter detected last frame! Recorded a frame deltaTime above .034 (30fps) of " << dtime << std::endl)
+			WARNINGCOLOR(std::cout << "Framerate jitter detected last frame! Recorded a frame deltaTime above .034 (30fps) of " << dtime << std::endl);
 			dtime = .034;
 	}
 	lastFrame = currentFrame;

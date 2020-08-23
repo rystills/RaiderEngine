@@ -27,7 +27,7 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void glfwErrorCallback(int errorno, const char* errmsg) {
-	ERRORCOLOR(std::cout << "GLFW Error #" << errorno << ": " << errmsg << std::endl)
+	ERRORCOLOR(std::cout << "GLFW Error #" << errorno << ": " << errmsg << std::endl);
 }
 
 bool beginFrame(bool tickPhysics) {
@@ -129,7 +129,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	// TODO: precalculate individual VAOs in TextObjects for faster rendering
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
-		ERRORCOLOR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl)
+		ERRORCOLOR(std::cout << "Error: font '" << fontName << "' at size '" << fontSize << "' not found in fonts map; please load this (font,size) pair and try again" << std::endl);
 		return;
 	}
 	if (text.length() == 0)
@@ -227,7 +227,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 
 	FT_Init_FreeType(&ft);
 	if (FT_New_Face(ft, (fontDir + fontName + ".ttf").c_str(), 0, &face))
-		ERRORCOLOR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl)
+		ERRORCOLOR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl);
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
 	// calculate texture width
@@ -402,7 +402,7 @@ void initGBuffer() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 	// finally check if framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERRORCOLOR(std::cout << "Framebuffer not complete!" << std::endl)
+		ERRORCOLOR(std::cout << "Framebuffer not complete!" << std::endl);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -456,7 +456,7 @@ GLFWwindow* initWindow() {
 	// create the game window
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RaiderEngine", NULL, NULL);
 	if (window == NULL) {
-		ERRORCOLOR(std::cout << "Failed to create GLFW window" << std::endl)
+		ERRORCOLOR(std::cout << "Failed to create GLFW window" << std::endl);
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
@@ -482,7 +482,7 @@ GLFWwindow* initWindow() {
 void initGL() {
 	// load opengl function pointers
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		ERRORCOLOR(std::cout << "Failed to initialize GLAD" << std::endl)
+		ERRORCOLOR(std::cout << "Failed to initialize GLAD" << std::endl);
 			exit(EXIT_FAILURE);
 	}
 
@@ -879,7 +879,7 @@ void NVSettingsCheckError(NvAPI_Status status) {
 
 	NvAPI_ShortString szDesc = { 0 };
 	NvAPI_GetErrorMessage(status, szDesc);
-	ERRORCOLOR(printf("NVAPI error: %s\n", szDesc))
+	ERRORCOLOR(printf("NVAPI error: %s\n", szDesc));
 	exit(-1);
 }
 

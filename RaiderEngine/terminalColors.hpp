@@ -8,9 +8,9 @@
 inline CONSOLE_SCREEN_BUFFER_INFO cbInfo;
 inline HANDLE hConsole;
 inline int originalColor;
-#define WARNINGCOLOR(msg) { SetConsoleTextAttribute(hConsole, 14); msg; SetConsoleTextAttribute(hConsole, originalColor); }
-#define ERRORCOLOR(msg) { SetConsoleTextAttribute(hConsole, 12); msg; SetConsoleTextAttribute(hConsole, originalColor); }
-#define SUCCESSCOLOR(msg) { SetConsoleTextAttribute(hConsole, 10); msg; SetConsoleTextAttribute(hConsole, originalColor); }
+#define WARNINGCOLOR(msg) do { SetConsoleTextAttribute(hConsole, 14); msg; SetConsoleTextAttribute(hConsole, originalColor); } while(0)
+#define ERRORCOLOR(msg) do { SetConsoleTextAttribute(hConsole, 12); msg; SetConsoleTextAttribute(hConsole, originalColor); } while(0)
+#define SUCCESSCOLOR(msg) do { SetConsoleTextAttribute(hConsole, 10); msg; SetConsoleTextAttribute(hConsole, originalColor); } while(0)
 #else
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
