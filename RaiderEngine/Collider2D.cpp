@@ -21,7 +21,7 @@ bool Collider2D::linesIntersect(glm::vec2 pt1, glm::vec2 pt2, glm::vec2 pt3, glm
 bool Collider2D::pointInPoly(glm::vec2 pt, glm::vec2 polyPts[], int numPts) {
 	bool collision = false;
 	for (int i = 0; i < numPts; ++i) {
-		glm::vec2 vc(polyPts[i]), vn(polyPts[i == numPts-1 ? 0 : i + 1]);
+		glm::vec2 vc(polyPts[i]), vn(polyPts[(i+1) % numPts]);
 		if (((vc.y >= pt.y && vn.y < pt.y) || (vc.y < pt.y && vn.y >= pt.y)) && (pt.x < (vn.x - vc.x) * (pt.y - vc.y) / (vn.y - vc.y) + vc.x))
 			collision = !collision;
 	}
@@ -42,7 +42,7 @@ bool Collider2D::collisionRectangleRotatedRectangle(Collider2DRectangle a, glm::
 	b.getRotatedCornerPoints(bpoints, bPos, brot);
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j) {
-			if (linesIntersect(apoints[i], apoints[i == 3 ? 0 : i + 1], bpoints[j], bpoints[j == 3 ? 0 : j + 1]))
+			if (linesIntersect(apoints[i], apoints[(i+1) % 4], bpoints[j], bpoints[(j+1) % 4]))
 				return true;
 		}
 		
@@ -57,7 +57,7 @@ bool Collider2D::collisionRectanglePolygon(Collider2DRectangle a, glm::vec2 aPos
 	b.getRotatedPoints(&bpoints[0], bPos, brot);
 	for (int i = 0; i < 4; ++i)
 		for (unsigned int j = 0; j < bpoints.size(); ++j) {
-			if (linesIntersect(apoints[i], apoints[i == 3 ? 0 : i + 1], bpoints[j], bpoints[j == bpoints.size()-1 ? 0 : j + 1]))
+			if (linesIntersect(apoints[i], apoints[(i+1) % 4], bpoints[j], bpoints[(j+1) % bpoints.size()]))
 				return true;
 		}
 
@@ -79,7 +79,7 @@ bool Collider2D::collisionLineRectangle(Collider2DLine a, glm::vec2 aPos, float 
 	b.getRotatedCornerPoints(points, bPos, brot);
 	// check for any intersections
 	for (int i = 0; i < 4; ++i)
-		if (linesIntersect(pt1,pt2,points[i],points[i==3?0:i+1]))
+		if (linesIntersect(pt1,pt2,points[i],points[(i+1) % 4]))
 			return true;
 	// no intersections; check if the line segment is fully contained within the rectangle
 	return pointInPoly(pt1, points, 4);
@@ -93,7 +93,7 @@ bool Collider2D::collisionLinePolygon(Collider2DLine a, glm::vec2 aPos, float ar
 	b.getRotatedPoints(&points[0], bPos, brot);
 	// check for any intersections
 	for (unsigned int i = 0; i < points.size(); ++i)
-		if (linesIntersect(pt1,pt2,points[i],points[i==points.size()-1?0:i+1]))
+		if (linesIntersect(pt1,pt2,points[i],points[(i+1) % points.size()]))
 			return true;
 	// no intersections; check if the line segment is fully contained within the rectangle
 	return pointInPoly(pt1, &points[0], points.size());
@@ -152,7 +152,7 @@ bool Collider2D::collisionPolygonPolygon(Collider2DPolygon a, glm::vec2 aPos, fl
 	b.getRotatedPoints(&bpoints[0], bPos, brot);
 	for (unsigned int i = 0; i < apoints.size(); ++i)
 		for (unsigned int j = 0; j < bpoints.size(); ++j) {
-			if (linesIntersect(apoints[i], apoints[i == apoints.size() - 1 ? 0 : i + 1], bpoints[j], bpoints[j == bpoints.size() - 1 ? 0 : j + 1]))
+			if (linesIntersect(apoints[i], apoints[(i+1) % apoints.size()], bpoints[j], bpoints[(j+1) % bpoints.size()]))
 				return true;
 		}
 
