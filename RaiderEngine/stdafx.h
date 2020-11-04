@@ -58,3 +58,7 @@
 #define DEMO_TILEMAP 5
 #define DEMO_2D_PLATFORMER 6
 #define COMPILE_DEMO DEMO_3D_CAROUSEL
+
+// temporary polyfill for std:c++latest due to regression causing internal error some time between VS 16.7.4 and VS 16.7.6
+#define contains(x) count(x) != 0
+#define ends_with(x) back() == x
