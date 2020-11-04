@@ -43,9 +43,6 @@ public:
 	*/
 	void updateViewProj();
 
-	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-	void ProcessKeyboard(Camera_Movement direction);
-
 	/*
 	set the camera's yaw value, clamping it to the range of 0-359
 	@param inYaw: the new yaw value to use

@@ -25,52 +25,27 @@ void Camera::updateViewProj() {
 	view = glm::lookAt(Position, Position + Front, Up);
 }
 
-void Camera::ProcessKeyboard(Camera_Movement direction) {
-	if (!controllable) return;
-	float velocity = (keyHeld("run") ? sprintSpeed : movementSpeed) * deltaTime;
-	if (direction == FORWARD)
-		//Position -= glm::normalize(glm::cross(Right, WorldUp)) * velocity;
-		Position += Front * velocity;
-	if (direction == BACKWARD)
-		//Position += glm::normalize(glm::cross(Right, WorldUp)) * velocity;
-		Position -= Front * velocity;
-	if (direction == LEFT)
-		Position -= Right * velocity;
-	if (direction == RIGHT)
-		Position += Right * velocity;
-}
-
 void Camera::setYaw(float inYaw) {
 	Yaw = fmodf(inYaw, 360);
-	while (Yaw < 0)
+	if (Yaw < 0)
 		Yaw += 360;
 }
 
 void Camera::moveFlycam() {
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		ProcessKeyboard(FORWARD);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		ProcessKeyboard(BACKWARD);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		ProcessKeyboard(LEFT);
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		ProcessKeyboard(RIGHT);
+	if (!controllable) return;
+	float velocity = (keyHeld("run") ? sprintSpeed : movementSpeed) * deltaTime;
+	Position += (float)(keyHeld("mvForward") - keyHeld("mvBackward")) * Front * velocity;
+	Position += (float)(keyHeld("mvRight") - keyHeld("mvLeft")) * Right * velocity;
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
 	if (!controllable) return;
-	xoffset *= MouseSensitivity;
-	yoffset *= MouseSensitivity;
-	setYaw(Yaw + xoffset);
-	Pitch += yoffset;
+	setYaw(Yaw + xoffset*MouseSensitivity);
+	Pitch += yoffset*MouseSensitivity;
 
 	// Make sure that when pitch is out of bounds, screen doesn't get flipped
-	if (constrainPitch) {
-		if (Pitch > 89.0f)
-			Pitch = 89.0f;
-		if (Pitch < -89.0f)
-			Pitch = -89.0f;
-	}
+	if (constrainPitch)
+		Pitch = glm::min(glm::max(Pitch,-89.f),89.f);
 
 	// Update Front, Right and Up Vectors using the updated Euler angles
 	updateCameraVectors();
@@ -78,12 +53,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 
 void Camera::ProcessMouseScroll(float yoffset) {
 	if (!controllable) return;
-	if (Zoom >= 1.0f && Zoom <= 45.0f)
-		Zoom -= yoffset;
-	if (Zoom <= 1.0f)
-		Zoom = 1.0f;
-	if (Zoom >= 45.0f)
-		Zoom = 45.0f;
+	Zoom = glm::min(glm::max(Zoom - yoffset*4, 1.f), 45.f);
 }
 
 void Camera::updateCameraVectors() {
