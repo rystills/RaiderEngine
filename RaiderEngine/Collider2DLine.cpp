@@ -32,12 +32,10 @@ bool Collider2DLine::collision(glm::vec2 myPos, float myRot, Collider2D* other, 
 }
 
 void Collider2DLine::getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {
-	pts[0] = glm::vec2(sx, sy);
-	pts[1] = glm::vec2(ex, ey);
-	RotatePoint(pts[0], glm::vec2(0, 0), rot);
-	RotatePoint(pts[1], glm::vec2(0, 0), rot);
-	pts[0] += pos;
-	pts[1] += pos;
+	pts[0] = glm::vec2(sx+pos.x, sy+pos.y);
+	pts[1] = glm::vec2(ex+pos.x, ey+pos.y);
+	RotatePoint(pts[0], pos, rot);
+	RotatePoint(pts[1], pos, rot);
 }
 
 void Collider2DLine::debugDraw(glm::vec2 pos, float rot) {

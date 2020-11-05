@@ -35,9 +35,8 @@ bool Collider2DPolygon::collision(glm::vec2 myPos, float myRot, Collider2D* othe
 
 void Collider2DPolygon::getRotatedPoints(glm::vec2 pts[], glm::vec2 pos, float rot) {
 	for (unsigned int i = 0; i < points.size(); ++i) {
-		pts[i] = glm::vec2(points[i].x,points[i].y);
-		RotatePoint(pts[i], glm::vec2(0), rot);
-		pts[i] += pos;
+		pts[i] = glm::vec2(points[i].x + pos.x,points[i].y + pos.y);
+		RotatePoint(pts[i], pos, rot);
 	}
 }
 

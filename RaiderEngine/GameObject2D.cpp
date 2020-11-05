@@ -153,7 +153,7 @@ bool GameObject2D::inScreenBounds() {
 }
 
 bool GameObject2D::collidesWith(GameObject2D* other, int colLayer) {
-	return collider && other->collider && other->collider->collisionLayer == colLayer ? collider->collision(center, rotation, other->collider, other->center, other->rotation) : false;
+	return collider && other->collider && other->collider->collisionLayer == colLayer && collider->collision(center, rotation, other->collider, other->center, other->rotation);
 }
 bool GameObject2D::collidesWith(Tilemap* t, int colLayer) {
 	// check collisions with all tiles that lie within the square containing our bounding radius
