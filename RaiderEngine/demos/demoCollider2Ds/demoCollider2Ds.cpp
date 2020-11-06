@@ -63,9 +63,6 @@ int main() {
 			g2->collider = cols[(g2ColInd+=1) %= numCols];
 		textObjects[1]->text = "Colliding ? " + (g1->collidesWith(g2) ? std::string("true") : std::string("false")) + " | " + (g2->collidesWith(g1) ? std::string("true") : std::string("false"));
 		render(true);
-		// set the close flag if the player presses the escape key
-		if (keyPressed(GLFW_KEY_ESCAPE))
-			glfwSetWindowShouldClose(window, true);
 	}
 	closeEngine();
 }

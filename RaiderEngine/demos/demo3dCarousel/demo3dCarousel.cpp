@@ -151,9 +151,6 @@ int main() {
 		if (displayString.size() == 0)
 			queueCenterIndicator();
 		render();
-		// set the close flag if the player presses the escape key
-		if (keyPressed(GLFW_KEY_ESCAPE))
-			glfwSetWindowShouldClose(window, true);
 	}
 	closeEngine();
 }

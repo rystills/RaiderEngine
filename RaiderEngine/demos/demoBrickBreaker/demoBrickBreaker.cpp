@@ -28,9 +28,6 @@ int main() {
 		checkDemoToggles();
 		updateObjects();
 		render(true);
-		// set the close flag if the player presses the escape key
-		if (keyPressed(GLFW_KEY_ESCAPE))
-			glfwSetWindowShouldClose(window, true);
 	}
 	closeEngine();
 }

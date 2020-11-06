@@ -43,9 +43,6 @@ int main() {
 		to1->text = "total particle count: " + std::to_string(pes->particles.size() + pef->particles.size() + numPecParts + per->particles.size());
 		to2->text = "num recycled particles: " + std::to_string(pes->recycledParticleInds.size() + pef->recycledParticleInds.size() + numPecRecycled + per->recycledParticleInds.size());
 		render(true);
-		// set the close flag if the player presses the escape key
-		if (keyPressed(GLFW_KEY_ESCAPE))
-			glfwSetWindowShouldClose(window, true);
 	}
 	closeEngine();
 }

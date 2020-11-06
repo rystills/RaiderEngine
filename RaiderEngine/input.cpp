@@ -62,6 +62,10 @@ void checkDemoToggles() {
 		enableTextureMaps[2] = !enableTextureMaps[2];
 	if (keyStates[GLFW_KEY_F4][pressed])
 		enableTextureMaps[3] = !enableTextureMaps[3];
+
+	// set the close flag if the player presses the escape key
+	if (keyPressed(GLFW_KEY_ESCAPE))
+		glfwSetWindowShouldClose(window, true);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
