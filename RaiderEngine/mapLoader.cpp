@@ -81,7 +81,8 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		if (strncmp(fullName.c_str(), "go_", 3) == 0)
 			// convert a node starting with go_ into a specific GameObject instance defined in the object registry
 			// NOTE: MapNodeFlags are applied to generic models by default, but must be explicitly handled when overloading ObjectRegistryBase to spawn custom classes
-			objectRegistry->instantiateGameObject(name, pos, rot, scale, argList);
+			// NOTE: models loaded in from assimp are offset by 90 degrees (pi/2); this cancels out for static meshes and manual instantiation, but must be corrected here for GameObjects referencing their own models
+			objectRegistry->instantiateGameObject(name, pos, rot + glm::vec3(glm::half_pi<float>(),0,0), scale, argList);
 		else if (strncmp(fullName.c_str(), "l_", 2) == 0)
 			// convert a node starting with l_ into a specific Light instance defined in the object registry
 			objectRegistry->instantiateLight(name, pos, rot, scale, argList);
@@ -93,7 +94,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
 			models.insert(std::make_pair(fullName, baseModel));
-			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, false, mapNodeFlags.usePhysics, mapNodeFlags.castShadows));
+			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, mapNodeFlags.usePhysics, mapNodeFlags.castShadows));
 		}
 		// reset the current node flags
 		mapNodeFlags.usePhysics = true;

@@ -5,13 +5,13 @@
 #include "settings.hpp"
 #include "physics.hpp"
 
-GameObject::GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic, bool grabbable, bool fixInitialRotation, bool usePhysics, bool castShadows) :
+GameObject::GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic, bool grabbable, bool usePhysics, bool castShadows) :
 position(position), scaleVal(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics), castShadows(castShadows) {
 	setModel(modelName, makeStatic == 1);
 	isStatic = makeStatic > 0;
 	if (isStatic)
 		this->grabbable = false;
-	addPhysics(setRotation(rotationEA, fixInitialRotation));
+	addPhysics(setRotation(rotationEA));
 }
 
 void GameObject::initStaticVertexBuffer() {
@@ -71,9 +71,8 @@ void GameObject::rotate(const float& angle, glm::vec3 const& axes) {
 	isDirty = true;
 }
 
-glm::quat GameObject::setRotation(const glm::vec3& rotationEA, const bool& fixInitialRotation) {
-	// models loaded in from assimp are offset by 90 degrees (pi/2); we correct that here
-	glm::quat q = glm::quat(fixInitialRotation ? glm::vec3(rotationEA.x + glm::half_pi<float>(),rotationEA.y,rotationEA.z) : rotationEA);
+glm::quat GameObject::setRotation(const glm::vec3& rotationEA) {
+	glm::quat q = glm::quat(rotationEA);
 	rotation = glm::toMat4(q);
 	return q;
 }

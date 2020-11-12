@@ -57,7 +57,7 @@
 #define DEMO_PARTICLE_EMITTER_2DS 4
 #define DEMO_TILEMAP 5
 #define DEMO_2D_PLATFORMER 6
-#define COMPILE_DEMO DEMO_COLLIDER_2DS
+#define COMPILE_DEMO DEMO_3D_CAROUSEL
 
 // temporary polyfill for std:c++latest due to regression causing internal error some time between VS 16.7.4 and VS 16.7.6
 #define contains(x) count(x) != 0
