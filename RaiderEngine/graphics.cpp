@@ -227,7 +227,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 
 	FT_Init_FreeType(&ft);
 	if (FT_New_Face(ft, (fontDir + fontName + ".ttf").c_str(), 0, &face))
-		ERRORCOLOR(std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl);
+		ERRORCOLOR(std::cout << "Freetype error: Failed to load font pair '" << fontName << ", " << fontSize << "'" << std::endl);
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
 	// calculate texture width
@@ -297,6 +297,7 @@ void freetypeLoadFont(std::string fontName, int fontSize) {
 
 	FT_Done_FreeType(ft);
 	free(pixels);
+	SUCCESSCOLOR(std::cout << "Successfully loaded font pair '" << fontName << ", " << fontSize << "'" << std::endl);
 }
 
 void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {

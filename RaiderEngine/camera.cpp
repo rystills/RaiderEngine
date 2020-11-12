@@ -33,9 +33,9 @@ void Camera::setYaw(float inYaw) {
 
 void Camera::moveFlycam() {
 	if (!controllable) return;
-	float velocity = (keyHeld("run") ? sprintSpeed : movementSpeed) * deltaTime;
-	Position += (float)(keyHeld("mvForward") - keyHeld("mvBackward")) * Front * velocity;
-	Position += (float)(keyHeld("mvRight") - keyHeld("mvLeft")) * Right * velocity;
+	float velocity = (keyStates[GLFW_KEY_LEFT_SHIFT][held] ? sprintSpeed : movementSpeed) * deltaTime;
+	Position += (float)(keyStates[GLFW_KEY_W][held] - keyStates[GLFW_KEY_S][held]) * Front * velocity;
+	Position += (float)(keyStates[GLFW_KEY_D][held] - keyStates[GLFW_KEY_A][held]) * Right * velocity;
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
