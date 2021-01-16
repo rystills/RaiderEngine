@@ -73,11 +73,11 @@ void updatePhysics() {
 
 void debugDrawPhysics() {
 	const PxRenderBuffer& rb = gScene->getRenderBuffer();
-	for (PxU32 i = 0; i < rb.getNbLines(); i++) {
-		const PxDebugLine& line = rb.getLines()[i];
+	const physx::PxDebugLine* lines = rb.getLines();
+	PxU32 noLines = rb.getNbLines();
+	for (PxU32 i = 0; i < noLines; ++i)
 		// TODO: use correct state color, and draw PlayerController (same as before)
-		queueDrawLine(glm::vec3(line.pos0.x, line.pos0.y, line.pos0.z), glm::vec3(line.pos1.x, line.pos1.y, line.pos1.z), stateColors[0]);
-	}
+		queueDrawLine(glm::vec3(lines[i].pos0.x, lines[i].pos0.y, lines[i].pos0.z), glm::vec3(lines[i].pos1.x, lines[i].pos1.y, lines[i].pos1.z), stateColors[0]);
 }
 
 PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData) {

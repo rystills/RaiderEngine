@@ -14,7 +14,9 @@
 // this file holds global settings and shared engine data
 inline unsigned int SCR_WIDTH = 1280, SCR_HEIGHT = 720, TARGET_WIDTH = 1280, TARGET_HEIGHT = 720, UI_TARGET_WIDTH = 1280, UI_TARGET_HEIGHT = 720, MONITOR_WIDTH = 0, MONITOR_HEIGHT = 0, MONITOR_REFRESH_RATE = 0;
 inline const unsigned int SHADOW_WIDTH = 512, SHADOW_HEIGHT = 512;
-inline bool debugDraw = false;
+inline bool drawColliders = false;
+inline bool drawNormals = false;
+inline bool drawLightCubes = false;
 inline bool drawLightSpheres = false;
 // global visual debugging toggles
 inline bool enableTextureMaps[Model::numMapTypes] = {true, true, true, true};

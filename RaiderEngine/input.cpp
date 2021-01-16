@@ -43,9 +43,15 @@ void checkDemoToggles() {
 	if (keyPressed(GLFW_KEY_F11))
 		setWindowMode(renderState.fullScreen ? 1280 : MONITOR_WIDTH, renderState.fullScreen ? 720 : MONITOR_HEIGHT, !renderState.fullScreen);
 
-	// debug toggle
+	// debug toggles
 	if (keyStates[GLFW_KEY_F6][pressed])
-		debugDraw = !debugDraw;
+		drawColliders = !drawColliders;
+	if (keyStates[GLFW_KEY_F7][pressed])
+		drawNormals = !drawNormals;
+	if (keyStates[GLFW_KEY_F8][pressed])
+		drawLightCubes = !drawLightCubes;	
+	if (keyStates[GLFW_KEY_F9][pressed])
+		drawLightSpheres = !drawLightSpheres;
 
 	// lighting toggle
 	if (keyPressed(GLFW_KEY_F5)) {

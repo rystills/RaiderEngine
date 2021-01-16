@@ -677,15 +677,19 @@ void renderLightingPass() {
 }
 
 void debugDrawLightCubes() {
-	if (debugDraw) {
+	if (drawLightCubes) {
 		shaders["lightCube"]->use();
 		shaders["lightCube"]->setMat4("projection", mainCam->projection);
 		shaders["lightCube"]->setMat4("view", mainCam->view);
+	}
+	if (drawLightCubes || drawLightSpheres) {
 		for (unsigned int i = 0; i < lights.size(); ++i) {
-			// render small solid cube at light position
-			shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(lights[i]->radius*.005f)));
-			shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
-			renderLightCube();
+			if (drawLightCubes) {
+				// render small solid cube at light position
+				shaders["lightCube"]->setMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), lights[i]->position), glm::vec3(lights[i]->radius*.005f)));
+				shaders["lightCube"]->setVec3("lightColor", lights[i]->on ? lights[i]->color : lights[i]->offColor);
+				renderLightCube();
+			}
 			if (drawLightSpheres) {
 				// render wireframe sphere showing light radius
 				#define numSegs 12
@@ -716,8 +720,24 @@ void debugDrawLightCubes() {
 void renderLines() {
 	// TODO: distinguish between queuing 3d lines and points to be rendered, and 2d lines and points to be rendered
 	// draw 3d colliders
-	if (debugDraw)
+	if (drawColliders)
 		debugDrawPhysics();
+	// draw normals
+	if (drawNormals) {
+		glm::vec4 vertP, vertE;
+		for (auto&& kv : gameObjects) {
+			if (kv.second.size() == 0)
+				continue;
+			for (unsigned int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
+				for (const Vertex& v : kv.second[0]->model->meshes[i].vertices) {
+					vertP = glm::vec4(v.Position, 1);
+					vertE = vertP + glm::vec4(v.Normal * .05f, 0);
+					for (unsigned int r = 0; r < kv.second.size(); ++r)
+						queueDrawLine(kv.second[r]->modelTransform * vertP, kv.second[r]->modelTransform * vertE, Color::indigo);
+				}
+			}
+		}
+	}
 	if (!pointsQueue.empty() || !linesQueue.empty()) {
 		// setup
 		if (shaders["lineShader"]->use()) {
@@ -734,7 +754,7 @@ void renderLines() {
 
 void renderLines2D() {
 	// TODO: enable rendering 2d points
-	if (debugDraw) {
+	if (drawColliders) {
 		// draw 2d colliders
 		for (auto&& kv : gameObject2Ds)
 			for (unsigned int i = 0; i < kv.second.size(); ++i)
@@ -744,7 +764,7 @@ void renderLines2D() {
 			for (unsigned int i = 0; i < t->mapSize.x; ++i)
 				for (unsigned int r = 0; r < t->mapSize.y; ++r)
 					if (t->tileColliders[t->map[i][r]])
-						t->tileColliders[t->map[i][r]]->debugDraw(glm::vec2(t->pos.x + t->gridSize / 2.f + t->gridSize * i, t->pos.y + t->gridSize / 2.f + t->gridSize * r),0);	
+						t->tileColliders[t->map[i][r]]->debugDraw(glm::vec2(t->pos.x + t->gridSize / 2.f + t->gridSize * i, t->pos.y + t->gridSize / 2.f + t->gridSize * r), 0);
 	}
 	if (!linesQueue.empty()) {
 		// setup

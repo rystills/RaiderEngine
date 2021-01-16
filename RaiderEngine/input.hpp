@@ -30,7 +30,7 @@ reset all input events that occur for a single frame only
 void resetSingleFrameInput();
 
 /*
-toggle fullScreen, debugDraw, or lighting
+toggle fullscreen, lighting, and rendering of various debug lines / map types
 */
 void checkDemoToggles();
 

@@ -31,7 +31,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 
 	setVsync(false);
-	debugDraw = true;
+	drawColliders = true;
 	setClearColor(.6f, 1.f, .4f, 1);
 	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20, Color::black, "Inter-Regular", 18));
 	addTextObject(new TextObject("Colliding ? ", 6, UI_TARGET_HEIGHT - 44, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 18));
