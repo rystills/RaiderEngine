@@ -9,6 +9,7 @@ inline std::string displayString = "";
 inline PxDistanceJoint* gMouseJoint = NULL;
 inline PxRigidDynamic* gMouseSphere = NULL;
 inline PxShape* sphereShape = NULL;
+inline PxShape* hitShape = NULL;
 inline float sphereDist;
 inline PxRigidActor* hitBody;
 

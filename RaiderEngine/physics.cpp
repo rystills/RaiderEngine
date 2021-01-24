@@ -20,7 +20,7 @@ void initPhysics() {
 	if (!gPhysics)
 		ERRORCOLOR(std::cout << "PxCreatePhysics failed!" << std::endl);
 
-	// create physcs scene
+	// create physics scene
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f, -GRAVITY_STRENGTH, 0.0f);
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);

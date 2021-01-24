@@ -65,6 +65,7 @@ void updateHeldBody() {
 			((PxRigidDynamic*)hitBody)->wakeUp();
 
 			// move hit object to custom filter so it does not block raycasts while held
+			hitShape = hit.block.shape;
 			hit.block.shape->setQueryFilterData(noHitFilterData);
 
 			// create joint between sphere and hit object
@@ -79,9 +80,12 @@ void updateHeldBody() {
 		((PxRigidDynamic*)hitBody)->setAngularVelocity(PxVec3(0, 0, 0), false);
 		// reset held object linear velocity as well
 		((PxRigidDynamic*)hitBody)->setLinearVelocity(PxVec3(0, 0, 0), false);
-		// continue to hold object
-		PxRaycastBuffer hit = raycast(mainCam->Position, mainCam->Front, sphereDist);
-		// move held object sphere in front of obstacles to prevent it from clipping through walls / into other objects
+		// perform a sweep from the camera using the held body's shape and orientation to determine the precise destination
+		PxQueryFilterData queryFilterData = PxQueryFilterData();
+		queryFilterData.data = defaultFilterData;
+		PxSweepBuffer hit;
+		PxTransform castOrigin(PxVec3(mainCam->Position.x, mainCam->Position.y, mainCam->Position.z), hitBody->getGlobalPose().q);
+		gScene->sweep(hitShape->getGeometry().convexMesh(), castOrigin, PxVec3(mainCam->Front.x,mainCam->Front.y,mainCam->Front.z),sphereDist,hit, PxHitFlag::eDEFAULT, queryFilterData);
 		glm::vec3 newPos = mainCam->Position + mainCam->Front * (hit.hasBlock ? hit.block.distance : sphereDist);
 		gMouseSphere->setGlobalPose(PxTransform(newPos.x, newPos.y, newPos.z));
 
