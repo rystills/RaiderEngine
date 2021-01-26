@@ -122,6 +122,11 @@ float Model::calculateVolume() {
 void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices(mesh->mNumVertices);
 	std::vector<unsigned int> indices;
+	// process materials
+	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
+	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	std::vector<Texture> matTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 
 	// populate vertex data
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
@@ -130,7 +135,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 		// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 		// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
-		vertices[i].TexCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, -mesh->mTextureCoords[0][i].y) : glm::vec2(0.f);
+		vertices[i].TexCoords = mesh->mTextureCoords[0] ? glm::vec4(mesh->mTextureCoords[0][i].x, -mesh->mTextureCoords[0][i].y, matTextures[0].scrollSpeed.x, matTextures[0].scrollSpeed.y) : glm::vec4(0.f);
 		vertices[i].Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 	}
 	// populate index (triangle) data
@@ -138,12 +143,9 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		for (unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
 			indices.push_back(mesh->mFaces[i].mIndices[j]);
 
-	// process materials
-	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	
 	// return a mesh object created from the extracted mesh data
-	meshes.emplace_back(vertices, indices, loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"));
+	meshes.emplace_back(vertices, indices, matTextures);
 }
 
 void Model::createDefaultMaterialMaps() {
@@ -190,6 +192,12 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, the default GL_LINEAR_MIPMAP_LINEAR/GL_LINEAR is likely preferable.
 		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, filterMin2D, filterMax2D);
 		loadedTex.type = texture_diffuse;
+		// apply scroll data if present
+		std::string scrollMapName = texFullName.substr(0, texFullName.find_last_of('.')) + "_SCROLL.txt";
+		if (std::filesystem::exists(textureDir + scrollMapName)) {
+			std::ifstream input(textureDir + scrollMapName);
+			input >> loadedTex.scrollSpeed.x >> loadedTex.scrollSpeed.y;
+		}
 		texturesLoaded[texName] = loadedTex;
 		SUCCESSCOLOR(std::cout << "loaded texture_diffuse texture: '" << texName << "'" << std::endl);
 		return loadedTex;
@@ -230,12 +238,13 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
+
+		std::string mapName = str.C_Str();
+		int sPos = ignoreModelTexturePaths ? ('\\' + mapName).find_last_of('\\') : 0;
+		std::string mapBaseName = mapName.substr(sPos, mapName.find_last_of('.') - sPos);
 		// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
 		for (int k = 0; k < numMapTypes; ++k) {
 			// get current map name
-			std::string mapName = str.C_Str();
-			int sPos = ignoreModelTexturePaths ? ('\\' + mapName).find_last_of('\\') : 0;
-			std::string mapBaseName = mapName.substr(sPos, mapName.find_last_of('.')-sPos);
 			mapName = mapBaseName + mapExtensions[k];
 
 			// check if the current texture has already been loaded
@@ -249,8 +258,13 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 					Texture extraTex;
 					textureFromFile(textureDir + mapBaseName + '/' + mapName, extraTex);
 					extraTex.type = static_cast<MapType>(k);
+					// apply scroll data if present
+					if (k == 0 && std::filesystem::exists(textureDir + mapBaseName + '/' + mapBaseName + "_SCROLL.txt")) {
+						std::ifstream input(textureDir + mapBaseName + '/' + mapBaseName + "_SCROLL.txt");
+						input >> extraTex.scrollSpeed.x >> extraTex.scrollSpeed.y;
+					}
 					textures.push_back(extraTex);
-					texturesLoaded[mapName] = extraTex;  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+					texturesLoaded[mapName] = extraTex;  // store it as a texture loaded for the entire model, to ensure we won't unnecessarily load duplicate textures
 					SUCCESSCOLOR(std::cout << "loaded " << mapTypeNames[k] << " texture: '" << mapName << "'" << std::endl);
 				}
 				else {

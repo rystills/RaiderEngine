@@ -65,6 +65,7 @@ struct RenderState {
 	bool fullScreen = false;
 	std::pair<std::string, int> lastFontUsed;
 	glm::vec3 lastFontColor;
+	glm::vec2 uvScroll2D = glm::vec2(std::numeric_limits<float>::infinity());
 } inline renderState;
 
 /* methods to add/remove objects from the engine */

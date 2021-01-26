@@ -104,7 +104,7 @@ int main() {
 	freetypeLoadFont("Inter-Regular", 18);
 	freetypeLoadFont("Inter-Regular", 24);
 	addTextObject(new FpsDisplay(6, UI_TARGET_HEIGHT - 20,Color::white, "Inter-Regular", 18));
-	addTextObject(new TextObject("Press f1-f6 to toggle visuals and F to toggle flycam",6, UI_TARGET_HEIGHT - 50, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 24));
+	addTextObject(new TextObject("Press f1-f9 to toggle visuals, f11 to toggle fullscreen, and F to toggle flycam",6, UI_TARGET_HEIGHT - 50, glm::vec3(.8f, .2f, .5f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Use WASD to move, space to jump, left ctrl to crouch, and left shift to sprint", 6, UI_TARGET_HEIGHT - 80, glm::vec3(.5f, .8f, .2f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Press left mouse to grab objects, and right mouse to observe hovered objects", 6, UI_TARGET_HEIGHT - 110, glm::vec3(.2f, .5f, .8f), "Inter-Regular", 24));
 	addTextObject(new TextObject("Press 1-4 to switch between the demo scenes", 6, UI_TARGET_HEIGHT - 140, glm::vec3(1, 1, 0), "Inter-Regular", 24));

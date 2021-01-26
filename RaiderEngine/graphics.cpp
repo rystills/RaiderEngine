@@ -611,6 +611,7 @@ void renderGeometryPass() {
 		shaders["shaderGeometryPass"]->setMat4("view", mainCam->view);
 	if (mainCam->Position != renderState.viewPos)
 		shaders["shaderGeometryPass"]->setVec3("viewPos", mainCam->Position);
+	shaders["shaderGeometryPass"]->setFloat("Time", (float)totalTime);
 	drawGameObjects("shaderGeometryPass");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -806,11 +807,16 @@ void render2D(bool clearScreen) {
 
 	// render GameObject2Ds
 	shaders["2DShader"]->use();
+	shaders["2DShader"]->setFloat("Time", (float)totalTime);
 	glBindVertexArray(GameObject2D::VAO);
 	for (auto&& kv : gameObject2Ds) {
 		// don't render gameObjects using the default (empty) sprite
 		if (kv.second[0]->sprite.id == Model::defaultDiffuseMap.id)
 			continue;
+		if (kv.second[0]->sprite.scrollSpeed != renderState.uvScroll2D) {
+			renderState.uvScroll2D = kv.second[0]->sprite.scrollSpeed;
+			shaders["2DShader"]->setVec2("uvScroll", renderState.uvScroll2D.x, renderState.uvScroll2D.y);
+		}
 		glBindTexture(GL_TEXTURE_2D, kv.second[0]->sprite.id);
 		// copy GameObject2D model matrices before rendering them all in one go
 		// TODO: consider caching model matrix array / buffered VAO data for static GameObject2Ds

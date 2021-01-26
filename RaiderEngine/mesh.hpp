@@ -5,7 +5,7 @@
 struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
-    glm::vec2 TexCoords;
+    glm::vec4 TexCoords;
     glm::vec3 Tangent;
 };
 
@@ -14,6 +14,7 @@ struct Texture {
 	enum MapType type;
 	std::string path;
 	GLuint width, height;
+	glm::vec2 scrollSpeed = glm::vec2(0);
 };
 
 /*
