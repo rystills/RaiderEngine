@@ -340,67 +340,67 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\deferred_shading.fs">
+    <None Include="shaders\2DShader.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\deferred_shading.vs">
+    <None Include="shaders\2DShader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\g_buffer.fs">
+    <None Include="shaders\deferred_shading.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\g_buffer.vs">
+    <None Include="shaders\deferred_shading.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\point_shadows_depth.fs">
+    <None Include="shaders\g_buffer.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\point_shadows_depth.gs">
+    <None Include="shaders\g_buffer.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\point_shadows_depth.vs">
+    <None Include="shaders\lightCube.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\textShader.fs">
+    <None Include="shaders\lightCube.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\textShader.vs">
+    <None Include="shaders\lineShader.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\lineShader.fs">
+    <None Include="shaders\lineShader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\lineShader.vs">
+    <None Include="shaders\lineShader2D.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\2DShader.fs">
+    <None Include="shaders\lineShader2D.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\2DShader.vs">
+    <None Include="shaders\Particle2DShader.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\lineShader2D.fs">
+    <None Include="shaders\Particle2DShader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\lineShader2D.vs">
+    <None Include="shaders\point_shadows_depth.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\Particle2DShader.fs">
+    <None Include="shaders\point_shadows_depth.geom">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\Particle2DShader.vs">
+    <None Include="shaders\point_shadows_depth.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\tilemapShader.fs">
+    <None Include="shaders\textShader.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\tilemapShader.vs">
+    <None Include="shaders\textShader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\lightCube.vs">
+    <None Include="shaders\tilemapShader.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\lightCube.fs">
+    <None Include="shaders\tilemapShader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

@@ -494,16 +494,16 @@ void initGL() {
 
 void loadShaders() {
 	// load shaders
-	shaders["shaderGeometryPass"] = std::make_unique<Shader>("g_buffer.vs", "g_buffer.fs");
-	shaders["shaderLightingPass"] = std::make_unique<Shader>("deferred_shading.vs", "deferred_shading.fs");
-	shaders["lightCube"] = std::make_unique<Shader>("lightCube.vs", "lightCube.fs");
-	shaders["lineShader"] = std::make_unique<Shader>("lineShader.vs", "lineShader.fs");
-	shaders["lineShader2D"] = std::make_unique<Shader>("lineShader2D.vs", "lineShader2D.fs");
-	shaders["textShader"] = std::make_unique<Shader>("textShader.vs", "textShader.fs");
-	shaders["tilemapShader"] = std::make_unique<Shader>("tilemapShader.vs", "tilemapShader.fs");
-	shaders["2DShader"] = std::make_unique<Shader>("2DShader.vs", "2DShader.fs");
-	shaders["Particle2DShader"] = std::make_unique<Shader>("Particle2DShader.vs", "Particle2DShader.fs");
-	shaders["pointShadowsDepth"] = std::make_unique<Shader>("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
+	shaders["shaderGeometryPass"] = std::make_unique<Shader>("g_buffer.vert", "g_buffer.frag");
+	shaders["shaderLightingPass"] = std::make_unique<Shader>("deferred_shading.vert", "deferred_shading.frag");
+	shaders["lightCube"] = std::make_unique<Shader>("lightCube.vert", "lightCube.frag");
+	shaders["lineShader"] = std::make_unique<Shader>("lineShader.vert", "lineShader.frag");
+	shaders["lineShader2D"] = std::make_unique<Shader>("lineShader2D.vert", "lineShader2D.frag");
+	shaders["textShader"] = std::make_unique<Shader>("textShader.vert", "textShader.frag");
+	shaders["tilemapShader"] = std::make_unique<Shader>("tilemapShader.vert", "tilemapShader.frag");
+	shaders["2DShader"] = std::make_unique<Shader>("2DShader.vert", "2DShader.frag");
+	shaders["Particle2DShader"] = std::make_unique<Shader>("Particle2DShader.vert", "Particle2DShader.frag");
+	shaders["pointShadowsDepth"] = std::make_unique<Shader>("point_shadows_depth.vert", "point_shadows_depth.frag", "point_shadows_depth.geom");
 
 	// configure shaders
 	shaders["shaderLightingPass"]->use();
