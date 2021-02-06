@@ -1,3 +1,4 @@
+// deferred_shading (fs) - heavy lifting shader; retrives the data from the gbuffer, then calculates lighting, shadows, etc.
 #version 330 core
 out vec4 FragColor;
 

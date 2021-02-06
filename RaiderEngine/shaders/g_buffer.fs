@@ -1,3 +1,4 @@
+// g_buffer (fs) - checks for alpha discard, then stores normal / albedoSpec / position in the gbuffer to be used by deferred_shading
 #version 330 core
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec4 gNormal;

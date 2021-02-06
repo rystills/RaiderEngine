@@ -1,3 +1,4 @@
+// lightCube (fs) - renders a white cube at the position of a light source
 #version 330 core
 layout (location = 0) out vec4 FragColor;
 

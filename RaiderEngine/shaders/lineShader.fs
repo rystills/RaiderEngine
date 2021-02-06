@@ -1,5 +1,5 @@
+// lineShader (fs) - handles 3D line rendering
 #version 330 core
-
 in vec4 color_from_vshader;
 out vec4 out_color;
 

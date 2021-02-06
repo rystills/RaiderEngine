@@ -1,3 +1,4 @@
+// point_shadows_depth (fs) - renders point light shadows to a depth cubemap
 #version 330 core
 in vec4 FragPos;
 

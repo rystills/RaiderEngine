@@ -1,3 +1,4 @@
+// particle2DShader (fs) - renders 2D particle systems
 #version 330 core
 in vec2 TexCoords;
 out vec4 color;

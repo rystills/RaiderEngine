@@ -1,3 +1,4 @@
+// lightCube (vs) - renders a white cube at the position of a light source
 #version 330 core
 layout (location = 0) in vec3 aPos;
 

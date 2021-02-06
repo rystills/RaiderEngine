@@ -1,3 +1,4 @@
+// point_shadows_depth (gs) - renders point light shadows to a depth cubemap
 #version 330 core
 layout (triangles) in;
 layout (triangle_strip, max_vertices=18) out;
