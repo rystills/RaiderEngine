@@ -528,7 +528,7 @@ void loadShaders() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 }
 
-void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignoreNonShadowCasters) {
+void drawGameObjects(std::string shaderName, int shouldSendTextures, bool ignoreNonShadowCasters) {
 	// TODO: consider caching model matrix array / buffered VAO data for static GameObjects
 	glBindBuffer(GL_ARRAY_BUFFER, GameObject::instancedModelVBO);
 	for (auto&& kv : gameObjects) {
@@ -548,8 +548,8 @@ void drawGameObjects(std::string shaderName, bool shouldSendTextures, bool ignor
 		for (unsigned int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
 			glBindVertexArray(*kv.second[0]->model->meshes[i].VAO);
 			// transfer the textures for the current submesh once initially
-			if (shouldSendTextures)
-				kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName]);
+			if (shouldSendTextures > 0)
+				kv.second[0]->model->meshes[i].sendTexturesToShader(*shaders[shaderName], shouldSendTextures == 1);
 			// now render the current submesh for all GameObjects
 			if (kv.second.size() > modelMatrices3D.capacity()) {
 				modelMatrices3D.reserve(kv.second.size());
@@ -592,7 +592,7 @@ void renderDepthMap() {
 			for (unsigned int i = 0; i < 6; ++i)
 				shaders["pointShadowsDepth"]->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 			shaders["pointShadowsDepth"]->setVec3("lightPos", lightPos);
-			drawGameObjects("pointShadowsDepth", false, true);
+			drawGameObjects("pointShadowsDepth", 1, true);
 		}
 	}
 }

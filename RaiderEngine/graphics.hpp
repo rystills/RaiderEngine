@@ -146,10 +146,10 @@ void loadShaders();
 /*
 draw all GameObjects to the specified shader
 @param shaderName: the shader to which to render the GameObjects
-@param shouldSendTextures: whether or not to render with textures (performance gain by disabling this when generating the depthMap) 
+@param shouldSendTextures: whether or not to send textures to the shader; 0 = no textures, 1 = diffuse only, 2 = all textures
 @param ignoreNonShadowCasters: whether or not to skip GameObjects that are set to not cast shadows
 */
-void drawGameObjects(std::string shaderName, bool shouldSendTextures = true, bool ignoreNonShadowCasters = false);
+void drawGameObjects(std::string shaderName, int shouldSendTextures = 2, bool ignoreNonShadowCasters = false);
 
 /*
 render the depth information from each of NR_LIGHTS to the scene

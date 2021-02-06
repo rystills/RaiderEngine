@@ -19,11 +19,25 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 	setupMesh();
 }
 
-void Mesh::sendTexturesToShader(Shader shader) {
+void Mesh::sendTexturesToShader(Shader shader, bool diffuseOnly) {
+	if (diffuseOnly) {
+		// bind the first diffuse texture
+		for (int i = 0; i < textures.size(); ++i) {
+			if (textures[i].type == MapType::texture_diffuse) {
+				glActiveTexture(GL_TEXTURE0); // activate the proper texture unit before binding
+				// set the sampler to the correct texture unit
+				shader.setInt((Model::mapTypeNames[MapType::texture_diffuse] + '1').c_str(), 0);
+				// bind the texture
+				glBindTexture(GL_TEXTURE_2D, enableTextureMaps[MapType::texture_diffuse] ? textures[i].id : Model::mapDefaults[MapType::texture_diffuse]->id);
+				break;
+			}
+		}
+		return;
+	}
 	// bind appropriate textures
 	unsigned int texMapNums[Model::numMapTypes] = { 0 };
 	for (unsigned int i = 0; i < textures.size(); ++i) {
-		glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
+		glActiveTexture(GL_TEXTURE0 + i); // activate the proper texture unit before binding
 		MapType type = textures[i].type;
 
 		// set the sampler to the correct texture unit

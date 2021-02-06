@@ -40,8 +40,10 @@ public:
 
 	/*
 	bind all of the textures used by this mesh for rendering, and update the shader uniforms accordingly
+	@param shader: the shader to which we will send our textures
+	@param diffuseOnly: whether we will send only the diffuse texture, or all textures
 	*/
-	void sendTexturesToShader(Shader shader);
+	void sendTexturesToShader(Shader shader, bool diffuseOnly = false);
 
 private:
     /*
