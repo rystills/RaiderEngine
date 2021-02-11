@@ -44,6 +44,12 @@ public:
 	void updateViewProj();
 
 	/*
+	set the camera's pitch value, optionally clamping it to the range of -89-89
+	@param inPitch: the new pitch value to use
+	*/
+	void setPitch(float inPitch, GLboolean constrainPitch = true);
+
+	/*
 	set the camera's yaw value, clamping it to the range of 0-359
 	@param inYaw: the new yaw value to use
 	*/

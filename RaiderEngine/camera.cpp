@@ -25,6 +25,12 @@ void Camera::updateViewProj() {
 	view = glm::lookAt(Position, Position + Front, Up);
 }
 
+void Camera::setPitch(float inPitch, GLboolean constrainPitch) {
+	Pitch = inPitch;
+	if (constrainPitch)
+		Pitch = glm::min(glm::max(Pitch,-89.f),89.f);
+}
+
 void Camera::setYaw(float inYaw) {
 	Yaw = fmodf(inYaw, 360);
 	if (Yaw < 0)
