@@ -71,14 +71,39 @@ void GameObject::rotate(const float& angle, glm::vec3 const& axes) {
 	isDirty = true;
 }
 
-glm::quat GameObject::setRotation(const glm::vec3& rotationEA) {
+glm::quat GameObject::setRotation(glm::vec3 const& rotationEA) {
 	glm::quat q = glm::quat(rotationEA);
 	rotation = glm::toMat4(q);
 	return q;
 }
 
+glm::vec4 GameObject::forwardVec() {
+	return glm::normalize(rotation * glm::vec4(0, 0, 1, 0));
+}
+glm::vec4 GameObject::backVec() {
+	return glm::normalize(rotation * glm::vec4(0, 0, -1, 0));
+}
+glm::vec4 GameObject::rightVec() {
+	return glm::normalize(rotation * glm::vec4(-1, 0, 0, 0));
+}
+glm::vec4 GameObject::leftVec() {
+	return glm::normalize(rotation * glm::vec4(1, 0, 0, 0));
+}
+glm::vec4 GameObject::upVec() {
+	return glm::normalize(rotation * glm::vec4(0, 1, 0, 0));
+}
+glm::vec4 GameObject::downVec() {
+	return glm::normalize(rotation * glm::vec4(0, -1, 0, 0));
+}
+
+
 void GameObject::translate(glm::vec3 const& amnt) {
 	position += amnt;
+	isDirty = true;
+}
+
+void GameObject::translate(glm::vec4 const& dir, float const& amnt) {
+	position = (glm::vec4(position, 1) + dir * amnt).xyz();
 	isDirty = true;
 }
 

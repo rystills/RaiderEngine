@@ -66,9 +66,18 @@ public:
 	update the GameObject's rotation from a vec3 of euler angles
 	@param rotationEA: the desired rotation (in radian euler angles) to set
 	*/
-	glm::quat setRotation(const glm::vec3& rotationEA);
+	glm::quat setRotation(glm::vec3 const& rotationEA);
+
+	glm::vec4 GameObject::forwardVec();
+	glm::vec4 GameObject::backVec();
+	glm::vec4 GameObject::rightVec();
+	glm::vec4 GameObject::leftVec();
+	glm::vec4 GameObject::upVec();
+	glm::vec4 GameObject::downVec();
 
 	void translate(glm::vec3 const& amnt);
+
+	void translate(glm::vec4 const& dir, float const& amnt);
 
 	void setPos(glm::vec3 const& newPos);
 
