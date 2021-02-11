@@ -96,6 +96,18 @@ glm::vec4 GameObject::downVec() {
 	return glm::normalize(rotation * glm::vec4(0, -1, 0, 0));
 }
 
+glm::vec2 GameObject::pitchYawFromMat(glm::mat4 const& inMat) {
+	glm::mat4 invRot = glm::inverse(inMat);
+	const glm::vec3 direction = -glm::vec3(invRot[2]);
+	float yaw = glm::degrees(glm::atan(-direction.x, -direction.z));
+	float pitch = glm::degrees(glm::asin(-direction.y));
+	return glm::vec2(pitch, yaw);
+}
+
+glm::vec2 GameObject::pitchYawFromEA(glm::vec3 const& inEA) {
+	return pitchYawFromMat(glm::toMat4(glm::quat(inEA)));
+}
+
 
 void GameObject::translate(glm::vec3 const& amnt) {
 	position += amnt;

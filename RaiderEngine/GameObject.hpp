@@ -75,6 +75,9 @@ public:
 	glm::vec4 GameObject::upVec();
 	glm::vec4 GameObject::downVec();
 
+	static glm::vec2 pitchYawFromMat(glm::mat4 const& inMat);
+	static glm::vec2 pitchYawFromEA(glm::vec3 const& inEA);
+
 	void translate(glm::vec3 const& amnt);
 
 	void translate(glm::vec4 const& dir, float const& amnt);
