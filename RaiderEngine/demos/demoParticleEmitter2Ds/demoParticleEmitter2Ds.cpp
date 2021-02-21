@@ -13,11 +13,12 @@
 #include "CloudEmitter.hpp"
 
 int main() {
-	initEngine();
 	// directories
 	setTextureDir("demos/demoParticleEmitter2Ds/images");
 	setSoundDir("demos/demoParticleEmitter2Ds/sounds");
 	setFontDir("demos/shared/fonts");
+
+	initEngine();
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);

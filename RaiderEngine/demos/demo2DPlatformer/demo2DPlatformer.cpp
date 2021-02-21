@@ -46,16 +46,6 @@ void reloadMap() {
 }
 
 int main() {
-	TARGET_WIDTH = 320;
-	TARGET_HEIGHT  = 180;
-	SCR_WIDTH = 1280;
-	SCR_HEIGHT = 720;
-	UI_TARGET_WIDTH = 1920;
-	UI_TARGET_HEIGHT = 1080;
-	filterMin2D = GL_NEAREST_MIPMAP_NEAREST;
-	filterMax2D = GL_NEAREST;
-	initEngine();
-	setEnableCursor(true);
 	// directories
 	setFontDir("demos/shared/fonts");
 	setTextureDir("demos/demo2DPlatformer/images");
@@ -69,6 +59,17 @@ int main() {
 	setKeyBinding("climb", GLFW_KEY_N);
 	setKeyBinding("saveMap", GLFW_KEY_O);
 	setKeyBinding("loadMap", GLFW_KEY_L);
+
+	TARGET_WIDTH = 320;
+	TARGET_HEIGHT = 180;
+	SCR_WIDTH = 1280;
+	SCR_HEIGHT = 720;
+	UI_TARGET_WIDTH = 1920;
+	UI_TARGET_HEIGHT = 1080;
+	filterMin2D = GL_NEAREST_MIPMAP_NEAREST;
+	filterMax2D = GL_NEAREST;
+	initEngine();
+	setEnableCursor(true);
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 24);

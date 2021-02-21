@@ -5,7 +5,6 @@
 #include "GameManager.hpp"
 
 int main() {
-	initEngine();
 	// directories
 	setTextureDir("demos/demoBrickBreaker/images");
 	setSoundDir("demos/demoBrickBreaker/sounds");
@@ -15,6 +14,8 @@ int main() {
 	setKeyBinding("mvLeft", GLFW_KEY_A);
 	setKeyBinding("mvRight", GLFW_KEY_D);
 	setKeyBinding("restart", GLFW_KEY_ENTER);
+
+	initEngine();
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);

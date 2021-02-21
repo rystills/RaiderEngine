@@ -44,8 +44,6 @@ void reloadMap() {
 }
 
 int main() {
-	initEngine();
-	setEnableCursor(true);
 	// directories
 	setFontDir("demos/shared/fonts");
 	setTextureDir("demos/demoTilemap/images");
@@ -53,6 +51,9 @@ int main() {
 	// keybindings
 	setKeyBinding("saveMap", GLFW_KEY_S);
 	setKeyBinding("loadMap", GLFW_KEY_L);
+
+	initEngine();
+	setEnableCursor(true);
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);

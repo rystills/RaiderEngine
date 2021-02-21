@@ -12,7 +12,6 @@
 #include "Collider2DPolygon.hpp"
 
 int main() {
-	initEngine();
 	// directories
 	setFontDir("demos/shared/fonts");
 
@@ -26,6 +25,7 @@ int main() {
 	setKeyBinding("swap1", GLFW_KEY_R);
 	setKeyBinding("swap2", GLFW_KEY_F);
 
+	initEngine();
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);

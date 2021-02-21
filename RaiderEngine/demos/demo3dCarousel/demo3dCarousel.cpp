@@ -2,6 +2,7 @@
 #if (COMPILE_DEMO == DEMO_3D_CAROUSEL)
 #include "settings.hpp"
 #include "mapLoader.hpp"
+#include "input.hpp"
 #include "mouseInteraction.hpp"
 #include "audio.hpp"
 #include "ObjectRegistry.hpp"
@@ -65,13 +66,6 @@ void checkSwitchMap(int mapNum) {
 }
 
 int main() {
-	// initialization
-	initEngine();
-	PlayerBase player;
-	player.init();
-	PlayerSpawn::player = &player;
-	objectRegistry = new ObjectRegistry();
-
 	// directories
 	setMapDir("demos/demo3dCarousel/maps");
 	setModelDir("demos/demo3dCarousel/models");
@@ -79,6 +73,7 @@ int main() {
 	setSoundDir("demos/demo3dCarousel/sounds");
 	setFontDir("demos/shared/fonts");
 
+	// keybindings
 	setKeyBinding("loadScene1", GLFW_KEY_1);
 	setKeyBinding("loadScene2", GLFW_KEY_2);
 	setKeyBinding("loadScene3", GLFW_KEY_3);
@@ -91,6 +86,13 @@ int main() {
 	setKeyBinding("mvForward", GLFW_KEY_W);
 	setKeyBinding("mvBackward", GLFW_KEY_S);
 	setKeyBinding("toggleFlyCam", GLFW_KEY_F);
+
+	// initialization
+	initEngine();
+	PlayerBase player;
+	player.init();
+	PlayerSpawn::player = &player;
+	objectRegistry = new ObjectRegistry();
 
 	// sound
 	playSound("Julie_Li_-_01_-_resound.ogg");
