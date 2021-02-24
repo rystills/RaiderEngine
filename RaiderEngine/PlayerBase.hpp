@@ -1,3 +1,4 @@
+
 #pragma once
 #include "stdafx.h"
 #include "physics.hpp"
@@ -12,10 +13,10 @@ public:
 	float crouchSpeed = 180;
 	float runSpeed = 480;
 	float maxMoveSpeedRatio = 1 / 60.f;
-	float height = 1;
+	float height;  // height does not include the half spheres at either end of the capsule; the true height is height + 2 * radius
+	float radius;
 	float stepHeight = .1f;
 	float crouchScale = .3f;
-	float radius = .5f;
 	float playerGravity = 42;
 	float jumpStrength = 9;
 	float groundStoppingSpeed = 180;
@@ -32,8 +33,10 @@ public:
 
 	/*
 	initialize the player, creating a new physics controller
+	@param inHeight: the height of the player; defaults to 1m
+	@param inRadius: the radius of the player; defaults to .4m (for a true height of 1.8m)
 	*/
-	void init();
+	void init(float inHeight = 1.f, float inRadius = .4f);
 
 	/*
 	set the player's position in world space

@@ -6,7 +6,9 @@
 #include "settings.hpp"
 #include "input.hpp"
 
-void PlayerBase::init() {
+void PlayerBase::init(float inHeight, float inRadius) {
+	height = inHeight;
+	radius = inRadius;
 	// create the controller manager
 	manager = PxCreateControllerManager(*gScene);
 	// create the player controller
