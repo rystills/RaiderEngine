@@ -1,4 +1,3 @@
-
 #pragma once
 #include "stdafx.h"
 #include "physics.hpp"
@@ -17,6 +16,7 @@ public:
 	float radius;
 	float stepHeight = .1f;
 	float crouchScale = .3f;
+	float eyeTopHeadOffset = .1f;
 	float playerGravity = 42;
 	float jumpStrength = 9;
 	float groundStoppingSpeed = 180;

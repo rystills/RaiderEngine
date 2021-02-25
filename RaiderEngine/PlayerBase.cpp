@@ -39,7 +39,7 @@ void PlayerBase::syncCameraPos() {
 	PxExtendedVec3 playerPos = controller->getPosition();
 	mainCam->Position.x = static_cast<float>(playerPos.x);
 	// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-	mainCam->Position.y = static_cast<float>(playerPos.y) + (height * (crouching ? crouchScale : 1) / 2 + radius);
+	mainCam->Position.y = static_cast<float>(playerPos.y) + height * (crouching ? crouchScale : 1) / 2 + radius - eyeTopHeadOffset;
 	mainCam->Position.z = static_cast<float>(playerPos.z);
 }
 
