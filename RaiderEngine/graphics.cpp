@@ -732,9 +732,11 @@ void renderLines() {
 			for (unsigned int i = 0; i < kv.second[0]->model->meshes.size(); ++i) {
 				for (const Vertex& v : kv.second[0]->model->meshes[i].vertices) {
 					vertP = glm::vec4(v.Position, 1);
-					vertE = vertP + glm::vec4(v.Normal * .05f, 0);
-					for (unsigned int r = 0; r < kv.second.size(); ++r)
+					for (unsigned int r = 0; r < kv.second.size(); ++r) {
+						// scale the normal magnitude by the inverse of the model scale to cancel out the scaling factor in the model transform
+						vertE = vertP + glm::vec4(v.Normal * .05f * (3.f / (kv.second[r]->scaleVal.x + kv.second[r]->scaleVal.y + kv.second[r]->scaleVal.z)), 0);
 						queueDrawLine(kv.second[r]->modelTransform * vertP, kv.second[r]->modelTransform * vertE, Color::indigo);
+					}
 				}
 			}
 		}
