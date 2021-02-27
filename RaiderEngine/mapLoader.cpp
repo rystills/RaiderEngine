@@ -43,6 +43,8 @@ std::vector<std::string> extractNameArgs(std::string name) {
 				mapNodeFlags.castShadows = token[eqpos+1] == '1';
 			else if (namedArg == "usePhysics")
 				mapNodeFlags.usePhysics = token[eqpos+1] == '1';
+			else if (namedArg == "enableShadows")
+				mapNodeFlags.enableShadows = token[eqpos+1] == '1';
 		}
 	}
 	return args;
@@ -99,6 +101,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 		// reset the current node flags
 		mapNodeFlags.usePhysics = true;
 		mapNodeFlags.castShadows = true;
+		mapNodeFlags.enableShadows = true;
 	}
 
 	// recurse over child nodes regardless of current node type

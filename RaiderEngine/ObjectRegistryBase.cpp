@@ -13,6 +13,6 @@ GameObject* ObjectRegistryBase::instantiateGameObject(std::string name, glm::vec
 }
 
 Light* ObjectRegistryBase::instantiateLight(std::string name, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::vector<std::string> extraArgs) {
-	if (name == "point") return addLight(new Light(pos, extraArgs.size() > 0 ? std::stof(extraArgs[0]) : 200, extraArgs.size() > 3 ? glm::vec3(std::stof(extraArgs[1]), std::stof(extraArgs[2]), std::stof(extraArgs[3])) : glm::vec3(1, 1, 1)));
+	if (name == "point") return addLight(new Light(pos, mapNodeFlags.enableShadows, extraArgs.size() > 0 ? std::stof(extraArgs[0]) : 200, extraArgs.size() > 3 ? glm::vec3(std::stof(extraArgs[1]), std::stof(extraArgs[2]), std::stof(extraArgs[3])) : glm::vec3(1, 1, 1)));
 	return NULL;
 }

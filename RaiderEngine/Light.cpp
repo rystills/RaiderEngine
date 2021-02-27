@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Light.hpp"
 
-Light::Light(glm::vec3 position, float strength, glm::vec3 color) : position(position), color(color) {
+Light::Light(glm::vec3 position, bool enableShadows, float strength, glm::vec3 color) : position(position), enableShadows(enableShadows), color(color) {
 	offColor = glm::vec3(color.r / 8, color.g / 8, color.b / 8);
 	linear = 7 / strength * .7f;
 	quadratic = 7 / strength * 1.8f;
@@ -22,4 +22,9 @@ void Light::calculateMaxBrightness() {
 
 void Light::calculateRadius() {
 	radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (1 - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
+}
+
+void Light::setPos(glm::vec3 const& newPos) {
+	position = newPos;
+	dirty = true;
 }

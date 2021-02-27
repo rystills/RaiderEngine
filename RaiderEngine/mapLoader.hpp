@@ -5,6 +5,7 @@
 struct MapNodeFlags {
 	bool usePhysics = true;
 	bool castShadows = true;
+	bool enableShadows = true;
 } inline mapNodeFlags;
 
 inline std::vector<std::string> transformIdentifiers = { "$_Translation", "$_PreRotation", "$_GeometricTranslation", "$_Rotation", "$_Scaling" };

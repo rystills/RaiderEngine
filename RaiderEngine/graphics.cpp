@@ -646,6 +646,7 @@ void renderLightingPass() {
 				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Linear", lights[i]->linear);
 				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i]->quadratic);
 				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].Radius", lights[i]->radius);
+				shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].EnableShadows", lights[i]->enableShadows);
 			}
 			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", lights[i]->on);
 		}

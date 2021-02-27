@@ -5,7 +5,7 @@
 class FlickerLight : public Light {
 public:
 	float elapsedTime = 0, prevTime = 0, flickerWait = chooseFlickerWait(3);
-	FlickerLight(glm::vec3 position, float strength, glm::vec3 color) : Light(position, strength, color) { }
+	FlickerLight(glm::vec3 position, bool enableShadows, float strength, glm::vec3 color) : Light(position, enableShadows, strength, color) { }
 
 	/*
 	choose how long the light should wait before switching states again

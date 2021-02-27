@@ -22,6 +22,7 @@ struct Light {
     vec3 Position;
     vec3 Color;
     bool On;
+    bool EnableShadows;
     float Linear;
     float Quadratic;
     float Radius;
@@ -101,7 +102,7 @@ void main()
 			// calculate distance between light source and current fragment
 			float distance = length(lights[i].Position - FragPos);
 			if(distance < lights[i].Radius) {
-				float shadow = ShadowCalculation(FragPos, Normal, lights[i].Position, i);
+				float shadow = lights[i].EnableShadows ? ShadowCalculation(FragPos, Normal, lights[i].Position, i) : 0;
 				// diffuse
 				vec3 lightDir = normalize(lights[i].Position - FragPos);
 				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
