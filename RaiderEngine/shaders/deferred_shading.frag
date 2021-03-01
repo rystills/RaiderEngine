@@ -94,7 +94,7 @@ void main()
     float Specular = texture(gAlbedoSpec, TexCoords).a;
     
     // then calculate lighting as usual
-    vec3 ambient = Diffuse * ambientStrength;
+    vec3 ambient = Diffuse * (ambientStrength + emission);
 	vec3 diffuseSpec = vec3(0,0,0);
     vec3 viewDir  = normalize(viewPos - FragPos);
     for(int i = 0; i < NR_LIGHTS; ++i) {
@@ -117,8 +117,8 @@ void main()
 				diffuseSpec += (1-shadow)*(diffuse + specular);
 			}
 		}
-    }    
-	vec3 lighting = ambient + diffuseSpec + emission;// * Diffuse;   
+    }
+	vec3 lighting = ambient + diffuseSpec;// * Diffuse;   
 	// apply linear fog matching clear color, starting at 10 units and capping out at 50 units
 	// formula: min(1,-x + y*max(minval,dist)) where y = 1/(maxval-minval), x = -y*minval
 	float fog = min(1,-.25+.025*max(10,distance(viewPos,FragPos)));
