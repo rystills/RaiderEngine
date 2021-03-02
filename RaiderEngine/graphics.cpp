@@ -305,8 +305,8 @@ void queueDrawPoint(glm::vec3 pos, glm::vec3 color) {
 	size_t qsize = pointsQueue.size();
 	unsigned int vec3Size = 3 * sizeof(GLfloat);
 	pointsQueue.resize(qsize + 6);
-	memcpy(&pointsQueue[0] + qsize, &pos, vec3Size);
-	memcpy(&pointsQueue[0] + qsize + 3, &color, vec3Size);
+	memcpy(&pointsQueue[qsize], &pos, vec3Size);
+	memcpy(&pointsQueue[qsize + 3], &color, vec3Size);
 }
 
 void drawPoints() {
@@ -330,10 +330,10 @@ void queueDrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& 
 	size_t qsize = linesQueue.size();
 	unsigned int vec3Size = 3 * sizeof(GLfloat);
 	linesQueue.resize(qsize + 12);
-	memcpy(&linesQueue[0] + qsize, &from, vec3Size);
-	memcpy(&linesQueue[0] + qsize+3, &color, vec3Size);
-	memcpy(&linesQueue[0] + qsize+6, &to, vec3Size);
-	memcpy(&linesQueue[0] + qsize+9, &color, vec3Size);
+	memcpy(&linesQueue[qsize], &from, vec3Size);
+	memcpy(&linesQueue[qsize+3], &color, vec3Size);
+	memcpy(&linesQueue[qsize+6], &to, vec3Size);
+	memcpy(&linesQueue[qsize+9], &color, vec3Size);
 }
 
 void drawLines() {

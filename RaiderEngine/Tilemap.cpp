@@ -65,7 +65,7 @@ void Tilemap::init(std::string spriteName, std::vector<Collider2D*> cols) {
 	// set each tile
 	for (unsigned int i = 0; i < mapSize.x; ++i)
 		for (unsigned int r = 0; r < mapSize.y; ++r)
-			setTileData(&verts[0] + static_cast<int>(24 * (i * mapSize.y + r)), i, r);
+			setTileData(&verts[static_cast<int>(24 * (i * mapSize.y + r))], i, r);
 
 	// buffer the full set of tiles as a single triangle array for rendering (use GL_STATIC_DRAW as Tilemaps are not expected to change frequently)
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(24 * sizeof(GLfloat) * mapSize.x * mapSize.y), &verts[0], GL_STATIC_DRAW);

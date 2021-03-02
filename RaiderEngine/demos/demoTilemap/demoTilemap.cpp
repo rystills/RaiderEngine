@@ -35,7 +35,7 @@ void reloadMap() {
 		for (int i = 0; i < t->mapSize.x; ++i) {
 			for (int r = 0; r < t->mapSize.y; ++r) {
 				mapFile >> t->map[i][r];
-				t->setTileData(&verts[0] + static_cast<int>(24 * (i * t->mapSize.y + r)), i, r);
+				t->setTileData(&verts[static_cast<int>(24 * (i * t->mapSize.y + r))], i, r);
 			}
 		}
 		mapFile.close();
