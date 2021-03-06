@@ -12,6 +12,7 @@
 #include "ParticleEmitter2D.hpp"
 #include "Tilemap.hpp"
 #include "timing.hpp"
+#include "PlayerSpawn.hpp"
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and height will be significantly larger than specified on retina displays.
@@ -626,6 +627,9 @@ void renderLightingPass() {
 		shaders["shaderLightingPass"]->setVec4("clearColor", renderState.clearColor);
 	if (renderState.ambientStrength != renderState.prevAmbientStrength)
 		shaders["shaderLightingPass"]->setFloat("ambientStrength", renderState.ambientStrength);
+	if (renderState.underWater != PlayerSpawn::player->swimming)
+		shaders["shaderLightingPass"]->setBool("underWater", PlayerSpawn::player->swimming);
+
 	glBindTexture(GL_TEXTURE_2D, gBuffer.position);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gBuffer.normal);
@@ -890,6 +894,7 @@ void render(bool only2D) {
 	// update render state
 	renderState.prevAmbientStrength = renderState.ambientStrength;
 	renderState.prevClearColor = renderState.clearColor;
+	renderState.underWater = PlayerSpawn::player->swimming;
 	renderState.projection = mainCam->projection;
 	renderState.view = mainCam->view;
 	renderState.viewPos = mainCam->Position;

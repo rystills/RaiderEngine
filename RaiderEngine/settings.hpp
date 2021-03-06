@@ -59,6 +59,7 @@ struct RenderState {
 	float far_plane;
 	float ambientStrength = .3f, prevAmbientStrength;
 	glm::vec4 clearColor, prevClearColor;
+	bool underWater = false;
 	bool twoSidedDrawing = true;
 	bool useVsync = false;
 	bool enableCursor = false;
