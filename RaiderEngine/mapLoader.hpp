@@ -3,9 +3,11 @@
 
 // this file is responsible for loading maps from special FBX files
 struct MapNodeFlags {
+	std::string surfType = "solid";
 	bool usePhysics = true;
 	bool castShadows = true;
 	bool enableShadows = true;
+	bool drawTwoSided = false;
 } inline mapNodeFlags;
 
 inline std::vector<std::string> transformIdentifiers = { "$_Translation", "$_PreRotation", "$_GeometricTranslation", "$_Rotation", "$_Scaling" };

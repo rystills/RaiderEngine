@@ -5,8 +5,8 @@
 #include "settings.hpp"
 #include "physics.hpp"
 
-GameObject::GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic, bool grabbable, bool usePhysics, bool castShadows) :
-position(position), scaleVal(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics), castShadows(castShadows) {
+GameObject::GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic, bool grabbable, bool usePhysics, bool castShadows, bool drawTwoSided) :
+position(position), scaleVal(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics), castShadows(castShadows), drawTwoSided(drawTwoSided) {
 	setModel(modelName, makeStatic == 1);
 	isStatic = makeStatic > 0;
 	if (isStatic)

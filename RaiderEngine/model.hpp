@@ -28,11 +28,14 @@ public:
 	PxBase* collisionMesh;
 	bool isStaticMesh;
 	float volume;
+	// TODO: enums
+	std::string surfType;
+	std::string colliderType = "";
 
 	/*
 	Model default constructor: create a new empty model
 	*/
-	Model(bool isStatic = true, bool gamma = false) : isStaticMesh(isStatic), gammaCorrection(gamma) {};
+	Model(bool isStatic = true, bool gamma = false, std::string surfType = "solid") : isStaticMesh(isStatic), gammaCorrection(gamma), surfType(surfType) {};
 
     /*
 	Model constructor: creates a new model with the specified path, optionally performing gamma correction
@@ -40,7 +43,7 @@ public:
 	@param isStatic: whether this is a static model (and therefore can use a triangle mesh) or a dynamic model (and therefore should default to a convex hull)
 	@param gamma: whether to apply gamma correction (true) or not (false)
 	*/
-	Model(std::string const& path, bool isStatic = false, bool gamma = false);
+	Model(std::string const& path, bool isStatic = false, bool gamma = false, std::string surfType = "solid");
 
 	/*
 	calculate the collision shape for this mesh, to be used by bullet physics

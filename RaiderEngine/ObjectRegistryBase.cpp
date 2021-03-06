@@ -8,7 +8,7 @@
 
 GameObject* ObjectRegistryBase::instantiateGameObject(std::string name, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::vector<std::string> extraArgs) {
 	if (name == "PlayerSpawn") PlayerSpawn(pos, rot);  // special case: player spawn simply defines the starting transform for the player; don't add it to gameObjects
-	else return addGameObject(new GameObject(pos, rot, scale, name, 0, true, mapNodeFlags.usePhysics, mapNodeFlags.castShadows));  // default; spawn a named model as a generic GameObject
+	else return addGameObject(new GameObject(pos, rot, scale, name, 0, true, mapNodeFlags.usePhysics, mapNodeFlags.castShadows, mapNodeFlags.drawTwoSided));  // default; spawn a named model as a generic GameObject
 	return NULL;
 }
 

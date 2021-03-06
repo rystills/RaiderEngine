@@ -34,7 +34,7 @@ public:
 	@param grabbable: whether or not the GameObject can be grabbed by the player via object picking
 	@param usePhysics: whether or not this GameObject should be added to the physics world
 	*/
-	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool usePhysics = true, bool castShadows = true);
+	GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic = 0, bool grabbable = true, bool usePhysics = true, bool castShadows = true, bool drawTwoSided = false);
 
 	static void initStaticVertexBuffer();
 

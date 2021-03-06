@@ -46,7 +46,7 @@ void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S, GLuint
 	texIn.height = height;
 }
 
-Model::Model(std::string const& path, bool isStatic, bool gamma) : isStaticMesh(isStatic), gammaCorrection(gamma) {
+Model::Model(std::string const& path, bool isStatic, bool gamma, std::string surfType) : isStaticMesh(isStatic), gammaCorrection(gamma), surfType(surfType) {
 	loadModel(path);
 	generateCollisionShape();
 }
@@ -61,7 +61,8 @@ void Model::generateCollisionShape() {
 		verts.insert(verts.end(), meshes[i].vertices.begin(), meshes[i].vertices.end());
 	volume = calculateVolume();
 	// note: consider removing the isStaticMesh flag and allowing a Model to contain one or both of the triangle mesh and convex hull depending on the staticness of the GameObjects which use it
-	if (isStaticMesh) {
+	if (isStaticMesh && surfType == "solid") {
+		colliderType = "triangleMesh";
 		// combine triangles (vertex lists)
 		std::vector<unsigned int> inds;
 		for (unsigned int i = 0, vertsAdded = 0; i < meshes.size(); vertsAdded += meshes[i].vertices.size(), ++i) {
@@ -93,6 +94,7 @@ void Model::generateCollisionShape() {
 		collisionMesh = gPhysics->createTriangleMesh(readBuffer);
 	}
 	else {
+		colliderType = "convexHull";
 		// create convex hull shape from mesh verts
 		PxConvexMeshDesc convexDesc;
 		convexDesc.points.count = verts.size();

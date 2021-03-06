@@ -40,11 +40,15 @@ std::vector<std::string> extractNameArgs(std::string name) {
 		else {
 			std::string namedArg = token.substr(0, eqpos);
 			if (namedArg == "castShadows")
-				mapNodeFlags.castShadows = token[eqpos+1] == '1';
+				mapNodeFlags.castShadows = token[eqpos + 1] == '1';
 			else if (namedArg == "usePhysics")
-				mapNodeFlags.usePhysics = token[eqpos+1] == '1';
+				mapNodeFlags.usePhysics = token[eqpos + 1] == '1';
 			else if (namedArg == "enableShadows")
-				mapNodeFlags.enableShadows = token[eqpos+1] == '1';
+				mapNodeFlags.enableShadows = token[eqpos + 1] == '1';
+			else if (namedArg == "surfType")
+				mapNodeFlags.surfType = &token[eqpos + 1];
+			else if (namedArg == "drawTwoSided")
+				mapNodeFlags.drawTwoSided = &token[eqpos + 1];
 		}
 	}
 	return args;
@@ -92,16 +96,19 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 			// once we've reached the final node for a static mesh (non-object) process the mesh data and store it as a new model in the scene
 			// generate a new model from the mesh list
 			Model* baseModel = new Model();
+			baseModel->surfType = mapNodeFlags.surfType;
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 				baseModel->processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 			baseModel->generateCollisionShape();
 			models.insert(std::make_pair(fullName, baseModel));
-			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, mapNodeFlags.usePhysics, mapNodeFlags.castShadows));
+			addGameObject(new GameObject(pos, rot, scale, fullName, true, false, mapNodeFlags.usePhysics, mapNodeFlags.castShadows, mapNodeFlags.drawTwoSided));
 		}
 		// reset the current node flags
+		mapNodeFlags.surfType = "solid";
 		mapNodeFlags.usePhysics = true;
 		mapNodeFlags.castShadows = true;
 		mapNodeFlags.enableShadows = true;
+		mapNodeFlags.drawTwoSided = false;
 	}
 
 	// recurse over child nodes regardless of current node type
