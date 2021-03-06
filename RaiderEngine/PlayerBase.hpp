@@ -15,7 +15,7 @@ public:
 	float height;  // height does not include the half spheres at either end of the capsule; the true height is height + 2 * radius
 	float radius;
 	float stepHeight = .1f;
-	float crouchScale = .3f;
+	float crouchScale = .1f;
 	float eyeTopHeadOffset = .1f;
 	float playerGravity = 42;
 	float jumpStrength = 9;
@@ -26,6 +26,7 @@ public:
 
 	glm::vec3 velocity;
 	bool crouching = false;
+	bool swimming = false;
 	bool ctrlDown = false;
 	bool flyCam = false;
 

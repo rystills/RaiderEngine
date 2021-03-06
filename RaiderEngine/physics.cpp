@@ -3,6 +3,8 @@
 #include "timing.hpp"
 #include "graphics.hpp"
 #include "terminalColors.hpp"
+#include "PlayerSpawn.hpp"
+#include "GameObject.hpp"
 
 void initPhysics() {
 	// create a foundation so we can use PhysX
@@ -26,6 +28,7 @@ void initPhysics() {
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	sceneDesc.simulationEventCallback = &gEventCallback;
 	gScene = gPhysics->createScene(sceneDesc);
 
 	// create client
@@ -88,4 +91,13 @@ PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, P
 	queryFilterData.data = filterData;
 	gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, queryFilterData);
 	return hit;
+}
+
+void GEventCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
+	if (!PlayerSpawn::player)
+		return;
+	physx::PxRigidDynamic* playerActor = PlayerSpawn::player->controller->getActor();
+	for (int i = 0; i < count; ++i)
+		if (pairs[i].otherActor == playerActor && ((GameObject*)pairs[i].triggerActor->userData)->model->surfType == "water")
+			PlayerSpawn::player->swimming ^= true;
 }

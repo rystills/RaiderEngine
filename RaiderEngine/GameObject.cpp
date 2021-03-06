@@ -47,15 +47,22 @@ void GameObject::addPhysics(glm::quat rot) {
 		static_cast<PxRigidDynamic*>(body)->setMass(10 + mass);
 	}
 
+	// TODO: should the shape live in the model class rather than the GameObject class?
 	// our shape, unlike our body type, depends on our model's staticness
-	if (model->isStaticMesh)
+	if (model->colliderType == "triangleMesh")
 		PxRigidActorExt::createExclusiveShape(*body, PxTriangleMeshGeometry((PxTriangleMesh*)model->collisionMesh, physScale), *gMaterial);
 	else
 		PxRigidActorExt::createExclusiveShape(*body, PxConvexMeshGeometry((PxConvexMesh*)model->collisionMesh, physScale), *gMaterial);
 	// assign default raycast filter
 	PxShape* shape;
 	body->getShapes(&shape, 1);
-	shape->setQueryFilterData(defaultFilterData);
+	if (model->surfType == "solid") {
+		shape->setQueryFilterData(defaultFilterData);
+	}
+	else {
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+		shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+	}
 	// store a pointer to this GameObject in the body's data field, then finally add the body to the physics scene
 	body->userData = this;
 	gScene->addActor(*body);

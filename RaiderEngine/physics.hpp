@@ -49,3 +49,15 @@ perform a raycast from the specified position in the specified direction, return
 @returns: a PxRaycastBuffer containing the hit data
 */
 PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData = defaultFilterData);
+
+class GEventCallback : public PxSimulationEventCallback {
+public:
+	GEventCallback() { };
+	virtual void onTrigger(PxTriggerPair* pairs, PxU32 count) override;
+
+	virtual void							onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs) {};
+	virtual void							onConstraintBreak(PxConstraintInfo*, PxU32) {}
+	virtual void							onWake(PxActor**, PxU32) {}
+	virtual void							onSleep(PxActor**, PxU32) {}
+	virtual void							onAdvance(const PxRigidBody* const*, const PxTransform*, const PxU32) {}
+} inline gEventCallback;
