@@ -54,70 +54,108 @@ void PlayerBase::update() {
 	if (keyPressed("toggleFlyCam"))
 		flyCam = !flyCam;
 
-	// normalize camera front to get a constant speed regardless of pitch
-	glm::vec3 normalFront = glm::normalize(glm::cross(mainCam->WorldUp, mainCam->Right));
-	bool grounded = canJump();
-	// movement
-	float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
-	if (mainCam->controllable && !flyCam) {
-		baseMoveSpeed = (crouching ? crouchSpeed : (keyHeld("run") ? runSpeed : walkSpeed));
-		forwardSpeed = (keyHeld("mvForward") - keyHeld("mvBackward")) * baseMoveSpeed;
-		strafeSpeed = (keyHeld("mvRight") - keyHeld("mvLeft")) * baseMoveSpeed;
-		if (forwardSpeed && strafeSpeed) {
-			// average forward and strafe speeds to prevent diagonal movement from being faster
-			float invMag = baseMoveSpeed / sqrt(forwardSpeed * forwardSpeed + strafeSpeed * strafeSpeed);
-			forwardSpeed *= invMag;
-			strafeSpeed *= invMag;
+	if (swimming) {
+		// movement
+		float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
+		if (mainCam->controllable && !flyCam) {
+			baseMoveSpeed = (crouching ? crouchSpeed : (keyHeld("run") ? runSpeed : walkSpeed));
+			forwardSpeed = (keyHeld("mvForward") - keyHeld("mvBackward")) * baseMoveSpeed;
+			strafeSpeed = (keyHeld("mvRight") - keyHeld("mvLeft")) * baseMoveSpeed;
+			if (forwardSpeed && strafeSpeed) {
+				// average forward and strafe speeds to prevent diagonal movement from being faster
+				float invMag = baseMoveSpeed / sqrt(forwardSpeed * forwardSpeed + strafeSpeed * strafeSpeed);
+				forwardSpeed *= invMag;
+				strafeSpeed *= invMag;
+			}
+		}
+		velocity += mainCam->Right * strafeSpeed * waterControl * deltaTime;
+		velocity += mainCam->Front * forwardSpeed * waterControl * deltaTime;
+		// cap horizontal velocity depending on whether the player is walking or running
+		float maxMoveSpeed = baseMoveSpeed * maxMoveSpeedRatio;
+		float moveVel = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+		if (moveVel > maxMoveSpeed) {
+			float velDiff = (maxMoveSpeed) / moveVel;
+			velocity.x *= velDiff;
+			velocity.y *= velDiff;
+			velocity.z *= velDiff;
+		}
+		// if the player is not inputting movement in any direction, slow them down or stop them entirely
+		if (forwardSpeed == 0 && strafeSpeed == 0) {
+			float stopSpeed = waterStoppingSpeed * deltaTime;
+			moveVel = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+			if (moveVel <= stopSpeed) {
+				velocity = glm::vec3();
+			}
+			else {
+				velocity -= glm::normalize(velocity) * waterStoppingSpeed * deltaTime;
+			}
 		}
 	}
-	velocity += normalFront * forwardSpeed * (grounded ? 1 : airControl) * deltaTime;
-	velocity += mainCam->Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
-	// As long as we're grounded, keep vertical velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
-	// TODO: keep the player tethered to slopes / steps without relying on an artificial gravity
-	if (grounded)
-		velocity.y = -playerGravity * 10 * deltaTime;
-	else
-		velocity.y -= playerGravity * deltaTime;
-
-	// cap horizontal velocity depending on whether the player is walking or running
-	float maxMoveSpeed = baseMoveSpeed * maxMoveSpeedRatio;
-	float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-	if (moveVel > maxMoveSpeed) {
-		float velDiff = (maxMoveSpeed) / moveVel;
-		velocity.x *= velDiff;
-		velocity.z *= velDiff;
-	}
-	// if the player is not inputting movement in any direction, slow them down or stop them entirely
-	if (forwardSpeed == 0 && strafeSpeed == 0) {
-		float stopSpeed = (grounded ? groundStoppingSpeed : airStoppingSpeed) * deltaTime;
-		moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-		if (moveVel <= stopSpeed) {
-			velocity.x = 0;
-			velocity.z = 0;
+	else {
+		glm::vec3 normalFront = glm::cross(mainCam->WorldUp, mainCam->Right);
+		bool grounded = canJump();
+		// movement
+		float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
+		if (mainCam->controllable && !flyCam) {
+			baseMoveSpeed = (crouching ? crouchSpeed : (keyHeld("run") ? runSpeed : walkSpeed));
+			forwardSpeed = (keyHeld("mvForward") - keyHeld("mvBackward")) * baseMoveSpeed;
+			strafeSpeed = (keyHeld("mvRight") - keyHeld("mvLeft")) * baseMoveSpeed;
+			if (forwardSpeed && strafeSpeed) {
+				// average forward and strafe speeds to prevent diagonal movement from being faster
+				float invMag = baseMoveSpeed / sqrt(forwardSpeed * forwardSpeed + strafeSpeed * strafeSpeed);
+				forwardSpeed *= invMag;
+				strafeSpeed *= invMag;
+			}
 		}
-		else {
-			float velDir = std::atan2(velocity.z, velocity.x);
-			velocity.x -= cos(velDir) * stopSpeed;
-			velocity.z -= sin(velDir) * stopSpeed;
+		velocity += mainCam->Right * strafeSpeed * (grounded ? 1 : airControl) * deltaTime;
+		velocity += normalFront * forwardSpeed * (grounded ? 1 : airControl) * deltaTime;
+		// As long as we're grounded, keep vertical velocity at a few ticks of gravity. If we're airborn, continually apply gravity until we return to the ground
+		// TODO: keep the player tethered to slopes / steps without relying on an artificial gravity
+		if (grounded)
+			velocity.y = -playerGravity * 10 * deltaTime;
+		else
+			velocity.y -= playerGravity * deltaTime;
+
+		// cap horizontal velocity depending on whether the player is walking or running
+		float maxMoveSpeed = baseMoveSpeed * maxMoveSpeedRatio;
+		float moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+		if (moveVel > maxMoveSpeed) {
+			float velDiff = (maxMoveSpeed) / moveVel;
+			velocity.x *= velDiff;
+			velocity.z *= velDiff;
 		}
-	}
-	// jump
-	if (mainCam->controllable)
-		if (grounded && keyHeld("jump"))
-			// jump velocity is a burst, so deltaTime is ignored
-			velocity.y = jumpStrength;
+		// if the player is not inputting movement in any direction, slow them down or stop them entirely
+		if (forwardSpeed == 0 && strafeSpeed == 0) {
+			float stopSpeed = (grounded ? groundStoppingSpeed : airStoppingSpeed) * deltaTime;
+			moveVel = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+			if (moveVel <= stopSpeed) {
+				velocity.x = 0;
+				velocity.z = 0;
+			}
+			else {
+				float velDir = std::atan2(velocity.z, velocity.x);
+				velocity.x -= cos(velDir) * stopSpeed;
+				velocity.z -= sin(velDir) * stopSpeed;
+			}
+		}
+		// jump
+		if (mainCam->controllable)
+			if (grounded && keyHeld("jump"))
+				// jump velocity is a burst, so deltaTime is ignored
+				velocity.y = jumpStrength;
 
-	// stop moving up if we hit our head on a ceiling
-	if (velocity.y > 0) {
-		PxSceneReadLock scopedLock(*gScene);
-		PxCapsuleGeometry geom(radius, height * (crouching ? crouchScale : 1) * .5f);
-		PxExtendedVec3 position = controller->getPosition();
-		PxVec3 pos((float)position.x, (float)position.y + headBumpDist, (float)position.z);
-		PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
+		// stop moving up if we hit our head on a ceiling
+		if (velocity.y > 0) {
+			PxSceneReadLock scopedLock(*gScene);
+			PxCapsuleGeometry geom(radius, height * (crouching ? crouchScale : 1) * .5f);
+			PxExtendedVec3 position = controller->getPosition();
+			PxVec3 pos((float)position.x, (float)position.y + headBumpDist, (float)position.z);
+			PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
 
-		PxOverlapBuffer hit;
-		if (gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
-			velocity.y = 0;
+			PxOverlapBuffer hit;
+			if (gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
+				velocity.y = 0;
+		}
 	}
 
 	// apply to controller

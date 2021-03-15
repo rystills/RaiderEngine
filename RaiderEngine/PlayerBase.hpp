@@ -21,7 +21,9 @@ public:
 	float jumpStrength = 9;
 	float groundStoppingSpeed = 180;
 	float airStoppingSpeed = 12;
+	float waterStoppingSpeed = 6;
 	float airControl = .1f;
+	float waterControl = .3f;
 	float headBumpDist = .1f;
 
 	glm::vec3 velocity;
