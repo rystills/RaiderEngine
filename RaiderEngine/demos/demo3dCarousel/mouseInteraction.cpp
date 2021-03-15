@@ -57,7 +57,7 @@ void updateHeldBody() {
 			hitBody = hit.block.actor;
 			// create collision point sphere actor
 			gMouseSphere = gPhysics->createRigidDynamic(PxTransform(hit.block.position));
-			gMouseSphere->attachShape(*sphereShape);
+			//gMouseSphere->attachShape(*sphereShape);
 			gMouseSphere->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 			gScene->addActor(*gMouseSphere);
 
