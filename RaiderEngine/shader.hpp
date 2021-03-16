@@ -7,7 +7,7 @@ public:
 	static inline unsigned int activeShader = -1;
     unsigned int ID;
 
-	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr, const char* tessellationControlPath = nullptr, const char* tessellationEvaluationPath = nullptr);
     /*
 	activate the shader
 	@returns: whether or not we ended up switching the active shader

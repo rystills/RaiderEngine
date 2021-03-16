@@ -2,18 +2,24 @@
 #include "shader.hpp"
 #include "terminalColors.hpp"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
+Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath, const char* tessellationControlPath, const char* tessellationEvaluationPath) {
 	// 1. retrieve the vertex/fragment source code from filePath
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::string geometryCode;
+	std::string tessellationControlCode;
+	std::string tessellationEvaluationCode;
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
 	std::ifstream gShaderFile;
+	std::ifstream tessellationControlFile;
+	std::ifstream tessellationEvaluationFile;
 	// ensure ifstream objects can throw exceptions:
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	tessellationControlFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	tessellationEvaluationFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
 		// open files, switching to the fallback shader directory if the vertex shader is not located at the default shader directory
 		bool shadersFoundAtBaseDir = std::filesystem::exists(shaderDir + vertexPath);
@@ -36,13 +42,29 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		// convert stream into string
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
-		// if geometry shader path is present, also load a geometry shader
+		// load geometry shader if present
 		if (geometryPath != nullptr) {
 			gShaderFile.open(shadersFoundAtBaseDir ? shaderDir + geometryPath : fallbackShaderDir + geometryPath);
 			std::stringstream gShaderStream;
 			gShaderStream << gShaderFile.rdbuf();
 			gShaderFile.close();
 			geometryCode = gShaderStream.str();
+		}
+		// load tessellation control shader if present
+		if (tessellationControlPath != nullptr) {
+			tessellationControlFile.open(shadersFoundAtBaseDir ? shaderDir + tessellationControlPath : fallbackShaderDir + tessellationControlPath);
+			std::stringstream tShaderStream;
+			tShaderStream << tessellationControlFile.rdbuf();
+			tessellationControlFile.close();
+			tessellationControlCode = tShaderStream.str();
+		}
+		// load tessellation evaluation shader if present
+		if (tessellationEvaluationPath != nullptr) {
+			tessellationEvaluationFile.open(shadersFoundAtBaseDir ? shaderDir + tessellationEvaluationPath : fallbackShaderDir + tessellationEvaluationPath);
+			std::stringstream tShaderStream;
+			tShaderStream << tessellationEvaluationFile.rdbuf();
+			tessellationEvaluationFile.close();
+			tessellationEvaluationCode = tShaderStream.str();
 		}
 	}
 	catch (std::ifstream::failure e) {
@@ -62,7 +84,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	glShaderSource(fragment, 1, &fShaderCode, NULL);
 	glCompileShader(fragment);
 	checkCompileErrors(fragment, "FRAGMENT");
-	// if geometry shader is given, compile geometry shader
+	// compile geometry shader if present
 	unsigned int geometry;
 	if (geometryPath != nullptr) {
 		const char* gShaderCode = geometryCode.c_str();
@@ -71,19 +93,45 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		glCompileShader(geometry);
 		checkCompileErrors(geometry, "GEOMETRY");
 	}
+	// compile tessellation control shader if present
+	unsigned int tesselationControl;
+	if (tessellationControlPath != nullptr) {
+		const char* tShaderCode = tessellationControlCode.c_str();
+		tesselationControl = glCreateShader(GL_TESS_CONTROL_SHADER);
+		glShaderSource(tesselationControl, 1, &tShaderCode, NULL);
+		glCompileShader(tesselationControl);
+		checkCompileErrors(tesselationControl, "TESSELLATION CONTROL");
+	}
+	// compile tessellation evaluation shader if present
+	unsigned int tesselationEvaluation;
+	if (tessellationEvaluationPath != nullptr) {
+		const char* tShaderCode = tessellationEvaluationCode.c_str();
+		tesselationEvaluation = glCreateShader(GL_TESS_EVALUATION_SHADER);
+		glShaderSource(tesselationEvaluation, 1, &tShaderCode, NULL);
+		glCompileShader(tesselationEvaluation);
+		checkCompileErrors(tesselationEvaluation, "TESSELLATION EVALUATION");
+	}
 	// shader Program
 	ID = glCreateProgram();
 	glAttachShader(ID, vertex);
 	glAttachShader(ID, fragment);
 	if (geometryPath != nullptr)
 		glAttachShader(ID, geometry);
+	if (tessellationControlPath != nullptr)
+		glAttachShader(ID, tesselationControl);
+	if (tessellationEvaluationPath != nullptr)
+		glAttachShader(ID, tesselationEvaluation);
 	glLinkProgram(ID);
 	checkCompileErrors(ID, "PROGRAM");
-	// delete the shaders as they're linked into our program now and no longer necessery
+	// delete the shaders as they're linked into our program now and no longer neccessery
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
 	if (geometryPath != nullptr)
 		glDeleteShader(geometry);
+	if (tessellationControlPath != nullptr)
+		glDeleteShader(tesselationControl);
+	if (tessellationEvaluationPath != nullptr)
+		glDeleteShader(tesselationEvaluation);
 
 	// map all uniforms up front
 	GLint count, i, off, size;
