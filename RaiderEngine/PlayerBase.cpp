@@ -27,11 +27,14 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	controller->setStepOffset(stepHeight);
 	
 	// create a separate water check shape for determining whether or not the player is swimming (rather than just standing in a small puddle)
-	waterCheckShape = gPhysics->createShape(PxSphereGeometry(radius*.5f), *gMaterial, false);
+	waterCheckShape = gPhysics->createShape(PxSphereGeometry(waterCheckRadius), *gMaterial, false);
 	waterCheckShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
 	waterCheckShape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE, false);
 	waterCheckShape->setQueryFilterData(noHitFilterData);
-	controller->getActor()->attachShape(*waterCheckShape);
+	waterCheckBody = gPhysics->createRigidDynamic(PxTransform(0, 0, 0));
+	waterCheckBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	waterCheckBody->attachShape(*waterCheckShape);
+	gScene->addActor(*waterCheckBody);
 
 	// initialize the camera body to a very tiny sphere (basically a point) so we can tell when the camera is inside of a volume
 	camShape = gPhysics->createShape(PxSphereGeometry(.00001f), *gMaterial, false);
@@ -52,6 +55,7 @@ void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {
 	else
 		controller->setPosition(PxExtendedVec3(pos.x, pos.y + (isFeetPos ? height / 2 : 0), pos.z));
 	syncCameraPos();
+	syncWaterCheckPos();
 }
 
 void PlayerBase::updateSwimmingVolumeCount(bool enteredNewBody) {
@@ -71,6 +75,11 @@ void PlayerBase::syncCameraPos() {
 	mainCam->Position.y = static_cast<float>(playerPos.y) + height * (crouching ? crouchScale : 1) / 2 + radius - eyeTopHeadOffset;
 	mainCam->Position.z = static_cast<float>(playerPos.z);
 	camBody->setGlobalPose(PxTransform(mainCam->Position.x, mainCam->Position.y, mainCam->Position.z));
+}
+
+void PlayerBase::syncWaterCheckPos() {
+	PxExtendedVec3 footPos = controller->getFootPosition();
+	waterCheckBody->setGlobalPose(PxTransform(footPos.x, footPos.y + waterCheckFootOffset + waterCheckRadius, footPos.z));
 }
 
 bool PlayerBase::canJump() {
@@ -212,6 +221,9 @@ void PlayerBase::update() {
 			controller->resize(height * (crouching ? crouchScale : 1));
 		}
 	}
+	syncWaterCheckPos();
+
+	// update camera
 	if (flyCam)
 		mainCam->moveFlycam();
 	else

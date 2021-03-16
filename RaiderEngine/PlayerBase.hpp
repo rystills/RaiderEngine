@@ -30,7 +30,10 @@ public:
 
 	glm::vec3 velocity;
 	bool crouching = false;
+	PxRigidDynamic* waterCheckBody;
 	PxShape* waterCheckShape;
+	float waterCheckFootOffset = .7f;
+	float waterCheckRadius = .1f;
 	int swimmingVolumeCount = 0;
 	bool swimming = false;
 	int underWaterVolumeCount = 0;
@@ -62,6 +65,7 @@ public:
 	sync the position of the camera with the player's current position
 	*/
 	void syncCameraPos();
+	void syncWaterCheckPos();
 
 	/*
 	return whether or not the player is currently able to jump
