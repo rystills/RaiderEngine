@@ -16,6 +16,7 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	desc.height = height;
 	desc.radius = radius;
 	desc.material = gMaterial;
+	// TODO: player contactOffset seems very large; double check PxTolerancesScale and explore viability of reducing contactOffset
 	controller = (PxCapsuleController*)manager->createController(desc);
 	// set the player controller's user data
 	controller->setUserData(this);
@@ -24,6 +25,11 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	controller->getActor()->getShapes(&shape, 1);
 	shape->setQueryFilterData(noHitFilterData);
 	controller->setStepOffset(stepHeight);
+	waterCheckShape = gPhysics->createShape(PxSphereGeometry(radius*.5f), *gMaterial, false);
+	waterCheckShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+	waterCheckShape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE, false);
+	waterCheckShape->setQueryFilterData(noHitFilterData);
+	controller->getActor()->attachShape(*waterCheckShape);
 }
 
 void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {

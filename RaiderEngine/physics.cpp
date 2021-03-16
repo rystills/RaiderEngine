@@ -98,6 +98,6 @@ void GEventCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 		return;
 	physx::PxRigidDynamic* playerActor = PlayerSpawn::player->controller->getActor();
 	for (int i = 0; i < count; ++i)
-		if (pairs[i].otherActor == playerActor && ((GameObject*)pairs[i].triggerActor->userData)->model->surfType == "water")
+		if (pairs[i].otherActor == playerActor && pairs[i].otherShape == PlayerSpawn::player->waterCheckShape && ((GameObject*)pairs[i].triggerActor->userData)->model->surfType == "water")
 			PlayerSpawn::player->updateWaterVolumeCount(pairs[i].status == PxPairFlag::eNOTIFY_TOUCH_FOUND);
 }

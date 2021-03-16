@@ -28,6 +28,7 @@ public:
 
 	glm::vec3 velocity;
 	bool crouching = false;
+	PxShape* waterCheckShape;
 	int waterVolumeCount = 0;
 	bool swimming = false;
 	bool ctrlDown = false;
