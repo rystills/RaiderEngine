@@ -35,6 +35,11 @@ void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {
 		controller->setPosition(PxExtendedVec3(pos.x, pos.y + (isFeetPos ? height / 2 : 0), pos.z));
 }
 
+void PlayerBase::updateWaterVolumeCount(bool enteredNewBody) {
+	waterVolumeCount += (enteredNewBody ? 1 : -1);
+	swimming = waterVolumeCount > 0;
+}
+
 void PlayerBase::syncCameraPos() {
 	PxExtendedVec3 playerPos = controller->getPosition();
 	mainCam->Position.x = static_cast<float>(playerPos.x);

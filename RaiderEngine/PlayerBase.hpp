@@ -28,6 +28,7 @@ public:
 
 	glm::vec3 velocity;
 	bool crouching = false;
+	int waterVolumeCount = 0;
 	bool swimming = false;
 	bool ctrlDown = false;
 	bool flyCam = false;
@@ -48,6 +49,8 @@ public:
 	@param isFeetPos: whether we are setting the position of the feet or the position of the controller center
 	*/
 	void setPos(glm::vec3 pos, bool relative = false, bool isFeetPos = true);
+
+	void updateWaterVolumeCount(bool enteredNewBody);
 
 	/*
 	sync the position of the camera with the player's current position
