@@ -25,11 +25,23 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	controller->getActor()->getShapes(&shape, 1);
 	shape->setQueryFilterData(noHitFilterData);
 	controller->setStepOffset(stepHeight);
+	
+	// create a separate water check shape for determining whether or not the player is swimming (rather than just standing in a small puddle)
 	waterCheckShape = gPhysics->createShape(PxSphereGeometry(radius*.5f), *gMaterial, false);
 	waterCheckShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
 	waterCheckShape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE, false);
 	waterCheckShape->setQueryFilterData(noHitFilterData);
 	controller->getActor()->attachShape(*waterCheckShape);
+
+	// initialize the camera body to a very tiny sphere (basically a point) so we can tell when the camera is inside of a volume
+	camShape = gPhysics->createShape(PxSphereGeometry(.00001f), *gMaterial, false);
+	camShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+	camShape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE, false);
+	camShape->setQueryFilterData(noHitFilterData);
+	camBody = gPhysics->createRigidDynamic(PxTransform(0,0,0));
+	camBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	camBody->attachShape(*camShape);
+	gScene->addActor(*camBody);
 }
 
 void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {
@@ -39,11 +51,17 @@ void PlayerBase::setPos(glm::vec3 pos, bool relative, bool isFeetPos) {
 	}
 	else
 		controller->setPosition(PxExtendedVec3(pos.x, pos.y + (isFeetPos ? height / 2 : 0), pos.z));
+	syncCameraPos();
 }
 
-void PlayerBase::updateWaterVolumeCount(bool enteredNewBody) {
-	waterVolumeCount += (enteredNewBody ? 1 : -1);
-	swimming = waterVolumeCount > 0;
+void PlayerBase::updateSwimmingVolumeCount(bool enteredNewBody) {
+	swimmingVolumeCount += (enteredNewBody ? 1 : -1);
+	swimming = swimmingVolumeCount > 0;
+}
+
+void PlayerBase::updateUnderWaterVolumeCount(bool enteredNewBody) {
+	underWaterVolumeCount += (enteredNewBody ? 1 : -1);
+	underWater = underWaterVolumeCount > 0;
 }
 
 void PlayerBase::syncCameraPos() {
@@ -52,6 +70,7 @@ void PlayerBase::syncCameraPos() {
 	// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
 	mainCam->Position.y = static_cast<float>(playerPos.y) + height * (crouching ? crouchScale : 1) / 2 + radius - eyeTopHeadOffset;
 	mainCam->Position.z = static_cast<float>(playerPos.z);
+	camBody->setGlobalPose(PxTransform(mainCam->Position.x, mainCam->Position.y, mainCam->Position.z));
 }
 
 bool PlayerBase::canJump() {

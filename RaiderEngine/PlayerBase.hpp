@@ -8,6 +8,8 @@ class PlayerBase {
 public:
 	PxControllerManager* manager;
 	PxCapsuleController* controller;
+	PxRigidDynamic* camBody;
+	PxShape* camShape;
 	float walkSpeed = 300;
 	float crouchSpeed = 180;
 	float runSpeed = 480;
@@ -29,8 +31,10 @@ public:
 	glm::vec3 velocity;
 	bool crouching = false;
 	PxShape* waterCheckShape;
-	int waterVolumeCount = 0;
+	int swimmingVolumeCount = 0;
 	bool swimming = false;
+	int underWaterVolumeCount = 0;
+	bool underWater = false;
 	bool ctrlDown = false;
 	bool flyCam = false;
 
@@ -51,7 +55,8 @@ public:
 	*/
 	void setPos(glm::vec3 pos, bool relative = false, bool isFeetPos = true);
 
-	void updateWaterVolumeCount(bool enteredNewBody);
+	void updateSwimmingVolumeCount(bool enteredNewBody);
+	void updateUnderWaterVolumeCount(bool enteredNewBody);
 
 	/*
 	sync the position of the camera with the player's current position
