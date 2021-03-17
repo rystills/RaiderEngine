@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "TextObject.hpp"
 
-extern void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered);
+extern void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat depth, GLfloat scale, glm::vec3 color, bool centered);
 
 
 void TextObject::initVertexObjects() {
@@ -20,5 +20,5 @@ void TextObject::initVertexObjects() {
 }
 
 void TextObject::draw(Shader s) {
-	renderText(fontName, fontSize, s, text, x, y, scale, color, centered);
+	renderText(fontName, fontSize, s, text, x, y, depth, scale, color, centered);
 }

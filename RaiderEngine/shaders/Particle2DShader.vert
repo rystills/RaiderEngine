@@ -10,10 +10,11 @@ layout (location = 2) in vec2 pos;
 layout (location = 3) in float scale;
 uniform mat4 projection;
 uniform vec2 spriteDims;
+uniform float depth;
 
 void main() {
     TexCoords = vertex.zw;
 	mixColor = spriteColor;
 	// subtract spriteDims/2 to get centered rendering
-    gl_Position = projection * vec4(pos.xy + spriteDims*vertex.xy * scale - (scale*spriteDims/2),0.0,1.0);
+    gl_Position = projection * vec4(pos.xy + spriteDims*vertex.xy * scale - (scale*spriteDims/2),depth,1.0);
 }

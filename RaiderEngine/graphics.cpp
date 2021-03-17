@@ -126,7 +126,7 @@ void initBuffers() {
 	glGenVertexArrays(1, &primitiveVAO);
 }
 
-void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, bool centered) {
+void renderText(std::string fontName, int fontSize, Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat depth, GLfloat scale, glm::vec3 color, bool centered) {
 	// TODO: precalculate individual VAOs in TextObjects for faster rendering
 	// make sure we're using a valid font/size, and rendering a non-empty string
 	if (!fonts[fontName].count(fontSize)) {
@@ -148,6 +148,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		renderState.lastFontColor = color;
 		s.setVec3("textColor", color.x, color.y, color.z);
 	}
+	s.setFloat("depth", depth);
 
 	if (text.length() > TextObject::numGlpyhsBuffered) {
 		TextObject::numGlpyhsBuffered = text.length();
@@ -849,7 +850,7 @@ void render2D(bool clearScreen) {
 	}
 
 	// render Particle2Ds
-	setShouldDepthTest(false);
+	glDepthMask(GL_FALSE);
 
 	shaders["Particle2DShader"]->use();
 	glBindVertexArray(ParticleEmitter2D::VAO);
@@ -861,6 +862,7 @@ void render2D(bool clearScreen) {
 		for (auto&& pe : particleEmitter2Ds) {
 			glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
 			shaders["Particle2DShader"]->setVec2("spriteDims", glm::vec2(pe->sprite.width, pe->sprite.height));
+			shaders["Particle2DShader"]->setFloat("depth", pe->depth);
 			if (pe->particles.size() > ParticleEmitter2D::numParticlesInVBO) {
 				ParticleEmitter2D::numParticlesInVBO = pe->particles.size();
 				glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 7 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
@@ -871,10 +873,10 @@ void render2D(bool clearScreen) {
 	}
 
 	// render text
-	// TODO: text rendering should be orderable too
 	setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (unsigned int i = 0; i < textObjects.size(); ++i)
 		textObjects[i]->draw(*shaders["textShader"]);
+	glDepthMask(GL_TRUE);
 }
 
 void render(bool only2D) {
@@ -894,7 +896,7 @@ void render(bool only2D) {
 	// update render state
 	renderState.prevAmbientStrength = renderState.ambientStrength;
 	renderState.prevClearColor = renderState.clearColor;
-	renderState.underWater = PlayerSpawn::player->underWater;
+	renderState.underWater = PlayerSpawn::player && PlayerSpawn::player->underWater;
 	renderState.projection = mainCam->projection;
 	renderState.view = mainCam->view;
 	renderState.viewPos = mainCam->Position;

@@ -38,6 +38,7 @@ public:
 	bool isburst = false;
 	bool recycleParticles = true;
 	glm::vec3 colorShiftRate;
+	float depth = 0.1f;  // depth in NDC coordinates
 
 	ParticleEmitter2D(glm::vec2 pos, std::string spriteName = "");
 

@@ -13,6 +13,8 @@ public:
 	std::string fontName;
 	int fontSize;
 	float scale;
+	float depth = 0.1f;  // depth in NDC coordinates
+
 	TextObject(std::string text, float x, float y, glm::vec3 color, std::string fontName, int fontSize, bool centered = false, float scale = 1.f) : text(text), x(x), y(y), color(color), fontName(fontName), fontSize(fontSize), centered(centered), scale(scale) {};
 
 	static void initVertexObjects();
