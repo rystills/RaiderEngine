@@ -186,6 +186,7 @@
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="ObjectRegistryBase.cpp" />
+    <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ParticleEmitter2D.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="PlayerBase.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model.hpp" />
+    <ClInclude Include="ParticleEmitter.hpp" />
     <ClInclude Include="ParticleEmitter2D.hpp" />
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="PlayerBase.hpp" />
@@ -270,6 +272,8 @@
     <None Include="shaders\lineShader2D.vert" />
     <None Include="shaders\Particle2DShader.frag" />
     <None Include="shaders\Particle2DShader.vert" />
+    <None Include="shaders\ParticleShader.frag" />
+    <None Include="shaders\ParticleShader.vert" />
     <None Include="shaders\point_shadows_depth.frag" />
     <None Include="shaders\point_shadows_depth.geom" />
     <None Include="shaders\point_shadows_depth.vert" />

@@ -366,6 +366,8 @@ void calcOrthoProjection() {
 	shaders["lineShader2D"]->setMat4("projection", OrthoProjection);
 	shaders["2DShader"]->use();
 	shaders["2DShader"]->setMat4("projection", OrthoProjection);
+	shaders["ParticleShader"]->use();
+	shaders["ParticleShader"]->setMat4("projection", OrthoProjection);
 	shaders["Particle2DShader"]->use();
 	shaders["Particle2DShader"]->setMat4("projection", OrthoProjection);
 }
@@ -504,6 +506,7 @@ void loadShaders() {
 	shaders["textShader"] = std::make_unique<Shader>("textShader.vert", "textShader.frag");
 	shaders["tilemapShader"] = std::make_unique<Shader>("tilemapShader.vert", "tilemapShader.frag");
 	shaders["2DShader"] = std::make_unique<Shader>("2DShader.vert", "2DShader.frag");
+	shaders["ParticleShader"] = std::make_unique<Shader>("ParticleShader.vert", "ParticleShader.frag");
 	shaders["Particle2DShader"] = std::make_unique<Shader>("Particle2DShader.vert", "Particle2DShader.frag");
 	shaders["pointShadowsDepth"] = std::make_unique<Shader>("point_shadows_depth.vert", "point_shadows_depth.frag", "point_shadows_depth.geom");
 
@@ -681,6 +684,32 @@ void renderLightingPass() {
 	// copy content of geometry's depth buffer to default framebuffer's depth buffer
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.buffer);
 	glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+}
+
+void renderParticles() {
+	// render Particles
+	glDepthMask(GL_FALSE);
+
+	shaders["ParticleShader"]->use();
+	shaders["ParticleShader"]->setMat4("view", mainCam->view);
+	glBindVertexArray(ParticleEmitter::VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter::VBO);
+	setBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+	for (int i = 0; i < 2; setBlendFunc(GL_SRC_ALPHA, GL_ONE), ++i) {
+		// render particles in two passes; once in black, and once normally. Results in additive blending between particles, and normal blending with everything else
+		// TODO: there may be a way to optimize this. Consider rendering to a second buffer rather than doing two passes, or possible single-pass solution using premultiplied alpha
+		for (auto&& pe : particleEmitters) {
+			glBindTexture(GL_TEXTURE_2D, pe->sprite.id);
+			shaders["ParticleShader"]->setVec2("spriteDims", glm::vec2(pe->sprite.width, pe->sprite.height));
+			if (pe->particles.size() > ParticleEmitter::numParticlesInVBO) {
+				ParticleEmitter::numParticlesInVBO = pe->particles.size();
+				glBufferData(GL_ARRAY_BUFFER, pe->particles.size() * 8 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+			}
+			glBufferSubData(GL_ARRAY_BUFFER, 0, pe->particles.size() * 8 * sizeof(GLfloat), &pe->particles[0]);
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, pe->particles.size());
+		}
+	}
+	glDepthMask(GL_TRUE);
 }
 
 void debugDrawLightCubes() {
@@ -885,6 +914,7 @@ void render(bool only2D) {
 		renderDepthMap();
 		renderGeometryPass();
 		renderLightingPass();
+		renderParticles();
 		debugDrawLightCubes();
 		renderLines();
 	}

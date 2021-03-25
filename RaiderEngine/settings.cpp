@@ -54,6 +54,12 @@ Collider2D* addCollider2D(std::string name, Collider2D* go) {
 	return go;
 }
 
+ParticleEmitter* addParticleEmitter(ParticleEmitter* go) {
+	particleEmitters.emplace_back(go);
+	return go;
+	// TODO: define remove method for ParticleEmitter
+}
+
 ParticleEmitter2D* addParticleEmitter2D(ParticleEmitter2D* go) {
 	particleEmitter2Ds.emplace_back(go);
 	return go;
@@ -210,6 +216,8 @@ void updateObjects() {
 	for (auto&& kv : gameObject2Ds)
 		for (unsigned int i = 0; i < kv.second.size(); ++i)
 			kv.second[i]->update();
+	for (unsigned int i = 0; i < particleEmitters.size(); ++i)
+		particleEmitters[i]->update();
 	for (unsigned int i = 0; i < particleEmitter2Ds.size(); ++i)
 		particleEmitter2Ds[i]->update();
 	for (unsigned int i = 0; i < textObjects.size(); ++i)

@@ -195,6 +195,9 @@
     <ClCompile Include="ObjectRegistryBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -335,6 +338,9 @@
     <ClInclude Include="demos\demo2DPlatformer\Player.hpp">
       <Filter>Source Files\demos\demo2DPlatformer</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEmitter.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -401,6 +407,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\tilemapShader.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleShader.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleShader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

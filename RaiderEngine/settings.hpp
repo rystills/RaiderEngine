@@ -8,6 +8,7 @@
 #include "Light.hpp"
 #include "TextObject.hpp"
 #include "graphics.hpp"
+#include "ParticleEmitter.hpp"
 #include "ParticleEmitter2D.hpp"
 #include "Tilemap.hpp"
 
@@ -43,6 +44,7 @@ inline std::unordered_map<std::string, std::unordered_map<int, std::pair< GLuint
 inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
+inline std::vector<std::unique_ptr<ParticleEmitter>> particleEmitters;
 inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
 inline std::vector<std::unique_ptr<Tilemap>> tilemaps;
 inline bool forceDisableNvidiaThreadedOptimization = false;
@@ -85,6 +87,8 @@ void removeGameObject2D(GameObject2D* go);
 void removeGameObject2D(std::string spriteName, int ind);
 
 Collider2D* addCollider2D(std::string name, Collider2D* go);
+
+ParticleEmitter* addParticleEmitter(ParticleEmitter* go);
 
 ParticleEmitter2D* addParticleEmitter2D(ParticleEmitter2D* go);
 
