@@ -7,7 +7,8 @@ uniform sampler2D image;
 in vec4 mixColor;
 
 void main() {
-    if( texture(image, TexCoords).a < .001)
+    vec4 col =  texture(image, TexCoords);
+    if (col.a < .001)
         discard;
-    color = mixColor * texture(image, TexCoords);
+    color = mixColor * col;
 }  

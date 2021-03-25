@@ -15,10 +15,9 @@ uniform vec2 spriteDims;
 void main() {
     TexCoords = vertex.zw;
 	mixColor = spriteColor;
+    gl_Position = projection * view * vec4(pos,1.0);
+	// offset position in clip space by sprite dimensions
 	// subtract spriteDims/2 to get centered rendering
-//    gl_Position = projection * view * vec4(pos.xy + spriteDims*vertex.xy * scale - (scale*spriteDims/2),pos.z,1.0);
-//    gl_Position = projection * vec4(pos.xy + spriteDims*vertex.xy * scale - (scale*spriteDims/2),.1,1.0);
-//	gl_Position = projection * view * vec4(pos, 1.0);
-
-	gl_Position = projection * vec4(pos.xy + spriteDims*vertex.xy * scale - (scale*spriteDims/2),.1,1.0);
+	// apply the projection to the offset as well
+	gl_Position.xy += (projection * vec4(spriteDims*vertex.xy * scale - (scale*spriteDims/2),0,0)).xy;
 }

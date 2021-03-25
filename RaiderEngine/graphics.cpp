@@ -366,8 +366,6 @@ void calcOrthoProjection() {
 	shaders["lineShader2D"]->setMat4("projection", OrthoProjection);
 	shaders["2DShader"]->use();
 	shaders["2DShader"]->setMat4("projection", OrthoProjection);
-	shaders["ParticleShader"]->use();
-	shaders["ParticleShader"]->setMat4("projection", OrthoProjection);
 	shaders["Particle2DShader"]->use();
 	shaders["Particle2DShader"]->setMat4("projection", OrthoProjection);
 }
@@ -689,9 +687,13 @@ void renderLightingPass() {
 void renderParticles() {
 	// render Particles
 	glDepthMask(GL_FALSE);
+	setShouldBlend(true);
 
 	shaders["ParticleShader"]->use();
-	shaders["ParticleShader"]->setMat4("view", mainCam->view);
+	if (mainCam->view != renderState.view)
+		shaders["ParticleShader"]->setMat4("view", mainCam->view);
+	if (mainCam->projection != renderState.projection)
+		shaders["ParticleShader"]->setMat4("projection", mainCam->projection);
 	glBindVertexArray(ParticleEmitter::VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, ParticleEmitter::VBO);
 	setBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
@@ -710,6 +712,7 @@ void renderParticles() {
 		}
 	}
 	glDepthMask(GL_TRUE);
+	setShouldBlend(false);
 }
 
 void debugDrawLightCubes() {
@@ -1048,6 +1051,7 @@ void initGraphics() {
 	Model::createDefaultMaterialMaps();
 	GameObject::initStaticVertexBuffer();
 	GameObject2D::initStaticVertexBuffer();
+	ParticleEmitter::initVertexObjects();
 	ParticleEmitter2D::initVertexObjects();
 	TextObject::initVertexObjects();
 }
