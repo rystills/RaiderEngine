@@ -9,6 +9,7 @@
 #include "graphics.hpp"
 #include "terminalColors.hpp"
 #include "physics.hpp"
+#include "ParticleEmitter.hpp"
 #include "ParticleEmitter2D.hpp"
 #include "Tilemap.hpp"
 #include "timing.hpp"

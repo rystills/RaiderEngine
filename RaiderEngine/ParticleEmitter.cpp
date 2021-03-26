@@ -14,12 +14,13 @@ ParticleEmitter::ParticleEmitter(glm::vec3 pos, std::string spriteName) : pos(po
 void ParticleEmitter::initVertexObjects() {
 	// Configure VAO and temporary VBO
 	GLuint tempVBO;
+	// TODO: pos y flipped so that particles face the camera; the reason that this is necessary is unclear and requires a proper explanation
 	GLfloat vertices[] = {
 		// Pos      // Tex
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 1.0f, 1.0f,
 	};
 
 	glGenVertexArrays(1, &VAO);
