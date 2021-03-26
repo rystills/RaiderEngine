@@ -19,5 +19,6 @@ void main() {
 	// offset position in clip space by sprite dimensions
 	// subtract spriteDims/2 to get centered rendering
 	// apply the projection to the offset as well
+	// TODO: particles appear to be flipped vertically
 	gl_Position.xy += (projection * vec4(spriteDims*vertex.xy * scale - (scale*spriteDims/2),0,0)).xy;
 }

@@ -52,6 +52,8 @@ void checkDemoToggles() {
 		drawLightCubes = !drawLightCubes;	
 	if (keyStates[GLFW_KEY_F9][pressed])
 		drawLightSpheres = !drawLightSpheres;
+	if (keyStates[GLFW_KEY_F10][pressed])
+		freezeWorld = !freezeWorld;
 
 	// lighting toggle
 	if (keyPressed(GLFW_KEY_F5)) {

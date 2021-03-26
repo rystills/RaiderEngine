@@ -205,6 +205,8 @@ void setFallbackShaderDir(std::string newDir) {
 update all objects in all object lists
 */
 void updateObjects() {
+	if (freezeWorld)
+		return;
 	double sTime = glfwGetTime();
 	for (unsigned int i = 0; i < tilemaps.size(); ++i)
 		tilemaps[i]->update();

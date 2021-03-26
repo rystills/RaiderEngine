@@ -22,6 +22,7 @@ inline bool drawLightSpheres = false;
 // global visual debugging toggles
 inline bool enableTextureMaps[Model::numMapTypes] = {true, true, true, true};
 inline bool enableLighting = true;
+inline bool freezeWorld = false;
 inline float anisoFilterAmount = 0.0f;
 inline const int numFontCharacters = 128;  // we only care about the first 128 characters stored in a given font file, at least for now
 inline GLuint filterMin2D = GL_LINEAR_MIPMAP_LINEAR, filterMax2D= GL_LINEAR;
