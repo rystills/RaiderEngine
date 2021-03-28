@@ -81,7 +81,14 @@ void GameObject::rotate(const float& angle, glm::vec3 const& axes) {
 glm::quat GameObject::setRotation(glm::vec3 const& rotationEA) {
 	glm::quat q = glm::quat(rotationEA);
 	rotation = glm::toMat4(q);
+	isDirty = true;
 	return q;
+}
+
+glm::quat GameObject::setRotation(glm::quat const& rot) {
+	rotation = glm::toMat4(rot);
+	isDirty = true;
+	return rot;
 }
 
 glm::vec4 GameObject::forwardVec() {

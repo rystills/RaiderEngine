@@ -68,6 +68,13 @@ void PlayerBase::updateUnderWaterVolumeCount(bool enteredNewBody) {
 	underWater = underWaterVolumeCount > 0;
 }
 
+void PlayerBase::updateLadderVolumeCount(bool enteredNewBody, GameObject* ladder) {
+	ladderVolumeCount += (enteredNewBody ? 1 : -1);
+	climbingLadder = ladderVolumeCount > 0;
+	if (enteredNewBody)
+		connectedLadder = ladder;
+}
+
 void PlayerBase::syncCameraPos() {
 	PxExtendedVec3 playerPos = controller->getPosition();
 	mainCam->Position.x = static_cast<float>(playerPos.x);
@@ -93,7 +100,63 @@ void PlayerBase::update() {
 	if (keyPressed("toggleFlyCam"))
 		flyCam = !flyCam;
 
-	if (swimming) {
+	if (climbingLadder) {
+		// movement
+		float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
+		if (mainCam->controllable && !flyCam) {
+			baseMoveSpeed = (crouching ? crouchSpeed : (keyHeld("run") ? runSpeed : walkSpeed));
+			forwardSpeed = (keyHeld("mvForward") - keyHeld("mvBackward")) * baseMoveSpeed;
+			strafeSpeed = (keyHeld("mvRight") - keyHeld("mvLeft")) * baseMoveSpeed;
+			if (forwardSpeed && strafeSpeed) {
+				// average forward and strafe speeds to prevent diagonal movement from being faster
+				float invMag = baseMoveSpeed / sqrt(forwardSpeed * forwardSpeed + strafeSpeed * strafeSpeed);
+				forwardSpeed *= invMag;
+				strafeSpeed *= invMag;
+			}
+		}
+		velocity += mainCam->Right * strafeSpeed * waterControl * deltaTime;
+		velocity += mainCam->Front * forwardSpeed * waterControl * deltaTime;
+		// cap horizontal velocity depending on whether the player is walking or running
+		float maxMoveSpeed = baseMoveSpeed * maxMoveSpeedRatio;
+		float moveVel = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+		if (moveVel > maxMoveSpeed) {
+			float velDiff = (maxMoveSpeed) / moveVel;
+			velocity.x *= velDiff;
+			velocity.y *= velDiff;
+			velocity.z *= velDiff;
+		}
+		// if the player is not inputting movement in any direction, slow them down or stop them entirely
+		if (forwardSpeed == 0 && strafeSpeed == 0) {
+			float stopSpeed = ladderStoppingSpeed * deltaTime;
+			moveVel = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+			if (moveVel <= stopSpeed) {
+				velocity = glm::vec3();
+			}
+			else {
+				velocity -= glm::normalize(velocity) * ladderStoppingSpeed * deltaTime;
+			}
+		}
+
+		bool grounded = canJump();
+		// restrict effective velocity to ladder normal when not grounded
+		glm::vec4 effectiveVelocity(velocity,1);
+		if (!grounded) {
+			// rotate velocity by ladder rotation to get axis alignment
+			glm::quat q = connectedLadder->rotation;
+			// add a 90 degree rotation on the x axis to compensate for the -90 degree offset produced by assimp
+			q *= glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+			effectiveVelocity = q * effectiveVelocity;
+			// eliminate z to restrict movement to the xy plane, then rotate resulting velocity back by inverse ladder rotation
+			effectiveVelocity.z = 0;
+			effectiveVelocity = glm::inverse(q) * effectiveVelocity;
+			
+		}
+		// apply to controller
+		PxVec3 physVelocity(effectiveVelocity.x * deltaTime, effectiveVelocity.y * deltaTime, effectiveVelocity.z * deltaTime);
+		controller->move(physVelocity, 0, deltaTime, NULL);
+	}
+
+	else if (swimming) {
 		// movement
 		float baseMoveSpeed = (crouching ? crouchSpeed : walkSpeed), forwardSpeed = 0, strafeSpeed = 0;
 		if (mainCam->controllable && !flyCam) {
@@ -129,6 +192,9 @@ void PlayerBase::update() {
 				velocity -= glm::normalize(velocity) * waterStoppingSpeed * deltaTime;
 			}
 		}
+		// apply to controller
+		PxVec3 physVelocity(velocity.x * deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
+		controller->move(physVelocity, 0, deltaTime, NULL);
 	}
 	else {
 		glm::vec3 normalFront = glm::cross(mainCam->WorldUp, mainCam->Right);
@@ -195,11 +261,11 @@ void PlayerBase::update() {
 			if (gScene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(defaultFilterData, PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)))
 				velocity.y = 0;
 		}
+		// apply to controller
+		PxVec3 physVelocity(velocity.x* deltaTime, velocity.y* deltaTime, velocity.z* deltaTime);
+		controller->move(physVelocity, 0, deltaTime, NULL);
 	}
 
-	// apply to controller
-	PxVec3 physVelocity(velocity.x * deltaTime, velocity.y * deltaTime, velocity.z * deltaTime);
-	controller->move(physVelocity, 0, deltaTime, NULL);
 	// crouch toggle
 	if (keyPressed("crouch")) {
 		// we can always crouch, but if we're trying to stand back up, make sure we won't hit our head on something

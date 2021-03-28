@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "physics.hpp"
+#include "GameObject.hpp"
 
 // see this page for the physx CCT demo: https://github.com/NVIDIAGameWorks/PhysX/blob/4050bbfdc2699dfab7edbf0393df8ff96bbe06c5/physx/samples/samplecctsharedcode/SampleCCTCameraController.cpp
 
@@ -24,6 +25,7 @@ public:
 	float groundStoppingSpeed = 180;
 	float airStoppingSpeed = 12;
 	float waterStoppingSpeed = 6;
+	float ladderStoppingSpeed = 200;
 	float airControl = .1f;
 	float waterControl = .3f;
 	float headBumpDist = .1f;
@@ -38,6 +40,9 @@ public:
 	bool swimming = false;
 	int underWaterVolumeCount = 0;
 	bool underWater = false;
+	int ladderVolumeCount = 0;
+	GameObject* connectedLadder;
+	bool climbingLadder = false;
 	bool ctrlDown = false;
 	bool flyCam = false;
 
@@ -60,6 +65,7 @@ public:
 
 	void updateSwimmingVolumeCount(bool enteredNewBody);
 	void updateUnderWaterVolumeCount(bool enteredNewBody);
+	void updateLadderVolumeCount(bool enteredNewBody, GameObject* ladder);
 
 	/*
 	sync the position of the camera with the player's current position

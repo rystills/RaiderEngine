@@ -67,6 +67,7 @@ public:
 	@param rotationEA: the desired rotation (in radian euler angles) to set
 	*/
 	glm::quat setRotation(glm::vec3 const& rotationEA);
+	glm::quat setRotation(glm::quat const& rot);
 
 	glm::vec4 GameObject::forwardVec();
 	glm::vec4 GameObject::backVec();
