@@ -34,7 +34,7 @@ public:
 	bool crouching = false;
 	PxRigidDynamic* waterCheckBody;
 	PxShape* waterCheckShape;
-	float waterCheckFootOffset = .7f;
+	float waterCheckFootOffset = .6f;
 	float waterCheckRadius = .1f;
 	int swimmingVolumeCount = 0;
 	bool swimming = false;

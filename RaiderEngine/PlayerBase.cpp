@@ -13,18 +13,24 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	manager = PxCreateControllerManager(*gScene);
 	// create the player controller
 	PxCapsuleControllerDesc desc;
+	desc.contactOffset = .01f;
 	desc.height = height;
 	desc.radius = radius;
 	desc.material = gMaterial;
+	desc.stepOffset = stepHeight;
+	
 	// TODO: player contactOffset seems very large; double check PxTolerancesScale and explore viability of reducing contactOffset
 	controller = (PxCapsuleController*)manager->createController(desc);
 	// set the player controller's user data
 	controller->setUserData(this);
 	// set non-default raycast filter so that the player is ignored when raycasting
-	PxShape* shape;
-	controller->getActor()->getShapes(&shape, 1);
-	shape->setQueryFilterData(noHitFilterData);
-	controller->setStepOffset(stepHeight);
+	unsigned int nbShapes = controller->getActor()->getNbShapes();
+
+	PxShape** shapes = new PxShape * [nbShapes];
+	controller->getActor()->getShapes(shapes, nbShapes, 0);
+	for (unsigned int i = 0; i < nbShapes; ++i) {
+		shapes[i]->setQueryFilterData(noHitFilterData);
+	}
 	
 	// create a separate water check shape for determining whether or not the player is swimming (rather than just standing in a small puddle)
 	waterCheckShape = gPhysics->createShape(PxSphereGeometry(waterCheckRadius), *gMaterial, false);
@@ -76,10 +82,10 @@ void PlayerBase::updateLadderVolumeCount(bool enteredNewBody, GameObject* ladder
 }
 
 void PlayerBase::syncCameraPos() {
-	PxExtendedVec3 playerPos = controller->getPosition();
+	PxExtendedVec3 playerPos = controller->getFootPosition();
 	mainCam->Position.x = static_cast<float>(playerPos.x);
 	// camera height should be set to the top of the capsule minus the approximate distance from the top of the head to the eyes
-	mainCam->Position.y = static_cast<float>(playerPos.y) + height * (crouching ? crouchScale : 1) / 2 + radius - eyeTopHeadOffset;
+	mainCam->Position.y = static_cast<float>(playerPos.y) + height * (crouching ? crouchScale : 1) + 2*radius - eyeTopHeadOffset;
 	mainCam->Position.z = static_cast<float>(playerPos.z);
 	camBody->setGlobalPose(PxTransform(mainCam->Position.x, mainCam->Position.y, mainCam->Position.z));
 }
