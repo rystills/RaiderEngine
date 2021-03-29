@@ -22,12 +22,15 @@ public:
 	float eyeTopHeadOffset = .1f;
 	float playerGravity = 42;
 	float jumpStrength = 9;
+	float ladderJumpStrength = 4;
+	float ladderJumpSpeed = 10;
 	float groundStoppingSpeed = 180;
 	float airStoppingSpeed = 12;
 	float waterStoppingSpeed = 6;
 	float ladderStoppingSpeed = 200;
 	float airControl = .1f;
 	float waterControl = .3f;
+	float ladderControl = 1.f;
 	float headBumpDist = .1f;
 
 	glm::vec3 velocity;
