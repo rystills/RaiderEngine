@@ -67,6 +67,9 @@ void ParticleEmitter::spawnParticle() {
 		sy = randRange(spawnYOffMin, spawnYOffMax);
 		sz = randRange(spawnZOffMin, spawnZOffMax);
 	}
+	sx += spawnOffset.x;
+	sy += spawnOffset.y;
+	sz += spawnOffset.z;
 
 	if (recycleParticles && !recycledParticleInds.empty()) {
 		particles[recycledParticleInds.back()] = { glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), randRange(spawnAMin, spawnAMax)), pos + glm::vec3(sx, sy, sz), randRange(spawnScaleMin, spawnScaleMax) };

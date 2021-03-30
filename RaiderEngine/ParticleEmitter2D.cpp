@@ -63,6 +63,8 @@ void ParticleEmitter2D::spawnParticle() {
 		sx = randRange(spawnXOffMin, spawnXOffMax);
 		sy = randRange(spawnYOffMin, spawnYOffMax);
 	}
+	sx += spawnOffset.x;
+	sy += spawnOffset.y;
 
 	if (recycleParticles && !recycledParticleInds.empty()) {
 		particles[recycledParticleInds.back()] = { glm::vec4(randRange(spawnRMin, spawnRMax), randRange(spawnGMin, spawnGMax), randRange(spawnBMin, spawnBMax), randRange(spawnAMin, spawnAMax)), pos + glm::vec2(sx, sy), randRange(spawnScaleMin, spawnScaleMax) };

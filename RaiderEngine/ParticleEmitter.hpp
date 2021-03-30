@@ -39,6 +39,7 @@ public:
 	bool isburst = false;
 	bool recycleParticles = true;
 	glm::vec3 colorShiftRate;
+	glm::vec3 spawnOffset;  // use this to effectively move an emitter without displacing already active particles
 
 	ParticleEmitter(glm::vec3 pos, std::string spriteName = "");
 

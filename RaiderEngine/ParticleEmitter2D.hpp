@@ -38,6 +38,7 @@ public:
 	bool isburst = false;
 	bool recycleParticles = true;
 	glm::vec3 colorShiftRate;
+	glm::vec2 spawnOffset;  // use this to effectively move an emitter without displacing already active particles
 	float depth = 0.1f;  // depth in NDC coordinates
 
 	ParticleEmitter2D(glm::vec2 pos, std::string spriteName = "");
