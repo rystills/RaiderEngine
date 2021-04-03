@@ -50,6 +50,7 @@ void initPhysics() {
 	// filter groups
 	defaultFilterData.word0 = (1 << 0);
 	noHitFilterData.word0 = (1 << 1);
+	triggerFilterData.word0 = (1 << 2);
 	// debug visualization
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
@@ -83,13 +84,13 @@ void debugDrawPhysics() {
 		queueDrawLine(glm::vec3(lines[i].pos0.x, lines[i].pos0.y, lines[i].pos0.z), glm::vec3(lines[i].pos1.x, lines[i].pos1.y, lines[i].pos1.z), stateColors[0]);
 }
 
-PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData) {
+PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData, PxHitFlag::Enum hitFlag) {
 	PxVec3 origin(startPos.x, startPos.y, startPos.z);
 	PxVec3 unitDir(dir.x, dir.y, dir.z);                // [in] Normalized ray direction
 	PxRaycastBuffer hit;                 // [out] Raycast results
 	PxQueryFilterData queryFilterData = PxQueryFilterData();
 	queryFilterData.data = filterData;
-	gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, queryFilterData);
+	gScene->raycast(origin, unitDir, maxDistance, hit, hitFlag, queryFilterData);
 	return hit;
 }
 

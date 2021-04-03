@@ -62,6 +62,7 @@ void GameObject::addPhysics(glm::quat rot) {
 	else {
 		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
 		shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+		shape->setQueryFilterData(triggerFilterData);
 	}
 	// store a pointer to this GameObject in the body's data field, then finally add the body to the physics scene
 	body->userData = this;

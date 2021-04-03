@@ -16,6 +16,7 @@ inline PxPvdSceneClient* pvdClient = NULL;
 inline PxMaterial* gMaterial = NULL;
 inline PxCooking* gCooking = NULL;
 inline PxFilterData defaultFilterData;
+inline PxFilterData triggerFilterData;
 inline PxFilterData noHitFilterData;
 
 /*
@@ -46,9 +47,10 @@ perform a raycast from the specified position in the specified direction, return
 @param dir: the direction of the raycast
 @param maxDistance: the length of the raycast
 @param filterData: the shape filter group to check against
+@param hitFlag: the hit flag to use
 @returns: a PxRaycastBuffer containing the hit data
 */
-PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData = defaultFilterData);
+PxRaycastBuffer raycast(glm::vec3 startPos, glm::vec3 dir, PxReal maxDistance, PxFilterData filterData = defaultFilterData, PxHitFlag::Enum hitFlag = PxHitFlag::eDEFAULT);
 
 class GEventCallback : public PxSimulationEventCallback {
 public:
