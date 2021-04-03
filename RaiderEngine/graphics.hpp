@@ -181,7 +181,7 @@ void renderLines2D();
 /*
 draw all 2D elements, including GameObject2Ds, ParticleEmitter2Ds, and TextObjects
 */
-void render2D(bool clearScreen = false);
+void render2D(bool only2D = false);
 
 /*
 render the game, calling all individual render methods in order as necessary
