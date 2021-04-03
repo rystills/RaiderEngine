@@ -606,8 +606,9 @@ void renderGeometryPass() {
 	setShouldBlend(false);
 	// geometry pass: render scene's geometry/color data into gbuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.buffer);
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (clearEachFrame)
+		glClearColor(0, 0, 0, 1);
+	glClear(GL_DEPTH_BUFFER_BIT | (clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
 	shaders["shaderGeometryPass"]->use();
 	if (mainCam->projection != renderState.projection)
 		shaders["shaderGeometryPass"]->setMat4("projection", mainCam->projection);
@@ -623,8 +624,10 @@ void renderGeometryPass() {
 
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-	glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (clearEachFrame) {
+		glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 	shaders["shaderLightingPass"]->use();
 	if (renderState.clearColor != renderState.prevClearColor)
 		shaders["shaderLightingPass"]->setVec4("clearColor", renderState.clearColor);
@@ -923,7 +926,7 @@ void render(bool only2D) {
 		renderLines();
 	}
 	
-	render2D(only2D);
+	render2D(only2D && clearEachFrame);
 	renderLines2D();
 	glfwSwapBuffers(window);
 
@@ -1040,6 +1043,7 @@ void initGraphics() {
 	if (forceDisableNvidiaThreadedOptimization)
 		checkDisableNvidiaThreadedOptimization();
 	initGL();
+	glClear(GL_DEPTH_BUFFER_BIT);
 	initQuad();
 	initLightCube();
 	initGBuffer();

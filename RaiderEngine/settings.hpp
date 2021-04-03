@@ -50,6 +50,7 @@ inline std::vector<std::unique_ptr<ParticleEmitter2D>> particleEmitter2Ds;
 inline std::vector<std::unique_ptr<Tilemap>> tilemaps;
 inline bool forceDisableNvidiaThreadedOptimization = false;
 inline bool ignoreModelTexturePaths = true;
+inline bool clearEachFrame = true;
 
 // openGL render state
 struct RenderState {
