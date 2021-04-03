@@ -178,7 +178,7 @@ void Model::createDefaultMaterialMaps() {
 }
 
 /*
-simple texture load meant for 2D sprites, with min and mag filters set to GL_NEAREST for sharp pixels even at non-target resolutions
+simple texture load meant for 2D sprites
 */
 Texture Model::loadTextureSimple(std::string texFullName) {
 	// check if the current texture has already been loaded
@@ -192,7 +192,7 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 	if (std::filesystem::exists(textureDir + texFullName)) {
 		Texture loadedTex;
 		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, the default GL_LINEAR_MIPMAP_LINEAR/GL_LINEAR is likely preferable.
-		textureFromFile(textureDir + texFullName, loadedTex, GL_REPEAT, GL_REPEAT, filterMin2D, filterMax2D);
+		textureFromFile(textureDir + texFullName, loadedTex, wrapS2D, wrapT2D, filterMin2D, filterMax2D);
 		loadedTex.type = texture_diffuse;
 		// apply scroll data if present
 		std::string scrollMapName = texFullName.substr(0, texFullName.find_last_of('.')) + "_SCROLL.txt";

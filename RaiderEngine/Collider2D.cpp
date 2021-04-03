@@ -41,10 +41,9 @@ bool Collider2D::collisionRectangleRotatedRectangle(Collider2DRectangle a, glm::
 	glm::vec2 bpoints[4];
 	b.getRotatedCornerPoints(bpoints, bPos, brot);
 	for (int i = 0; i < 4; ++i)
-		for (int j = 0; j < 4; ++j) {
+		for (int j = 0; j < 4; ++j)
 			if (linesIntersect(apoints[i], apoints[(i+1) % 4], bpoints[j], bpoints[(j+1) % 4]))
 				return true;
-		}
 		
 	// no intersections; check if either rectangle fully contains the other
 	return pointInPoly(apoints[0], bpoints, 4) || pointInPoly(bpoints[0], apoints, 4);
@@ -56,10 +55,9 @@ bool Collider2D::collisionRectanglePolygon(Collider2DRectangle a, glm::vec2 aPos
 	std::vector<glm::vec2> bpoints(b.points.size(), glm::vec2(0));
 	b.getRotatedPoints(&bpoints[0], bPos, brot);
 	for (int i = 0; i < 4; ++i)
-		for (unsigned int j = 0; j < bpoints.size(); ++j) {
+		for (unsigned int j = 0; j < bpoints.size(); ++j)
 			if (linesIntersect(apoints[i], apoints[(i+1) % 4], bpoints[j], bpoints[(j+1) % bpoints.size()]))
 				return true;
-		}
 
 	// no intersections; check if either rectangle fully contains the other
 	return pointInPoly(apoints[0], &bpoints[0], bpoints.size()) || pointInPoly(bpoints[0], apoints, 4);
@@ -151,10 +149,9 @@ bool Collider2D::collisionPolygonPolygon(Collider2DPolygon a, glm::vec2 aPos, fl
 	std::vector<glm::vec2> bpoints(b.points.size(), glm::vec2(0));
 	b.getRotatedPoints(&bpoints[0], bPos, brot);
 	for (unsigned int i = 0; i < apoints.size(); ++i)
-		for (unsigned int j = 0; j < bpoints.size(); ++j) {
+		for (unsigned int j = 0; j < bpoints.size(); ++j)
 			if (linesIntersect(apoints[i], apoints[(i+1) % apoints.size()], bpoints[j], bpoints[(j+1) % bpoints.size()]))
 				return true;
-		}
 
 	// no intersections; check if either rectangle fully contains the other
 	return pointInPoly(apoints[0], &bpoints[0], bpoints.size()) || pointInPoly(bpoints[0], &apoints[0], apoints.size());
