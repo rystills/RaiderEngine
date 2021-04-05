@@ -96,7 +96,7 @@ void ParticleEmitter2D::update() {
 		if (particleMotions[i].life <= 0)
 			continue;
 		// the particle died just now
-		if ((particleMotions[i].life -= .7f*deltaTime) <= 0) {
+		if ((particleMotions[i].life -= deltaTime) <= 0) {
 			i-= killParticle(i);
 			continue;
 		}
@@ -117,7 +117,7 @@ void ParticleEmitter2D::update() {
 		partSpawnTimer -= deltaTime;
 		while (partSpawnTimer <= 0) {
 			spawnParticle();
-			partSpawnTimer += partSpawnMaxTimer;
+			partSpawnTimer += randomSpawnTime ? randRange(partSpawnMinTimer, partSpawnMaxTimer) : partSpawnMaxTimer;
 		}
 	}
 }

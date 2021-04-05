@@ -11,7 +11,7 @@ SparkleEmitter::SparkleEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "star.png
 	spawnScaleMin = .5f, spawnScaleMax = 1.75f;
 	spawnSpeedMin = 40, spawnSpeedMax = 175;
 	spawnAngleMin = 0, spawnAngleMax = glm::two_pi<float>();
-	spawnMinLife = .5f, spawnMaxLife = .5f;
+	spawnMinLife = .7f, spawnMaxLife = .7f;
 	shrink = true;
 	fade = true;
 	circleSpawn = true;

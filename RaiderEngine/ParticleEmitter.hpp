@@ -20,7 +20,8 @@ public:
 	Texture sprite;
 	inline static GLuint VAO, VBO;
 	inline static unsigned int numParticlesInVBO = 0;
-	float partSpawnTimer = 0.f, partSpawnMaxTimer = .01f;
+	bool randomSpawnTime = false;
+	float partSpawnTimer = .01f, partSpawnMaxTimer = .01f, partSpawnMinTimer = .01f;
 	std::vector<Particle> particles;
 	std::vector<ParticleMotionData> particleMotions;
 	std::vector<int> recycledParticleInds;

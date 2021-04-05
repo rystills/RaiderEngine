@@ -19,6 +19,7 @@ int main() {
 	setFontDir("demos/shared/fonts");
 
 	initEngine();
+	clearEachFrame = false;
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);

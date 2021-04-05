@@ -11,7 +11,7 @@ FireEmitter::FireEmitter(glm::vec2 pos) : ParticleEmitter2D(pos, "fire.png") {
 	spawnScaleMin = .75f, spawnScaleMax = 1;
 	spawnSpeedMin = 16, spawnSpeedMax = 80;
 	spawnAngleMin = -glm::half_pi<float>(), spawnAngleMax = -glm::half_pi<float>();
-	spawnMinLife = 1.2f, spawnMaxLife = 2.6f;
+	spawnMinLife = 1.7f, spawnMaxLife = 3.7f;
 	shrink = true;
 	fade = false;
 	circleSpawn = true;
