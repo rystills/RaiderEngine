@@ -31,11 +31,20 @@ struct GBuffer {
 	unsigned int buffer, position, normal, albedoSpec;
 } inline gBuffer;
 
+inline const int numFontCharacters = 128;  // we only care about the first 128 characters stored in a given font file, at least for now
+
 struct Character {
 	float x0, y0, x1, y1;  // coords of glyph in the texture atlas, baked in uv-space
 	int x_off, y_off;    // left & top bearing when rendering
 	int x_size, y_size;  // total glyph size, equal to (x1,y1) - (x0,y0)
 	int advance;         // x advance when rendering
+};
+
+struct CharacterSheet {
+	Character characters[numFontCharacters];
+	Character& operator[](int i) {
+		return characters[i];
+	}
 };
 
 // callback executed on window resize

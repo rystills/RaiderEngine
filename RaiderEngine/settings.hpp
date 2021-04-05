@@ -24,7 +24,6 @@ inline bool enableTextureMaps[Model::numMapTypes] = {true, true, true, true};
 inline bool enableLighting = true;
 inline bool freezeWorld = false;
 inline float anisoFilterAmount = 0.0f;
-inline const int numFontCharacters = 128;  // we only care about the first 128 characters stored in a given font file, at least for now
 inline GLuint filterMin2D = GL_LINEAR_MIPMAP_LINEAR, filterMax2D= GL_LINEAR;
 inline GLuint wrapS2D = GL_CLAMP_TO_EDGE, wrapT2D = GL_CLAMP_TO_EDGE;
 
@@ -42,7 +41,7 @@ inline std::unordered_map<std::string, std::unique_ptr<ALuint, std::function<voi
 inline std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject>>> gameObjects;
 inline std::unordered_map<std::string, std::vector<std::unique_ptr<GameObject2D>>> gameObject2Ds;
 inline std::vector<std::unique_ptr<Light>> lights;
-inline std::unordered_map<std::string, std::unordered_map<int, std::pair< GLuint, Character[numFontCharacters]>>> fonts;
+inline std::unordered_map<std::string, std::unordered_map<int, std::pair< GLuint, CharacterSheet>>> fonts;
 inline std::vector<std::unique_ptr<TextObject>> textObjects;
 inline std::unordered_map<std::string,std::unique_ptr<Shader>> shaders;
 inline std::unordered_map<std::string, std::unique_ptr<Collider2D>> colliders;
