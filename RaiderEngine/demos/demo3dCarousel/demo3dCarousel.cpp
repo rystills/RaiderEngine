@@ -99,7 +99,7 @@ int main() {
 
 	// demo settings
 	checkSwitchMap(1);
-	
+
 	// enable anisotropic filtering if supported
 	applyAnisotropicFiltering();
 	// add fps indicator
@@ -125,8 +125,8 @@ int main() {
 		else if (keyPressed("loadScene4"))
 			checkSwitchMap(4);
 
-		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave 
-		if (scene == 2) 
+		// create an extremely simple "day/night cycle" in scene 2 by mapping the ambient lighting strength to a sin wave
+		if (scene == 2)
 			setAmbientStrength(.5f*static_cast<float>(sin(totalTime)) + .5f);
 
 		// update player
@@ -148,7 +148,7 @@ int main() {
 				// the user didn't try to observe something, so check if the user is holding or trying to grab something
 				updateHeldBody();
 		}
-		
+
 		// render
 		if (displayString.size() == 0)
 			queueCenterIndicator();

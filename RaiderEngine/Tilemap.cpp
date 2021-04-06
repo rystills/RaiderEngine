@@ -21,27 +21,27 @@ void Tilemap::setTileData(GLfloat start[], int x, int y) {
 	start[1] = ypos;
 	start[2] = x0;
 	start[3] = y0;
-	
+
 	start[4] = xpos;
 	start[5] = ypos + gridSize;
 	start[6] = x0;
 	start[7] = y1;
-	
+
 	start[8] = xpos + gridSize;
 	start[9] = ypos + gridSize;
 	start[10] = x1;
 	start[11] = y1;
-	
+
 	start[12] = xpos;
 	start[13] = ypos;
 	start[14] = x0;
 	start[15] = y0;
-	
+
 	start[16] = xpos + gridSize;
 	start[17] = ypos + gridSize;
 	start[18] = x1;
 	start[19] = y1;
-	
+
 	start[20] = xpos + gridSize;
 	start[21] = ypos;
 	start[22] = x1;

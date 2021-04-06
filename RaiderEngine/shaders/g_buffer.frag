@@ -24,7 +24,7 @@ float ditherThresholdMatrix[16] = float[] (
 
 void main() {
     vec2 texCoords = fs_in.TexCoords;
-    
+
 	// discard fully transparent pixels
 	float alpha = texture(texture_diffuse1, texCoords).a;
     if (alpha < .001)
@@ -41,7 +41,7 @@ void main() {
 
     // store the fragment position vector in the first gbuffer texture
     gPosition = fs_in.FragPos;
-    
+
 	// also store the per-fragment normals into the gbuffer
 	// TODO: support a variable number of maps of each type per model
 	// TODO: use another shader for models that use default maps so as not to waste performance on useless calculations

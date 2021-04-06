@@ -87,7 +87,7 @@ void Player::update() {
 	glm::vec2 dVel((keyHeld("mvRight") - keyHeld("mvLeft")) * accel, 0);
 	// horizontal deceleration
 	if (dVel.x == 0 && vel.x != 0)
-		dVel.x = abs(vel.x) <= decel ? -vel.x : decel * (signbit(vel.x)*2-1);	
+		dVel.x = abs(vel.x) <= decel ? -vel.x : decel * (signbit(vel.x)*2-1);
 	vel.x = (std::max(-maxVel, std::min(maxVel, vel.x + dVel.x)));
 	// facing direction check
 	if (vel.x != 0) {

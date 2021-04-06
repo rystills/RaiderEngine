@@ -23,7 +23,7 @@ int main() {
 
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);
-	
+
 	setVsync(false);
 	setClearColor(0, 0, 0, 1);
 	addGameObject2D(new GameObject2D(glm::vec2(0), 0, glm::vec2(1), glm::vec3(1), "background.png"));

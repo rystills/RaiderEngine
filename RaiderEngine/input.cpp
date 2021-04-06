@@ -49,7 +49,7 @@ void checkDemoToggles() {
 	if (keyStates[GLFW_KEY_F7][pressed])
 		drawNormals = !drawNormals;
 	if (keyStates[GLFW_KEY_F8][pressed])
-		drawLightCubes = !drawLightCubes;	
+		drawLightCubes = !drawLightCubes;
 	if (keyStates[GLFW_KEY_F9][pressed])
 		drawLightSpheres = !drawLightSpheres;
 	if (keyStates[GLFW_KEY_F10][pressed])

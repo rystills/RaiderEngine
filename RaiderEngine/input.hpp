@@ -7,10 +7,10 @@ inline float lastY = 0;
 inline bool firstMouse = true;
 inline bool mousePressedLeft = false;  // whether or not the left mouse button was just pressed
 inline bool mouseHeldLeft = false;  // whether or not the left mouse button is currently being held down
-inline bool mouseReleasedLeft = false;  // whether or not the left mouse button was just released 
+inline bool mouseReleasedLeft = false;  // whether or not the left mouse button was just released
 inline bool mousePressedRight = false;  // whether or not the right mouse button was just pressed
 inline bool mouseHeldRight = false;  // whether or not the right mouse button is currently being held down
-inline bool mouseReleasedRight = false;  // whether or not the right mouse button was just released 
+inline bool mouseReleasedRight = false;  // whether or not the right mouse button was just released
 enum keyState { pressed = 0, held = 1, released = 2 };
 inline int keyStates[GLFW_KEY_LAST][3] = { 0 };
 inline std::unordered_map<std::string, unsigned int> keyBindings;

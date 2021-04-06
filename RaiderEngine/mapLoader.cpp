@@ -75,7 +75,7 @@ void processMapNode(aiNode* node, const aiScene* scene) {
 			trans *= nodes[nodes.size() - 1]->mTransformation;
 			nodes.pop_back();
 		}
-		
+
 		// decompose transform for object instantiation
 		aiVector3D aiPos, aiRot, aiScale;
 		trans.Decompose(aiScale, aiRot, aiPos);

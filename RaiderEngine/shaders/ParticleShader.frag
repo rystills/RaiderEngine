@@ -11,4 +11,4 @@ void main() {
     if (col.a < .001)
         discard;
     color = mixColor * col;
-}  
+}

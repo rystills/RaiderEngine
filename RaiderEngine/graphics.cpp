@@ -87,7 +87,7 @@ void initLightCube() {
 		-1.f, -1.f, -1.f,
 		1.f, -1.f, -1.f,
 		-1.f, 1.f, -1.f,
-		1.f, 1.f, -1.f 
+		1.f, 1.f, -1.f
 	};
 	glGenVertexArrays(1, &lightCubeVAO);
 	GLuint lightCubeVBO;
@@ -173,7 +173,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 	}
 
 	std::vector<GLfloat> verts;
-	verts.reserve(24 * text.length());	
+	verts.reserve(24 * text.length());
 	// Iterate through all characters
 	for (unsigned int i = 0; i < text.length(); ++i) {
 		ch = fonts[fontName][fontSize].second[text[i]];
@@ -194,22 +194,22 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 		verts[24 * i+5]  = ypos + h;
 		verts[24 * i+6]  = ch.x0;
 		verts[24 * i+7]  = ch.y1;
-		
+
 		verts[24 * i+8]  = xpos + w;
 		verts[24 * i+9]  = ypos + h;
 		verts[24 * i+10] = ch.x1;
 		verts[24 * i+11] = ch.y1;
-		
+
 		verts[24 * i+12]  = xpos;
 		verts[24 * i+13]  = ypos;
 		verts[24 * i+14] = ch.x0;
 		verts[24 * i+15] = ch.y0;
-		
+
 		verts[24 * i+16]  = xpos + w;
 		verts[24 * i+17]  = ypos + h;
 		verts[24 * i+18] = ch.x1;
 		verts[24 * i+19] = ch.y1;
-		
+
 		verts[24 * i+20] = xpos + w;
 		verts[24 * i+21] = ypos;
 		verts[24 * i+22] = ch.x1;
@@ -221,7 +221,7 @@ void renderText(std::string fontName, int fontSize, Shader& s, std::string text,
 
 	// render the full set of glyphs as a single triangle array
 	glBufferSubData(GL_ARRAY_BUFFER, 0, 24 * sizeof(GLfloat) * text.length(), &verts[0]);
-	glDrawArrays(GL_TRIANGLES, 0, text.length()*6);	
+	glDrawArrays(GL_TRIANGLES, 0, text.length()*6);
 }
 
 void freetypeLoadFont(std::string fontName, int fontSize) {
@@ -349,7 +349,7 @@ void drawLines() {
 		glBufferData(GL_ARRAY_BUFFER, linesQueue.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 	}
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * linesQueue.size(), &linesQueue[0]);
-	
+
 	glDrawArrays(GL_LINES, 0, linesQueue.size() / 6);
 	linesQueue.clear();
 }
@@ -395,7 +395,7 @@ void initGBuffer() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gBuffer.albedoSpec, 0);
-	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
 	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 	glDrawBuffers(3, attachments);
 	// create and attach depth buffer (renderbuffer)
@@ -565,7 +565,7 @@ void drawGameObjects(std::string shaderName, int shouldSendTextures, bool ignore
 				modelMatrices3D[r] = kv.second[r]->modelTransform;
 			}
 			glBufferSubData(GL_ARRAY_BUFFER, 0, kv.second.size() * sizeof(glm::mat4), &modelMatrices3D[0]);
-			glDrawElementsInstanced(GL_TRIANGLES, kv.second[0]->model->meshes[i].indices.size(), GL_UNSIGNED_INT, 0, kv.second.size());			
+			glDrawElementsInstanced(GL_TRIANGLES, kv.second[0]->model->meshes[i].indices.size(), GL_UNSIGNED_INT, 0, kv.second.size());
 		}
 	}
 }
@@ -626,7 +626,7 @@ void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
 	if (clearEachFrame)
 		glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
-	// this depth buffer clear will prepare a clean slate for 2D rendering, so that 2D objects don't have to compete with 3D objects for visibility 
+	// this depth buffer clear will prepare a clean slate for 2D rendering, so that 2D objects don't have to compete with 3D objects for visibility
 	glClear(GL_DEPTH_BUFFER_BIT | (clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
 	shaders["shaderLightingPass"]->use();
 	if (renderState.clearColor != renderState.prevClearColor)
@@ -661,13 +661,13 @@ void renderLightingPass() {
 			shaders["shaderLightingPass"]->setFloat("lights[" + std::to_string(i) + "].On", lights[i]->on);
 		}
 	}
-	
+
 	// shadow and lighting uniforms
 	if (mainCam->Position != renderState.viewPos)
 		shaders["shaderLightingPass"]->setVec3("viewPos", mainCam->Position);
 	if (mainCam->far_plane != renderState.far_plane)
 		shaders["shaderLightingPass"]->setFloat("far_plane", mainCam->far_plane);
-	
+
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap[0]);
 	glActiveTexture(GL_TEXTURE4);
@@ -744,7 +744,7 @@ void debugDrawLightCubes() {
 						glm::vec2 seg(k / static_cast<float>(numSegs-1), r / static_cast<float>(numSegs-1));
 						vertPositions[k * numSegs + r] = lights[i]->position + lights[i]->radius * glm::vec3(
 							std::cos(seg.x * TAU) * std::sin(seg.y * PI),
-							std::cos(seg.y * PI), 
+							std::cos(seg.y * PI),
 							std::sin(seg.x * TAU) * std::sin(seg.y * PI));
 					}
 				}
@@ -925,7 +925,7 @@ void render(bool only2D) {
 		debugDrawLightCubes();
 		renderLines();
 	}
-	
+
 	render2D(only2D);
 	renderLines2D();
 	glfwSwapBuffers(window);
@@ -986,7 +986,7 @@ void checkDisableNvidiaThreadedOptimization() {
 		NVDRS_SETTING setting;
 		setting.version = NVDRS_SETTING_VER;
 		NvDRSProfileHandle hProfile;
-		
+
 		if (NvAPI_DRS_FindProfileByName(hSession, profileInfo.profileName, &hProfile) == NVAPI_OK) {
 			// profile already exists
 			NVSettingsCheckError(NvAPI_DRS_GetSetting(hSession, hProfile, OGL_THREAD_CONTROL_ID, &setting));

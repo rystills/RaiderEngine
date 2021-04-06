@@ -9,4 +9,4 @@ void main() {
     if( texture(text, TexCoords).a < .001)
         discard;
     color = texture(text, TexCoords);
-}  
+}

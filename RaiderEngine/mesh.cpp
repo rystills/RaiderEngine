@@ -45,7 +45,7 @@ void Mesh::sendTexturesToShader(Shader shader, bool diffuseOnly) {
 		// bind the texture
 		glBindTexture(GL_TEXTURE_2D, enableTextureMaps[type] ? textures[i].id : Model::mapDefaults[type]->id);
 	}
-	
+
 	// reactivate tex0 as this is the assumed state
 	glActiveTexture(GL_TEXTURE0);
 }

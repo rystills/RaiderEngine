@@ -44,7 +44,7 @@ bool Collider2D::collisionRectangleRotatedRectangle(Collider2DRectangle a, glm::
 		for (int j = 0; j < 4; ++j)
 			if (linesIntersect(apoints[i], apoints[(i+1) % 4], bpoints[j], bpoints[(j+1) % 4]))
 				return true;
-		
+
 	// no intersections; check if either rectangle fully contains the other
 	return pointInPoly(apoints[0], bpoints, 4) || pointInPoly(bpoints[0], apoints, 4);
 }
@@ -169,7 +169,7 @@ float Collider2D::pointLineSegmentDistance(glm::vec2 v, glm::vec2 w, glm::vec2 p
 	float l2 = (float)(pow(v.x - w.x, 2) + pow(v.y - w.y, 2));  // i.e. |w-v|^2 -  avoid a sqrt
 	if (l2 == 0.0) return distance(p.x, p.y, v.x, v.y);   // v == w case
 											// Consider the line extending the segment, parameterized as v + t (w - v).
-											// We find projection of point p onto the line. 
+											// We find projection of point p onto the line.
 											// It falls where t = [(p-v) . (w-v)] / |w-v|^2
 											// We clamp t from [0,1] to handle points outside the segment vw.
 	float t = std::max(0.f, std::min(1.f, glm::dot(p - v, w - v) / l2));

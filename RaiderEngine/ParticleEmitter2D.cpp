@@ -32,7 +32,7 @@ void ParticleEmitter2D::initVertexObjects() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 
-	// configure VBO for vec4 spriteColor (attrib 1), vec2 pos (attrib 2), float scale (attrib 3), 
+	// configure VBO for vec4 spriteColor (attrib 1), vec2 pos (attrib 2), float scale (attrib 3),
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

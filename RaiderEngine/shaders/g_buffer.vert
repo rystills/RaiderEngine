@@ -19,17 +19,17 @@ uniform float Time;
 
 void main() {
     vec4 worldPos = instanceMatrix * vec4(aPos, 1.0);
-    vs_out.FragPos = worldPos.xyz; 
+    vs_out.FragPos = worldPos.xyz;
     // apply texture UV scrolling over time  // TODO: add scrolling texture support to other shaders (tilemaps, particles)
     vs_out.TexCoords = aTexCoords.xy + (aTexCoords.zw)*Time;
-    
+
     mat3 normalMatrix = transpose(inverse(mat3(instanceMatrix)));
     vec3 T = normalize(normalMatrix * aTangent);
     vec3 N = normalize(normalMatrix * aNormal);
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
-    
-    vs_out.TBN = transpose(mat3(T, B, N)); 
-    
+
+    vs_out.TBN = transpose(mat3(T, B, N));
+
     gl_Position = projection * view * worldPos;
 }

@@ -16,7 +16,7 @@ struct ParticleMotionData {
 };
 
 class ParticleEmitter {
-public: 
+public:
 	Texture sprite;
 	inline static GLuint VAO, VBO;
 	inline static unsigned int numParticlesInVBO = 0;

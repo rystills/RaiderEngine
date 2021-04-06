@@ -20,7 +20,7 @@ int main() {
 	// fonts
 	freetypeLoadFont("Inter-Regular", 18);
 	freetypeLoadFont("Inter-Regular", 48);
-	
+
 	setVsync(false);
 	setClearColor(.8f, .8f, 1, 1);
 	addTextObject(new GameManager("Inter-Regular", 48));

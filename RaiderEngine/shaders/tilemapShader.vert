@@ -10,4 +10,4 @@ uniform float depth;
 void main() {
     gl_Position = projection * vec4(pos + vertex.xy, depth, 1.0);
     TexCoords = vertex.zw;
-}  
+}

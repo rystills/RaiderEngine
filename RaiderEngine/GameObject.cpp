@@ -157,7 +157,7 @@ void GameObject::update() {
 			std::memcpy(&position, &pose.p, sizeof(glm::vec3));
 			isDirty = true;
 		}
-		
+
 		if (std::memcmp(&pose.q, &prevRot, sizeof(glm::vec4)) != 0) {
 			std::memcpy(&prevRot, &pose.q, sizeof(glm::vec4));
 			rotation = glm::toMat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z));

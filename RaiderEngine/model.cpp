@@ -134,7 +134,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		vertices[i].Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 		vertices[i].Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-		// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
+		// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
 		// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 		// NOTE: UVW coordinates must be flipped vertically here; they are then unflipped by the renderer
 		vertices[i].TexCoords = mesh->mTextureCoords[0] ? glm::vec4(mesh->mTextureCoords[0][i].x, -mesh->mTextureCoords[0][i].y, matTextures[0].scrollSpeed.x, matTextures[0].scrollSpeed.y) : glm::vec4(0.f);
@@ -145,7 +145,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		for (unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
 			indices.push_back(mesh->mFaces[i].mIndices[j]);
 
-	
+
 	// return a mesh object created from the extracted mesh data
 	meshes.emplace_back(vertices, indices, matTextures);
 }
@@ -188,7 +188,7 @@ Texture Model::loadTextureSimple(std::string texFullName) {
 		// texture already exists
 		return search->second;
 
-	// texture does not exist yet; try to load it 
+	// texture does not exist yet; try to load it
 	if (std::filesystem::exists(textureDir + texFullName)) {
 		Texture loadedTex;
 		// NOTE: GL_NEAREST resolves artifacts when scaling Tilemaps/atlases and looks sharper, making it ideal for pixel-art. For other styles, the default GL_LINEAR_MIPMAP_LINEAR/GL_LINEAR is likely preferable.
@@ -226,7 +226,7 @@ void Model::loadModel(std::string const& path) {
 void Model::processNode(aiNode* node, const aiScene* scene) {
 	// process each mesh located at the current node
 	for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-		// the node object only contains indices to index the actual objects in the scene. 
+		// the node object only contains indices to index the actual objects in the scene.
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		processMesh(scene->mMeshes[node->mMeshes[i]], scene);
 
@@ -255,7 +255,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 				// texture already exists
 				textures.push_back(search->second);
 			else {
-				// texture does not exist yet; try to load it 
+				// texture does not exist yet; try to load it
 				if (std::filesystem::exists(textureDir + mapBaseName + '/' + mapName)) {
 					Texture extraTex;
 					textureFromFile(textureDir + mapBaseName + '/' + mapName, extraTex);

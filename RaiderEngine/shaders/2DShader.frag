@@ -10,4 +10,4 @@ void main() {
     if( texture(image, TexCoords).a < .001)
         discard;
     color = mixColor * texture(image, TexCoords);
-}  
+}

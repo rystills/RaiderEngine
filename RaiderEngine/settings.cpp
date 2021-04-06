@@ -63,7 +63,7 @@ ParticleEmitter* addParticleEmitter(ParticleEmitter* go) {
 ParticleEmitter2D* addParticleEmitter2D(ParticleEmitter2D* go) {
 	particleEmitter2Ds.emplace_back(go);
 	return go;
-	// TODO: define remove methods for ParticleEmitter2D, Collider2D, and Tilemap 
+	// TODO: define remove methods for ParticleEmitter2D, Collider2D, and Tilemap
 }
 
 TextObject* addTextObject(TextObject* go) {

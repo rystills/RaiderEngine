@@ -61,7 +61,7 @@ public:
 	// transform methods
 	// TODO: these methods will have no effect on active physics enabled GameObjects; optional physics overrides should be implemented for each one
 	void rotate(const float& angle, glm::vec3 const& axes);
-	
+
 	/*
 	update the GameObject's rotation from a vec3 of euler angles
 	@param rotationEA: the desired rotation (in radian euler angles) to set

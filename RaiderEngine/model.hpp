@@ -10,11 +10,11 @@ load the specified texture from the specified directory
 */
 void textureFromFile(std::string fileName, Texture& texIn, GLuint Wrap_S = GL_REPEAT, GLuint Wrap_T = GL_REPEAT, GLuint Filter_Min = GL_LINEAR_MIPMAP_LINEAR, GLuint Filter_Max = GL_LINEAR);
 
-enum MapType { texture_diffuse, texture_normal, texture_specular, texture_emission }; 
+enum MapType { texture_diffuse, texture_normal, texture_specular, texture_emission };
 
 class Model {
 public:
-	static inline std::unordered_map<std::string, Texture> texturesLoaded;  // store all textures loaded for re-use across models 
+	static inline std::unordered_map<std::string, Texture> texturesLoaded;  // store all textures loaded for re-use across models
 	static inline Texture defaultDiffuseMap, defaultNormalMap, defaultSpecularMap, defaultEmissionMap;  // blank maps for materials which don't use the given effects
 	static const int numMapTypes = 4;
 	static inline Texture* mapDefaults[numMapTypes] = { &Model::defaultDiffuseMap, &Model::defaultNormalMap, &Model::defaultSpecularMap, &Model::defaultEmissionMap };
@@ -72,7 +72,7 @@ public:
 	load a single diffuse texture file if it does not already exist
 	*/
 	static Texture loadTextureSimple(std::string texFullName);
-    
+
 private:
     /*
 	load the model from the specified path using ASSIMP, and store the resulting meshes in the meshes vector

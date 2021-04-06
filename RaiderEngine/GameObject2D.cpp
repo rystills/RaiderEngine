@@ -4,7 +4,7 @@
 #include "settings.hpp"
 #include "Tilemap.hpp"
 
-GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter, float depth, Collider2D* collider) : 
+GameObject2D::GameObject2D(glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 color, std::string spriteName, bool posIsCenter, float depth, Collider2D* collider) :
 	position(position), rotation(rotation), color(color), scaleVal(scale), depth(depth), collider(collider) {
 	sprite = (spriteName == "" ? Model::defaultDiffuseMap : Model::loadTextureSimple(spriteName));
 	recalculateHalfExtents();
@@ -36,7 +36,7 @@ void GameObject2D::initStaticVertexBuffer() {
 	glBindVertexArray(VAO);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-	
+
 	// configure VBO for transform (model) instanced rendering (attribs 1-4 contain the model matrix in the 2D shader)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glGenBuffers(1, &instancedModelVBO);
@@ -50,7 +50,7 @@ void GameObject2D::initStaticVertexBuffer() {
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid*)(2 * vec4Size));
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid*)(3 * vec4Size));
-	
+
 	glVertexAttribDivisor(1, 1);
 	glVertexAttribDivisor(2, 1);
 	glVertexAttribDivisor(3, 1);

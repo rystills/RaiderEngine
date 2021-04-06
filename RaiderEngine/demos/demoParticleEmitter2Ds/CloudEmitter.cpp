@@ -30,6 +30,6 @@ void CloudEmitter::update() {
 		float forceDir = std::atan2(posDiff.y,posDiff.x);
 		int rotDir = fmod(glm::two_pi<float>() + particleMotions[i].ang - forceDir, glm::two_pi<float>()) > glm::pi<float>() ? 1 : -1;
 		particleMotions[i].ang -= rotDir * .018f * Collider2D::distance(particles[i].pos.x, particles[i].pos.y, pos.x, pos.y) * deltaTime;
-	}	
+	}
 }
 #endif

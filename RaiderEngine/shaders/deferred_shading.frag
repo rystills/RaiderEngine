@@ -36,7 +36,7 @@ uniform vec3 viewPos;
 #define numSamples 20
 // TODO: should these points be normalized? currently the first 8 points (the cube vertices) are sampling farther away than the remaining 12 (this might actually be a good thing for early bail detection)
 vec3 gridSamplingDisk[numSamples] = vec3[] (
-   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1),
    vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
    vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
    vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
@@ -64,28 +64,28 @@ float ShadowCalculation(vec3 fragPos, vec3 normal, vec3 lightPos, int lightNum) 
     // NOTE: increasing the divisor results in harder shadows (tweaked from 25 to 50)
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 50.0;
     float shadow = 0;
-    for (int i = 0; i < numSamples; ++i) { 
+    for (int i = 0; i < numSamples; ++i) {
         // use the fragment to light vector to sample from the depth map
-        shadow += 1-texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : (lightNum == 3 ? depthMap3 : depthMap4))), 
+        shadow += 1-texture(lightNum == 0 ? depthMap0 : (lightNum == 1 ? depthMap1 : (lightNum == 2 ? depthMap2 : (lightNum == 3 ? depthMap3 : depthMap4))),
         vec4(fragToLight + gridSamplingDisk[i] * diskRadius,currentDepth/far_plane-bias));
         // NOTE: early bail test (bailing after more iterations improves edge detection but reduces performance)
         if (i == earlyBailCount-1 && (shadow == 0 || shadow == earlyBailCount))
             return shadow/earlyBailCount;
     }
     return shadow / numSamples;
-        
+
     // display closestDepth as debug (to visualize depth cubemap)
-    // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
+    // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);
 }
 
 void main()
-{             
+{
     // retrieve data from gbuffer
     vec3 Normal = texture(gNormal, TexCoords).rgb;
     // respect the existing clear color if we have nothing to draw
-    if (Normal == vec3(0.0, 0.0, 0.0)) { 
-        discard; 
-        // NOTE: we can avoid setting clearColor to black and then back to the desired color each frame by 
+    if (Normal == vec3(0.0, 0.0, 0.0)) {
+        discard;
+        // NOTE: we can avoid setting clearColor to black and then back to the desired color each frame by
         // having it always be black and setting the desired color here instead via FragColor = clearColor * ambientStrength;
         // however, that would disallow rendering in front of something other than a solid color (ie. 2D sprite/skybox) so it is not used
     }
@@ -93,7 +93,7 @@ void main()
     float emission = texture(gNormal, TexCoords).a;
     vec3 Diffuse = texture(gAlbedoSpec, TexCoords).rgb;
     float Specular = texture(gAlbedoSpec, TexCoords).a;
-    
+
     // then calculate lighting as usual
     vec3 ambient = Diffuse * (ambientStrength + emission);
 	vec3 diffuseSpec = vec3(0,0,0);
@@ -108,7 +108,7 @@ void main()
 				vec3 lightDir = normalize(lights[i].Position - FragPos);
 				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
 				// specular
-				vec3 halfwayDir = normalize(lightDir + viewDir);  
+				vec3 halfwayDir = normalize(lightDir + viewDir);
 				float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
 				vec3 specular = lights[i].Color * spec * Specular;
 				// attenuation
@@ -119,16 +119,16 @@ void main()
 			}
 		}
     }
-	vec3 lighting = ambient + diffuseSpec;// * Diffuse;   
+	vec3 lighting = ambient + diffuseSpec;// * Diffuse;
 	// apply fog matching clear color
-	float dist = distance(viewPos,FragPos);	
+	float dist = distance(viewPos,FragPos);
     // exponential fog
 	// #define fogDensity .03
 	// float expFog = 1-1/exp(fogDensity * dist);
     // linear fog
 	float linearEnd = 100;
 	float linearStart = 10;
-	vec3 fogColor = clearColor.xyz*ambientStrength;	
+	vec3 fogColor = clearColor.xyz*ambientStrength;
 	if (underWater) {
 		linearEnd = 50;
 		linearStart = -10;

@@ -12,7 +12,7 @@ public:
 	bool dirty = true;
 	bool enableShadows = true;
 	Light(glm::vec3 position, bool enableShadows, float strength, glm::vec3 color);
-	
+
 	void setOn(bool nowOn);
 	virtual void update() {}
 

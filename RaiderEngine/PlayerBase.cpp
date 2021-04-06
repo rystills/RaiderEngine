@@ -18,7 +18,7 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	desc.radius = radius;
 	desc.material = gMaterial;
 	desc.stepOffset = stepHeight;
-	
+
 	// TODO: player contactOffset has been reduced, but the player still hovers a good distance off of the ground; further exploration needed
 	controller = (PxCapsuleController*)manager->createController(desc);
 	// set the player controller's user data
@@ -31,7 +31,7 @@ void PlayerBase::init(float inHeight, float inRadius) {
 	for (unsigned int i = 0; i < nbShapes; ++i) {
 		shapes[i]->setQueryFilterData(noHitFilterData);
 	}
-	
+
 	// create a separate water check shape for determining whether or not the player is swimming (rather than just standing in a small puddle)
 	waterCheckShape = gPhysics->createShape(PxSphereGeometry(waterCheckRadius), *gMaterial, false);
 	waterCheckShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
