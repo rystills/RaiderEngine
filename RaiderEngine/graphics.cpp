@@ -624,10 +624,10 @@ void renderGeometryPass() {
 
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-	if (clearEachFrame)
+	if (clearEachFrame) {
 		glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
-	// this depth buffer clear will prepare a clean slate for 2D rendering, so that 2D objects don't have to compete with 3D objects for visibility
-	glClear(GL_DEPTH_BUFFER_BIT | (clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 	shaders["shaderLightingPass"]->use();
 	if (renderState.clearColor != renderState.prevClearColor)
 		shaders["shaderLightingPass"]->setVec4("clearColor", renderState.clearColor);
@@ -683,7 +683,7 @@ void renderLightingPass() {
 	// finally, render everything to the screen as a single quad
 	renderQuad();
 
-	// copy content of geometry's depth buffer to default framebuffer's depth buffer
+	// copy gbuffer depth to default framebuffer
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.buffer);
 	glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }
@@ -833,8 +833,8 @@ void setGlViewport() {
 void render2D(bool only2D) {
 	setGlViewport();
 	setShouldDepthTest(true);
-	if (only2D)
-		glClear(GL_DEPTH_BUFFER_BIT | (clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
+	// this clears the depth buffer from the previous frame's 2d graphics, as well as the current frame's gbuffer quad
+	glClear(GL_DEPTH_BUFFER_BIT | (only2D && clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
 	setShouldBlend(true);
 	setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
