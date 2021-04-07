@@ -11,6 +11,7 @@
 #include "PlayerBase.hpp"
 #include "PlayerSpawn.hpp"
 #include "timing.hpp"
+#include "constants.hpp"
 
 /*
 queue a dot in the center of the screen to be rendered, allowing the player to easily see which object is currently being moused over

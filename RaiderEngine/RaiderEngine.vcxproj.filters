@@ -341,6 +341,9 @@
     <ClInclude Include="ParticleEmitter.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="constants.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

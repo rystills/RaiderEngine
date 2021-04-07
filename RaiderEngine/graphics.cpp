@@ -14,6 +14,7 @@
 #include "Tilemap.hpp"
 #include "timing.hpp"
 #include "PlayerSpawn.hpp"
+#include "constants.hpp"
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and height will be significantly larger than specified on retina displays.

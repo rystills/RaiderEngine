@@ -215,6 +215,7 @@
     <ClInclude Include="Collider2DLine.hpp" />
     <ClInclude Include="Collider2DPolygon.hpp" />
     <ClInclude Include="Collider2DRectangle.hpp" />
+    <ClInclude Include="constants.hpp" />
     <ClInclude Include="demos\demo2DPlatformer\Player.hpp" />
     <ClInclude Include="demos\demo3dCarousel\Cog.hpp" />
     <ClInclude Include="demos\demo3dCarousel\Compass.hpp" />

@@ -4,6 +4,7 @@
 #include "model.hpp"
 #include "settings.hpp"
 #include "physics.hpp"
+#include "constants.hpp"
 
 GameObject::GameObject(glm::vec3 position, glm::vec3 rotationEA, glm::vec3 scale, std::string modelName, int makeStatic, bool grabbable, bool usePhysics, bool castShadows, bool drawTwoSided) :
 position(position), scaleVal(scale), grabbable(grabbable), modelName(modelName), usePhysics(usePhysics), castShadows(castShadows), drawTwoSided(drawTwoSided) {
@@ -93,22 +94,23 @@ glm::quat GameObject::setRotation(glm::quat const& rot) {
 }
 
 glm::vec4 GameObject::forwardVec() {
-	return glm::normalize(rotation * glm::vec4(0, 0, 1, 0));
+	return glm::normalize(rotation * glm::vec4(Direction::forward, 0));
 }
 glm::vec4 GameObject::backVec() {
-	return glm::normalize(rotation * glm::vec4(0, 0, -1, 0));
+	return glm::normalize(rotation * glm::vec4(Direction::back, 0));
 }
+//TODO: for correct movement, right and left directions must be reversed; this must be investigated. perhaps the problem lies with assimp axes?
 glm::vec4 GameObject::rightVec() {
-	return glm::normalize(rotation * glm::vec4(-1, 0, 0, 0));
+	return glm::normalize(rotation * glm::vec4(Direction::right, 0));
 }
 glm::vec4 GameObject::leftVec() {
-	return glm::normalize(rotation * glm::vec4(1, 0, 0, 0));
+	return glm::normalize(rotation * glm::vec4(Direction::left, 0));
 }
 glm::vec4 GameObject::upVec() {
-	return glm::normalize(rotation * glm::vec4(0, 1, 0, 0));
+	return glm::normalize(rotation * glm::vec4(Direction::up, 0));
 }
 glm::vec4 GameObject::downVec() {
-	return glm::normalize(rotation * glm::vec4(0, -1, 0, 0));
+	return glm::normalize(rotation * glm::vec4(Direction::down, 0));
 }
 
 glm::vec2 GameObject::pitchYawFromMat(glm::mat4 const& inMat) {
@@ -130,7 +132,7 @@ void GameObject::translate(glm::vec3 const& amnt) {
 }
 
 void GameObject::translate(glm::vec4 const& dir, float const& amnt) {
-	position = (glm::vec4(position, 1) + dir * amnt).xyz();
+	position = (glm::vec4(position, 0) + dir * amnt).xyz();
 	isDirty = true;
 }
 
