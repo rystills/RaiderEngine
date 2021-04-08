@@ -171,8 +171,6 @@ void PlayerBase::update() {
 			if (!grounded) {
 				// rotate velocity by ladder rotation to get axis alignment
 				glm::quat q = connectedLadder->rotation;
-				// add a 90 degree rotation on the x axis to compensate for the -90 degree offset produced by assimp
-				q *= glm::angleAxis(glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
 				effectiveVelocity = q * effectiveVelocity;
 				// eliminate z to restrict movement to the xy plane, then rotate resulting velocity back by inverse ladder rotation
 				effectiveVelocity.z = 0;

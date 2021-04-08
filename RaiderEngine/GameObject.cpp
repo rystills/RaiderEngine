@@ -26,7 +26,7 @@ std::string GameObject::getDisplayString() {
 void GameObject::setModel(std::string modelName, bool makeStatic) {
 	// note: this function should only be called once at initialization, as the object's physics depend on its set model
 	if (!models.contains(modelName))
-		models.insert({ modelName, std::make_unique<Model>(modelDir + modelName + '/' + modelName + ".fbx", makeStatic) });
+		models.insert({ modelName, std::make_unique<Model>(modelDir + modelName + '/' + modelName + ".gltf", makeStatic) });
 	model = models[modelName].get();
 }
 
