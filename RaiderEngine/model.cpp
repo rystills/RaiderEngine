@@ -242,7 +242,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		mat->GetTexture(type, i, &str);
 
 		std::string mapName = str.C_Str();
-		int sPos = ignoreModelTexturePaths ? ('\\' + mapName).find_last_of('\\') : 0;
+		int sPos = ignoreModelTexturePaths ? std::max(('\\' + mapName).find_last_of('\\'), ('/' + mapName).find_last_of('/')) : 0;
 		std::string mapBaseName = mapName.substr(sPos, mapName.find_last_of('.') - sPos);
 		// manually check for maps other than diffuse rather than specifying them in 3ds max, to simplify workflow a bit
 		for (int k = 0; k < numMapTypes; ++k) {
