@@ -625,10 +625,6 @@ void renderGeometryPass() {
 
 void renderLightingPass() {
 	// lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-	if (clearEachFrame) {
-		glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
 	shaders["shaderLightingPass"]->use();
 	if (renderState.clearColor != renderState.prevClearColor)
 		shaders["shaderLightingPass"]->setVec4("clearColor", renderState.clearColor);
@@ -834,7 +830,7 @@ void setGlViewport() {
 void render2D(bool only2D) {
 	setGlViewport();
 	setShouldDepthTest(true);
-	// this clears the depth buffer from the previous frame's 2d graphics, as well as the current frame's gbuffer quad
+	// clear the depth buffer so that 2D assets don't compete with 3d assets for visibility
 	glClear(GL_DEPTH_BUFFER_BIT | (only2D && clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
 	setShouldBlend(true);
 	setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -918,7 +914,12 @@ void render2D(bool only2D) {
 
 void render(bool only2D) {
 	double sTime = glfwGetTime();
+	if (clearEachFrame)
+		// TODO: clear color should be updated when renderState.clearColor is dirty, rather than at the start of each frame
+		glClearColor(renderState.clearColor.r * renderState.ambientStrength, renderState.clearColor.g * renderState.ambientStrength, renderState.clearColor.b * renderState.ambientStrength, renderState.clearColor.a);
 	if (!only2D) {
+		// clear the screen to prepare for a fresh render
+		glClear(GL_DEPTH_BUFFER_BIT | (clearEachFrame ? GL_COLOR_BUFFER_BIT : 0));
 		renderDepthMap();
 		renderGeometryPass();
 		renderLightingPass();
@@ -926,7 +927,6 @@ void render(bool only2D) {
 		debugDrawLightCubes();
 		renderLines();
 	}
-
 	render2D(only2D);
 	renderLines2D();
 	glfwSwapBuffers(window);
