@@ -69,12 +69,12 @@ public:
 	glm::quat setRotation(glm::vec3 const& rotationEA);
 	glm::quat setRotation(glm::quat const& rot);
 
-	glm::vec4 GameObject::forwardVec();
-	glm::vec4 GameObject::backVec();
-	glm::vec4 GameObject::rightVec();
-	glm::vec4 GameObject::leftVec();
-	glm::vec4 GameObject::upVec();
-	glm::vec4 GameObject::downVec();
+	glm::vec4 forwardVec();
+	glm::vec4 backVec();
+	glm::vec4 rightVec();
+	glm::vec4 leftVec();
+	glm::vec4 upVec();
+	glm::vec4 downVec();
 
 	static glm::vec2 pitchYawFromMat(glm::mat4 const& inMat);
 	static glm::vec2 pitchYawFromEA(glm::vec3 const& inEA);
