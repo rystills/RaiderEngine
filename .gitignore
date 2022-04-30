@@ -350,3 +350,6 @@ MigrationBackup/
 libs
 My Inspector Results - RaiderEngine
 RaiderEngine/demos/demo3dCarousel/textures/*.png
+
+# cmake
+out/
