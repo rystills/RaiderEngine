@@ -22,7 +22,7 @@ add_subdirectory(RaiderEngine/libs/freetype-VER-2-12-0)
 
 #add_subdirectory(RaiderEngine/libs/openal-soft-1.22.0)
 
-#add_subdirectory(RaiderEngine/libs/assimp-5.2.3)
+add_subdirectory(RaiderEngine/libs/assimp-5.2.3)
 
 add_subdirectory(RaiderEngine/libs/PhysX-4.1)
 

@@ -13,4 +13,15 @@ set(CMAKE_CXX_STANDARD 23)
 # TODO: Add tests and install targets if needed.
 
 add_executable (RaiderEngine main.cpp)
-target_link_libraries(RaiderEngine freetype PhysXExtensions PhysX PhysXPvdSDK PhysXVehicle PhysXCharacterKinematic PhysXCooking PhysXCommon PhysXFoundation)
+
+target_link_libraries(RaiderEngine freetype assimp PhysXExtensions PhysX PhysXPvdSDK PhysXVehicle PhysXCharacterKinematic PhysXCooking PhysXCommon PhysXFoundation)
+
+add_custom_command(TARGET RaiderEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${PROJECT_BINARY_DIR}/RaiderEngine/libs/assimp-5.2.3/bin/assimp-vc142-mtd.dll"
+        $<TARGET_FILE_DIR:RaiderEngine>)
+
+add_custom_command(TARGET RaiderEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${PROJECT_BINARY_DIR}/RaiderEngine/libs/freetype-VER-2-12-0/freetyped.dll"
+        $<TARGET_FILE_DIR:RaiderEngine>)
