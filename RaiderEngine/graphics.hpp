@@ -208,11 +208,13 @@ initialize the main camera
 void initMainCamera();
 
 // special methods for reading/writing nvidia driver profile
+#ifdef ENABLE_NVAPI_QUERY
 void NVSettingsCheckError(NvAPI_Status status);
 
 void NVSettingsSetString(NvAPI_UnicodeString& nvStr, const wchar_t* wcStr);
 
 void checkDisableNvidiaThreadedOptimization();
+#endif
 
 /*
 call all of the graphics initialization steps in order

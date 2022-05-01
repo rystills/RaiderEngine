@@ -3,7 +3,7 @@ Before you can run the engine, you'll need to set up all of the dependencies. If
 Place the libs folder directly in ".\RaiderEngine\RaiderEngine" and place all of the files from the dlls folder in ".\RaiderEngine\Release" (you will need to create the Release folder if you haven't built yet).  
 If you're not on Windows, you'll need to build the dependencies yourself. Reference the libs folder in the above drive link to see how to structure the dependencies. This build process will be automated in the future.  
   
-Dependencies (you'll need to build these if you're not on Windows):  
+Dependencies:  
  • assimp (model loading)  
  • freetype (font loading)  
  • glad (openGL loader)  
