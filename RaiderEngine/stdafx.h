@@ -36,6 +36,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 // physx
+#include <PxConfig.h>
 #include <PxPhysicsAPI.h>
 // freetype
 #include "ft2build.h"

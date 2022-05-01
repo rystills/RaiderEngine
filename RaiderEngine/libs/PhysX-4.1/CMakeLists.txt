@@ -38,7 +38,7 @@ endif()
 #)
 
 
-add_definitions(-D_DEBUG)
+#add_definitions(-D_DEBUG)
 
 #INCLUDE_DIRECTORIES(${ECHO_ROOT_PATH}/thirdparty/physx/physx/include)
 #INCLUDE_DIRECTORIES(${ECHO_ROOT_PATH}/thirdparty/physx/pxshared/include)
