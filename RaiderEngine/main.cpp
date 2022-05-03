@@ -36,10 +36,10 @@
 #include FT_FREETYPE_H
 
 // assimp
-//#include <assimp/cimport.h>
-//#include <assimp/Importer.hpp>
-//#include <assimp/scene.h>
-//#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 int main() {
 	FT_Library  library;
@@ -57,8 +57,8 @@ int main() {
 	// init physx
 	mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mDefaultAllocatorCallback, mDefaultErrorCallback);
 
-	/*Assimp::Importer importer;
-	importer.GetErrorString();*/
+	Assimp::Importer importer;
+	importer.GetErrorString();
 
 	puts("success");
 }
