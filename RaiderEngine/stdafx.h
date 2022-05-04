@@ -42,7 +42,7 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 // stb
-#include "stb_image.h"
+#include <stb_image.h>
 // openalsoft
 #include "AL/al.h"
 #include "AL/alc.h"

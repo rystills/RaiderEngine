@@ -1,7 +1,4 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.8)
 set(CMAKE_CXX_STANDARD 23)
 project (RaiderEngine)
 
@@ -25,6 +22,8 @@ add_subdirectory(RaiderEngine/libs/openal-soft-1.22.0)
 add_subdirectory(RaiderEngine/libs/assimp-5.2.3)
 
 add_subdirectory(RaiderEngine/libs/PhysX-4.1)
+
+add_subdirectory(RaiderEngine/libs/stb)
 
 add_subdirectory (RaiderEngine)
 target_include_directories(RaiderEngine PRIVATE RaiderEngine/)
