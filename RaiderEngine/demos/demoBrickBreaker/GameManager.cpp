@@ -6,6 +6,7 @@
 #include "FpsDisplay.hpp"
 #include "input.hpp"
 #include "timing.hpp"
+#include <constants.hpp>
 
 GameManager::GameManager(std::string fontName, int fontSize) : TextObject("Press Enter to Start", UI_TARGET_WIDTH / 2.f, UI_TARGET_HEIGHT / 2.f, Color::white, fontName, fontSize, true) {
 	paddle = (Paddle*)addGameObject2D(new Paddle(glm::vec2(0)));

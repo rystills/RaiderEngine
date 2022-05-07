@@ -10,6 +10,7 @@
 #include "Collider2DCircle.hpp"
 #include "Collider2DLine.hpp"
 #include "Collider2DPolygon.hpp"
+#include <constants.hpp>
 
 int main() {
 	// directories

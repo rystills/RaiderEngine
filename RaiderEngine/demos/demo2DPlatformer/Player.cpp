@@ -5,6 +5,7 @@
 #include "timing.hpp"
 #include "settings.hpp"
 #include "Collider2DRectangle.hpp"
+#include <constants.hpp>
 
 Player::Player(glm::vec2 position) : GameObject2D(position, 0, glm::vec2(1), Color::white, "player.png") {
 	collider = colliders.contains("player") ? colliders["player"].get() : addCollider2D("player", new Collider2DRectangle(4,4));

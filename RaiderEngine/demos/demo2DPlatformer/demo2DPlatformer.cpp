@@ -10,6 +10,7 @@
 #include "input.hpp"
 #include "Player.hpp"
 #include "Collider2DRectangle.hpp"
+#include <constants.hpp>
 
 Tilemap* t;
 const int numTileTypes = 3;

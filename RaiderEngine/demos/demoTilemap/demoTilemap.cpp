@@ -8,6 +8,7 @@
 #include "input.hpp"
 #include "Tilemap.hpp"
 #include "input.hpp"
+#include <constants.hpp>
 
 Tilemap* t;
 const int numTileTypes = 3;
@@ -69,11 +70,11 @@ int main() {
 			for (int r = 0; r < mapHeight; ++r)
 				mapFile >> mapData[i][r];
 		mapFile.close();
-		t = addTilemap(new Tilemap("tilemap.png", 64, mapData, glm::vec2(0)));
+		t = addTilemap(new Tilemap("tilemap.png", 3, 64, mapData, glm::vec2(0), {}));
 	}
 	else
 		// no map data found; create an empty tilemap with the desired dimensions
-		t = addTilemap(new Tilemap("tilemap.png", 64, glm::vec2(16, 10), glm::vec2(0)));
+		t = addTilemap(new Tilemap("tilemap.png", 3, 64, glm::vec2(16, 10), glm::vec2(0), {}));
 
 	setVsync(false);
 	setClearColor(.85f, .85f, 1.f, 1.f);

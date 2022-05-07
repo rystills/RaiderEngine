@@ -11,6 +11,7 @@
 #include "FireEmitter.hpp"
 #include "RainEmitter.hpp"
 #include "CloudEmitter.hpp"
+#include <constants.hpp>
 
 int main() {
 	// directories
