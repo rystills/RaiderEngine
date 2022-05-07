@@ -948,6 +948,7 @@ void initMainCamera() {
 	mainCam = new Camera(glm::vec3(0));
 }
 
+#ifdef ENABLE_NVAPI_QUERY
 void NVSettingsCheckError(NvAPI_Status status) {
 	if (status == NVAPI_OK)
 		return;
@@ -1036,13 +1037,16 @@ void checkDisableNvidiaThreadedOptimization() {
 		exit(EXIT_SUCCESS);
 	}
 }
+#endif
 
 void initGraphics() {
 	renderState.clearColor.a = 1;
 	glfwSetErrorCallback(glfwErrorCallback);
 	window = initWindow();
+#ifdef ENABLE_NVAPI_QUERY
 	if (forceDisableNvidiaThreadedOptimization)
 		checkDisableNvidiaThreadedOptimization();
+#endif
 	initGL();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	initQuad();

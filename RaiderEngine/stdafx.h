@@ -36,21 +36,24 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 // physx
-#define NDEBUG
-#include "PxPhysicsAPI.h"
+#include <PxConfig.h>
+#include <PxPhysicsAPI.h>
 // freetype
 #include "ft2build.h"
 #include FT_FREETYPE_H
 // stb
-#include "stb_image.h"
+#include <stb_image.h>
 // openalsoft
 #include "AL/al.h"
 #include "AL/alc.h"
 #include "AL/alext.h"
 
 // nvapi
+// TODO: nvidia api has not been introduced to the cmake build setup yet
+#ifdef ENABLE_NVAPI_QUERY
 #include "nvapi.h"
 #include "NvApiDriverSettings.h"
+#endif
 
 // demo build selection
 #define DEMO_3D_CAROUSEL 1
