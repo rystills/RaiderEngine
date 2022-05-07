@@ -12,47 +12,11 @@
       "ctestCommandArgs": "",
       "variables": [
         {
-          "name": "NV_USE_DEBUG_WINCRT",
-          "value": "True",
-          "type": "BOOL"
-        },
-        {
-          "name": "FT_DISABLE_ZLIB",
-          "value": "False",
-          "type": "BOOL"
-        },
-        {
-          "name": "FORCE_STATIC_VCRT",
-          "value": "False",
-          "type": "BOOL"
-        },
-        {
-          "name": "FT_DISABLE_HARFBUZZ",
-          "value": "False",
-          "type": "BOOL"
-        },
-        {
-          "name": "FT_REQUIRE_ZLIB",
-          "value": "False",
-          "type": "BOOL"
-        },
-        {
           "name": "BUILD_SHARED_LIBS",
           "value": "True",
           "type": "BOOL"
         }
       ]
-    },
-    {
-      "name": "x86-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x86" ]
     },
     {
       "name": "x64-Release",
@@ -63,7 +27,14 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
     }
   ]
 }
