@@ -24,6 +24,7 @@
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #define GLM_FORCE_SWIZZLE
+#define GLM_FORCE_CTOR_INIT
 // glm
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
